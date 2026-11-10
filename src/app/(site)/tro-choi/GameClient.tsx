@@ -14,65 +14,65 @@ interface WordItem {
 
 const VOCAB_DATABASE: WordItem[] = [
     // HSK 1
-    { id: 'h1_1', hanzi: '你好', pinyin: 'nǐ hǎo', meanings: ['xin chào', 'chào', 'chào bạn'], category: 'hsk-1', categoryLabel: 'HSK 1' },
-    { id: 'h1_2', hanzi: '谢谢', pinyin: 'xièxie', meanings: ['cảm ơn', 'cám ơn', 'cảm ơn bạn'], category: 'hsk-1', categoryLabel: 'HSK 1' },
-    { id: 'h1_3', hanzi: '再见', pinyin: 'zàijiàn', meanings: ['tạm biệt', 'hẹn gặp lại'], category: 'hsk-1', categoryLabel: 'HSK 1' },
+    { id: 'h1_1', hanzi: '你好', pinyin: 'nǐ hǎo', meanings: ['xin chào', 'chào', 'chào bạn', 'xin chao', 'chao ban', 'chao'], category: 'hsk-1', categoryLabel: 'HSK 1' },
+    { id: 'h1_2', hanzi: '谢谢', pinyin: 'xièxie', meanings: ['cảm ơn', 'cám ơn', 'cảm ơn bạn', 'cam on', 'cam on ban'], category: 'hsk-1', categoryLabel: 'HSK 1' },
+    { id: 'h1_3', hanzi: '再见', pinyin: 'zàijiàn', meanings: ['tạm biệt', 'hẹn gặp lại', 'tam biet', 'hen gap lai', 'bye'], category: 'hsk-1', categoryLabel: 'HSK 1' },
     { id: 'h1_4', hanzi: '对不起', pinyin: 'duìbuqǐ', meanings: ['xin lỗi', 'xin loi'], category: 'hsk-1', categoryLabel: 'HSK 1' },
-    { id: 'h1_5', hanzi: '水', pinyin: 'shuǐ', meanings: ['nước', 'nuoc'], category: 'hsk-1', categoryLabel: 'HSK 1' },
-    { id: 'h1_6', hanzi: '茶', pinyin: 'chá', meanings: ['trà', 'chè', 'tra'], category: 'hsk-1', categoryLabel: 'HSK 1' },
-    { id: 'h1_7', hanzi: '吃', pinyin: 'chī', meanings: ['ăn', 'an'], category: 'hsk-1', categoryLabel: 'HSK 1' },
-    { id: 'h1_8', hanzi: '喝', pinyin: 'hē', meanings: ['uống', 'uong'], category: 'hsk-1', categoryLabel: 'HSK 1' },
-    { id: 'h1_9', hanzi: '猫', pinyin: 'māo', meanings: ['mèo', 'con mèo', 'meo'], category: 'hsk-1', categoryLabel: 'HSK 1' },
-    { id: 'h1_10', hanzi: '狗', pinyin: 'gǒu', meanings: ['chó', 'con chó', 'cho'], category: 'hsk-1', categoryLabel: 'HSK 1' },
-    { id: 'h1_11', hanzi: '苹果', pinyin: 'píngguǒ', meanings: ['táo', 'quả táo', 'trai tao'], category: 'hsk-1', categoryLabel: 'HSK 1' },
-    { id: 'h1_12', hanzi: '钱', pinyin: 'qián', meanings: ['tiền', 'tien'], category: 'hsk-1', categoryLabel: 'HSK 1' },
-    { id: 'h1_13', hanzi: '书', pinyin: 'shū', meanings: ['sách', 'cuốn sách', 'sach'], category: 'hsk-1', categoryLabel: 'HSK 1' },
-    { id: 'h1_14', hanzi: '老师', pinyin: 'lǎoshī', meanings: ['thầy giáo', 'cô giáo', 'giáo viên', 'thầy', 'cô'], category: 'hsk-1', categoryLabel: 'HSK 1' },
-    { id: 'h1_15', hanzi: '学生', pinyin: 'xuésheng', meanings: ['học sinh', 'sinh viên', 'hoc sinh'], category: 'hsk-1', categoryLabel: 'HSK 1' },
+    { id: 'h1_5', hanzi: '水', pinyin: 'shuǐ', meanings: ['nước', 'nuoc', 'nước uống'], category: 'hsk-1', categoryLabel: 'HSK 1' },
+    { id: 'h1_6', hanzi: '茶', pinyin: 'chá', meanings: ['trà', 'chè', 'tra', 'che', 'nước trà', 'nuoc tra'], category: 'hsk-1', categoryLabel: 'HSK 1' },
+    { id: 'h1_7', hanzi: '吃', pinyin: 'chī', meanings: ['ăn', 'an', 'ăn cơm'], category: 'hsk-1', categoryLabel: 'HSK 1' },
+    { id: 'h1_8', hanzi: '喝', pinyin: 'hē', meanings: ['uống', 'uong', 'uống nước'], category: 'hsk-1', categoryLabel: 'HSK 1' },
+    { id: 'h1_9', hanzi: '猫', pinyin: 'māo', meanings: ['mèo', 'con mèo', 'meo', 'con meo'], category: 'hsk-1', categoryLabel: 'HSK 1' },
+    { id: 'h1_10', hanzi: '狗', pinyin: 'gǒu', meanings: ['chó', 'con chó', 'cho', 'con cho'], category: 'hsk-1', categoryLabel: 'HSK 1' },
+    { id: 'h1_11', hanzi: '苹果', pinyin: 'píngguǒ', meanings: ['táo', 'quả táo', 'trái táo', 'tao', 'qua tao'], category: 'hsk-1', categoryLabel: 'HSK 1' },
+    { id: 'h1_12', hanzi: '钱', pinyin: 'qián', meanings: ['tiền', 'tien', 'tiền bạc'], category: 'hsk-1', categoryLabel: 'HSK 1' },
+    { id: 'h1_13', hanzi: '书', pinyin: 'shū', meanings: ['sách', 'cuốn sách', 'quyển sách', 'sach', 'cuon sach'], category: 'hsk-1', categoryLabel: 'HSK 1' },
+    { id: 'h1_14', hanzi: '老师', pinyin: 'lǎoshī', meanings: ['thầy giáo', 'cô giáo', 'giáo viên', 'thầy', 'cô', 'thay co', 'giao vien'], category: 'hsk-1', categoryLabel: 'HSK 1' },
+    { id: 'h1_15', hanzi: '学生', pinyin: 'xuésheng', meanings: ['học sinh', 'sinh viên', 'hoc sinh', 'sinh vien'], category: 'hsk-1', categoryLabel: 'HSK 1' },
 
     // HSK 2
-    { id: 'h2_1', hanzi: '早上', pinyin: 'zǎoshang', meanings: ['buổi sáng', 'sáng', 'buoi sang'], category: 'hsk-2', categoryLabel: 'HSK 2' },
-    { id: 'h2_2', hanzi: '晚上', pinyin: 'wǎnshang', meanings: ['buổi tối', 'tối', 'buoi toi'], category: 'hsk-2', categoryLabel: 'HSK 2' },
-    { id: 'h2_3', hanzi: '帮助', pinyin: 'bāngzhù', meanings: ['giúp đỡ', 'giúp', 'trợ giúp', 'giup do'], category: 'hsk-2', categoryLabel: 'HSK 2' },
-    { id: 'h2_4', hanzi: '便宜', pinyin: 'piányi', meanings: ['rẻ', 're'], category: 'hsk-2', categoryLabel: 'HSK 2' },
-    { id: 'h2_5', hanzi: '贵', pinyin: 'guì', meanings: ['đắt', 'quý', 'dat'], category: 'hsk-2', categoryLabel: 'HSK 2' },
+    { id: 'h2_1', hanzi: '早上', pinyin: 'zǎoshang', meanings: ['buổi sáng', 'sáng', 'buoi sang', 'sang'], category: 'hsk-2', categoryLabel: 'HSK 2' },
+    { id: 'h2_2', hanzi: '晚上', pinyin: 'wǎnshang', meanings: ['buổi tối', 'tối', 'buoi toi', 'toi'], category: 'hsk-2', categoryLabel: 'HSK 2' },
+    { id: 'h2_3', hanzi: '帮助', pinyin: 'bāngzhù', meanings: ['giúp đỡ', 'giúp', 'trợ giúp', 'giup do', 'giup'], category: 'hsk-2', categoryLabel: 'HSK 2' },
+    { id: 'h2_4', hanzi: '便宜', pinyin: 'piányi', meanings: ['rẻ', 're', 'giá rẻ', 're tien'], category: 'hsk-2', categoryLabel: 'HSK 2' },
+    { id: 'h2_5', hanzi: '贵', pinyin: 'guì', meanings: ['đắt', 'mắc', 'quý', 'dat', 'mac'], category: 'hsk-2', categoryLabel: 'HSK 2' },
     { id: 'h2_6', hanzi: '准备', pinyin: 'zhǔnbèi', meanings: ['chuẩn bị', 'chuan bi'], category: 'hsk-2', categoryLabel: 'HSK 2' },
-    { id: 'h2_7', hanzi: '欢迎', pinyin: 'huānyíng', meanings: ['hoan nghênh', 'chào đón', 'chao don'], category: 'hsk-2', categoryLabel: 'HSK 2' },
+    { id: 'h2_7', hanzi: '欢迎', pinyin: 'huānyíng', meanings: ['hoan nghênh', 'chào đón', 'chao don', 'hoan nghenh', 'chào mừng'], category: 'hsk-2', categoryLabel: 'HSK 2' },
     { id: 'h2_8', hanzi: '旅游', pinyin: 'lǚyóu', meanings: ['du lịch', 'du lich', 'đi du lịch'], category: 'hsk-2', categoryLabel: 'HSK 2' },
-    { id: 'h2_9', hanzi: '运动', pinyin: 'yùndòng', meanings: ['vận động', 'thể thao', 'van dong'], category: 'hsk-2', categoryLabel: 'HSK 2' },
-    { id: 'h2_10', hanzi: '时间', pinyin: 'shíjiān', meanings: ['thời gian', 'thoi gian'], category: 'hsk-2', categoryLabel: 'HSK 2' },
+    { id: 'h2_9', hanzi: '运动', pinyin: 'yùndòng', meanings: ['vận động', 'thể thao', 'van dong', 'the thao'], category: 'hsk-2', categoryLabel: 'HSK 2' },
+    { id: 'h2_10', hanzi: '时间', pinyin: 'shíjiān', meanings: ['thời gian', 'thoi gian', 'giờ giấc'], category: 'hsk-2', categoryLabel: 'HSK 2' },
 
     // HSK 3
-    { id: 'h3_1', hanzi: '打算', pinyin: 'dǎsuàn', meanings: ['dự định', 'kế hoạch', 'du dinh'], category: 'hsk-3', categoryLabel: 'HSK 3' },
-    { id: 'h3_2', hanzi: '容易', pinyin: 'róngyì', meanings: ['dễ', 'dễ dàng', 'de dang'], category: 'hsk-3', categoryLabel: 'HSK 3' },
-    { id: 'h3_3', hanzi: '满意', pinyin: 'mǎnyì', meanings: ['hài lòng', 'thỏa mãn', 'hai long'], category: 'hsk-3', categoryLabel: 'HSK 3' },
-    { id: 'h3_4', hanzi: '经理', pinyin: 'jīnglǐ', meanings: ['giám đốc', 'quản lý', 'kinh lý'], category: 'hsk-3', categoryLabel: 'HSK 3' },
-    { id: 'h3_5', hanzi: '解决', pinyin: 'jiějué', meanings: ['giải quyết', 'giai quyet'], category: 'hsk-3', categoryLabel: 'HSK 3' },
-    { id: 'h3_6', hanzi: '努力', pinyin: 'nǔlì', meanings: ['nỗ lực', 'cố gắng', 'cham chi', 'chăm chỉ'], category: 'hsk-3', categoryLabel: 'HSK 3' },
+    { id: 'h3_1', hanzi: '打算', pinyin: 'dǎsuàn', meanings: ['dự định', 'kế hoạch', 'du dinh', 'tính'], category: 'hsk-3', categoryLabel: 'HSK 3' },
+    { id: 'h3_2', hanzi: '容易', pinyin: 'róngyì', meanings: ['dễ', 'dễ dàng', 'de', 'de dang', 'đơn giản'], category: 'hsk-3', categoryLabel: 'HSK 3' },
+    { id: 'h3_3', hanzi: '满意', pinyin: 'mǎnyì', meanings: ['hài lòng', 'thỏa mãn', 'hai long', 'vừa lòng'], category: 'hsk-3', categoryLabel: 'HSK 3' },
+    { id: 'h3_4', hanzi: '经理', pinyin: 'jīnglǐ', meanings: ['giám đốc', 'quản lý', 'kinh lý', 'quan ly', 'giam doc'], category: 'hsk-3', categoryLabel: 'HSK 3' },
+    { id: 'h3_5', hanzi: '解决', pinyin: 'jiějué', meanings: ['giải quyết', 'giai quyet', 'xử lý'], category: 'hsk-3', categoryLabel: 'HSK 3' },
+    { id: 'h3_6', hanzi: '努力', pinyin: 'nǔlì', meanings: ['nỗ lực', 'cố gắng', 'cham chi', 'chăm chỉ', 'no luc', 'co gang'], category: 'hsk-3', categoryLabel: 'HSK 3' },
     { id: 'h3_7', hanzi: '相信', pinyin: 'xiāngxìn', meanings: ['tin tưởng', 'tin', 'tin tuong'], category: 'hsk-3', categoryLabel: 'HSK 3' },
-    { id: 'h3_8', hanzi: '习惯', pinyin: 'xíguàn', meanings: ['thói quen', 'tập quán', 'thoi quen'], category: 'hsk-3', categoryLabel: 'HSK 3' },
+    { id: 'h3_8', hanzi: '习惯', pinyin: 'xíguàn', meanings: ['thói quen', 'tập quán', 'thoi quen', 'quen'], category: 'hsk-3', categoryLabel: 'HSK 3' },
 
     // Công xưởng
-    { id: 'cx_1', hanzi: '工厂', pinyin: 'gōngchǎng', meanings: ['nhà máy', 'nhà xưởng', 'xưởng', 'nha may'], category: 'cong-xuong', categoryLabel: 'Công xưởng' },
-    { id: 'cx_2', hanzi: '车间', pinyin: 'chējiān', meanings: ['phân xưởng', 'xưởng', 'phan xuong'], category: 'cong-xuong', categoryLabel: 'Công xưởng' },
-    { id: 'cx_3', hanzi: '主管', pinyin: 'zhǔguǎn', meanings: ['quản lý', 'chủ quản', 'quan ly'], category: 'cong-xuong', categoryLabel: 'Công xưởng' },
-    { id: 'cx_4', hanzi: '组长', pinyin: 'zǔzhǎng', meanings: ['tổ trưởng', 'to truong'], category: 'cong-xuong', categoryLabel: 'Công xưởng' },
+    { id: 'cx_1', hanzi: '工厂', pinyin: 'gōngchǎng', meanings: ['nhà máy', 'nhà xưởng', 'xưởng', 'công xưởng', 'nha may'], category: 'cong-xuong', categoryLabel: 'Công xưởng' },
+    { id: 'cx_2', hanzi: '车间', pinyin: 'chējiān', meanings: ['phân xưởng', 'xưởng', 'phan xuong', 'chuyền'], category: 'cong-xuong', categoryLabel: 'Công xưởng' },
+    { id: 'cx_3', hanzi: '主管', pinyin: 'zhǔguǎn', meanings: ['quản lý', 'chủ quản', 'quan ly', 'chu quan', 'sếp'], category: 'cong-xuong', categoryLabel: 'Công xưởng' },
+    { id: 'cx_4', hanzi: '组长', pinyin: 'zǔzhǎng', meanings: ['tổ trưởng', 'to truong', 'trưởng nhóm'], category: 'cong-xuong', categoryLabel: 'Công xưởng' },
     { id: 'cx_5', hanzi: '安全', pinyin: 'ānquán', meanings: ['an toàn', 'an toan'], category: 'cong-xuong', categoryLabel: 'Công xưởng' },
     { id: 'cx_6', hanzi: '质量', pinyin: 'zhìliàng', meanings: ['chất lượng', 'chat luong'], category: 'cong-xuong', categoryLabel: 'Công xưởng' },
     { id: 'cx_7', hanzi: '产量', pinyin: 'chǎnliàng', meanings: ['sản lượng', 'san luong'], category: 'cong-xuong', categoryLabel: 'Công xưởng' },
-    { id: 'cx_8', hanzi: '机器', pinyin: 'jīqì', meanings: ['máy móc', 'máy', 'may moc'], category: 'cong-xuong', categoryLabel: 'Công xưởng' },
-    { id: 'cx_9', hanzi: '零件', pinyin: 'língjiàn', meanings: ['linh kiện', 'phụ tùng', 'linh kien'], category: 'cong-xuong', categoryLabel: 'Công xưởng' },
-    { id: 'cx_10', hanzi: '仓库', pinyin: 'cāngkù', meanings: ['kho', 'nhà kho', 'cang cu'], category: 'cong-xuong', categoryLabel: 'Công xưởng' },
+    { id: 'cx_8', hanzi: '机器', pinyin: 'jīqì', meanings: ['máy móc', 'máy', 'may moc', 'may'], category: 'cong-xuong', categoryLabel: 'Công xưởng' },
+    { id: 'cx_9', hanzi: '零件', pinyin: 'língjiàn', meanings: ['linh kiện', 'phụ tùng', 'linh kien', 'chi tiết'], category: 'cong-xuong', categoryLabel: 'Công xưởng' },
+    { id: 'cx_10', hanzi: '仓库', pinyin: 'cāngkù', meanings: ['kho', 'nhà kho', 'kho hàng', 'cang cu'], category: 'cong-xuong', categoryLabel: 'Công xưởng' },
 
     // Trẻ em
-    { id: 'te_1', hanzi: '红色', pinyin: 'hóngsè', meanings: ['màu đỏ', 'đỏ', 'mau do'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_2', hanzi: '黄色', pinyin: 'huángsè', meanings: ['màu vàng', 'vàng', 'mau vang'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_3', hanzi: '蓝色', pinyin: 'lánsè', meanings: ['màu xanh dương', 'xanh lam', 'màu xanh', 'xanh da trời'], category: 'tre-em', categoryLabel: 'Trẻ em' },
+    { id: 'te_1', hanzi: '红色', pinyin: 'hóngsè', meanings: ['màu đỏ', 'đỏ', 'mau do', 'do'], category: 'tre-em', categoryLabel: 'Trẻ em' },
+    { id: 'te_2', hanzi: '黄色', pinyin: 'huángsè', meanings: ['màu vàng', 'vàng', 'mau vang', 'vang'], category: 'tre-em', categoryLabel: 'Trẻ em' },
+    { id: 'te_3', hanzi: '蓝色', pinyin: 'lánsè', meanings: ['màu xanh', 'xanh dương', 'màu xanh dương', 'xanh lam', 'xanh da trời'], category: 'tre-em', categoryLabel: 'Trẻ em' },
     { id: 'te_4', hanzi: '大熊猫', pinyin: 'dàxióngmāo', meanings: ['gấu trúc', 'gau truc', 'gấu trúc khổng lồ'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_5', hanzi: '兔子', pinyin: 'tùzi', meanings: ['thỏ', 'con thỏ', 'tho'], category: 'tre-em', categoryLabel: 'Trẻ em' },
+    { id: 'te_5', hanzi: '兔子', pinyin: 'tùzi', meanings: ['thỏ', 'con thỏ', 'tho', 'con tho'], category: 'tre-em', categoryLabel: 'Trẻ em' },
     { id: 'te_6', hanzi: '太阳', pinyin: 'tàiyáng', meanings: ['mặt trời', 'ông mặt trời', 'mat troi'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_7', hanzi: '月亮', pinyin: 'yuèliang', meanings: ['mặt trăng', 'ông trăng', 'mat trang'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_8', hanzi: '朋友', pinyin: 'péngyou', meanings: ['bạn bè', 'bạn', 'ban be'], category: 'tre-em', categoryLabel: 'Trẻ em' },
+    { id: 'te_7', hanzi: '月亮', pinyin: 'yuèliang', meanings: ['mặt trăng', 'ông trăng', 'mat trang', 'trăng'], category: 'tre-em', categoryLabel: 'Trẻ em' },
+    { id: 'te_8', hanzi: '朋友', pinyin: 'péngyou', meanings: ['bạn bè', 'bạn', 'ban be', 'ban'], category: 'tre-em', categoryLabel: 'Trẻ em' },
 ];
 
 function removeVietnameseAccents(str: string): string {
@@ -210,6 +210,8 @@ export default function GameClient() {
     const [isDissolving, setIsDissolving] = useState(false);
     const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; color: string; size: number }>>([]);
     const [wrongShake, setWrongShake] = useState(false);
+    const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+    const [showHint, setShowHint] = useState(false);
     const [history, setHistory] = useState<Array<{ hanzi: string; pinyin: string; correct: boolean; meaning: string }>>([]);
 
     const inputRef = useRef<HTMLInputElement>(null);
@@ -233,6 +235,8 @@ export default function GameClient() {
         setIsDissolving(false);
         setParticles([]);
         setInputVal('');
+        setFeedbackMessage(null);
+        setShowHint(false);
 
         let pool = wordPoolRef.current;
         if (pool.length === 0) {
@@ -292,10 +296,20 @@ export default function GameClient() {
     };
 
     // Handle check answer
-    const checkAnswer = (text: string) => {
+    const checkAnswer = (text: string, isExplicitSubmit: boolean = false) => {
         if (!currentWord || isDissolving) return;
 
         const cleanTyped = cleanInput(text);
+        if (!cleanTyped) {
+            if (isExplicitSubmit) {
+                setFeedbackMessage('⚠️ Vui lòng nhập nghĩa tiếng Việt trước khi bấm Gửi!');
+                setWrongShake(true);
+                setTimeout(() => setWrongShake(false), 500);
+                if (inputRef.current) inputRef.current.focus();
+            }
+            return;
+        }
+
         const unaccentedTyped = removeVietnameseAccents(cleanTyped);
 
         const isMatch = currentWord.meanings.some(m => {
@@ -306,6 +320,8 @@ export default function GameClient() {
 
         if (isMatch) {
             // Correct!
+            setFeedbackMessage(null);
+            setShowHint(false);
             const bonus = Math.max(1, Math.floor(timeLeft / 2));
             const multiplier = streak >= 5 ? 3 : streak >= 2 ? 2 : 1;
             const pointsEarned = (10 + bonus) * multiplier;
@@ -322,6 +338,13 @@ export default function GameClient() {
             setStreak(prev => prev + 1);
             setHistory(prev => [{ hanzi: currentWord.hanzi, pinyin: currentWord.pinyin, correct: true, meaning: currentWord.meanings[0] }, ...prev]);
             triggerDissolve();
+        } else if (isExplicitSubmit) {
+            // Explicit submit but answer is wrong
+            sfx.playWrong();
+            setWrongShake(true);
+            setTimeout(() => setWrongShake(false), 500);
+            setFeedbackMessage(`❌ "${text.trim()}" chưa chính xác! Hãy thử lại hoặc bấm "Xem gợi ý" nhé.`);
+            if (inputRef.current) inputRef.current.focus();
         }
     };
 
@@ -630,16 +653,18 @@ export default function GameClient() {
                         </div>
 
                         {/* Input Form */}
-                        <div className="card p-4 sm:p-6 rounded-[2rem] bg-white/40 backdrop-blur-xl border border-white/40 shadow-xl">
+                        <div className={`card p-4 sm:p-6 rounded-[2rem] bg-white/40 backdrop-blur-xl border border-white/40 shadow-xl transition-all ${
+                            wrongShake ? 'animate-[shake_0.5s_ease-in-out]' : ''
+                        }`}>
                             <form
                                 onSubmit={(e) => {
                                     e.preventDefault();
-                                    checkAnswer(inputVal);
+                                    checkAnswer(inputVal, true);
                                 }}
                                 className="space-y-3"
                             >
                                 <label className="block text-xs font-bold uppercase tracking-wider text-[var(--muted)] text-center">
-                                    Gõ nghĩa tiếng Việt vào đây (nhấn Enter để kiểm tra):
+                                    Gõ nghĩa tiếng Việt vào đây (nhấn Enter hoặc bấm Gửi):
                                 </label>
                                 <div className="flex gap-2">
                                     <input
@@ -650,10 +675,17 @@ export default function GameClient() {
                                         onChange={(e) => {
                                             const val = e.target.value;
                                             setInputVal(val);
-                                            checkAnswer(val); // Instant trigger if matches!
+                                            if (feedbackMessage) setFeedbackMessage(null);
+                                            checkAnswer(val, false); // Instant trigger if matches!
                                         }}
                                         placeholder="Ví dụ: xin chào, cảm ơn, trà..."
-                                        className="w-full px-5 py-4 text-center rounded-2xl border-2 border-[var(--border)] focus:border-[var(--accent)] bg-white/80 text-lg sm:text-xl font-bold text-[var(--text)] placeholder:text-[var(--muted)]/50 focus:outline-none focus:ring-4 focus:ring-[var(--accent)]/20 transition-all shadow-inner"
+                                        className={`w-full px-5 py-4 text-center rounded-2xl border-2 bg-white/80 text-lg sm:text-xl font-bold text-[var(--text)] placeholder:text-[var(--muted)]/50 focus:outline-none focus:ring-4 focus:ring-[var(--accent)]/20 transition-all shadow-inner ${
+                                            feedbackMessage?.startsWith('❌')
+                                                ? 'border-rose-400 bg-rose-50/50'
+                                                : feedbackMessage?.startsWith('⚠️')
+                                                ? 'border-amber-400 bg-amber-50/50'
+                                                : 'border-[var(--border)] focus:border-[var(--accent)]'
+                                        }`}
                                         autoComplete="off"
                                         autoCorrect="off"
                                         autoCapitalize="off"
@@ -661,22 +693,46 @@ export default function GameClient() {
                                     />
                                     <button
                                         type="submit"
-                                        disabled={isDissolving || !inputVal.trim()}
-                                        className="btn btn-primary px-6 rounded-2xl font-bold shrink-0 text-base shadow-md disabled:opacity-50"
+                                        disabled={isDissolving}
+                                        className="btn btn-primary px-6 rounded-2xl font-bold shrink-0 text-base shadow-md hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                                     >
-                                        Gửi →
+                                        <span>Gửi</span>
+                                        <span>→</span>
                                     </button>
                                 </div>
+
+                                {/* Feedback message */}
+                                {feedbackMessage && (
+                                    <div className="text-center text-xs sm:text-sm font-semibold text-rose-600 bg-rose-50/90 py-2.5 px-4 rounded-xl border border-rose-200 animate-fade-in flex items-center justify-center gap-1.5">
+                                        <span>{feedbackMessage}</span>
+                                    </div>
+                                )}
+
+                                {/* Hint box */}
+                                {showHint && currentWord && (
+                                    <div className="text-center text-xs sm:text-sm font-medium text-amber-900 bg-amber-50/90 py-2.5 px-4 rounded-xl border border-amber-200 animate-fade-in">
+                                        💡 <strong>Gợi ý:</strong> Từ này có nghĩa tiếng Việt bắt đầu bằng chữ <strong className="text-rose-600 uppercase font-bold">&quot;{currentWord.meanings[0].charAt(0)}&quot;</strong> ({currentWord.meanings[0].split(' ').length} từ: {currentWord.meanings[0].slice(0, 3)}...)
+                                    </div>
+                                )}
                             </form>
                         </div>
 
                         {/* Skip button & helper */}
-                        <div className="flex justify-between items-center text-xs text-[var(--muted)] px-2">
-                            <span>Gợi ý: Gõ có dấu hoặc không dấu đều được tính điểm!</span>
+                        <div className="flex flex-wrap justify-between items-center text-xs text-[var(--muted)] px-2 gap-2">
+                            <div className="flex items-center gap-3">
+                                <span>Gõ có dấu hoặc không dấu đều đúng!</span>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowHint(prev => !prev)}
+                                    className="text-[var(--accent)] hover:underline font-bold inline-flex items-center gap-1 cursor-pointer"
+                                >
+                                    <span>💡</span> {showHint ? 'Ẩn gợi ý' : 'Xem gợi ý'}
+                                </button>
+                            </div>
                             <button
                                 type="button"
                                 onClick={handleTimeOut}
-                                className="hover:text-[var(--accent)] font-semibold underline"
+                                className="hover:text-[var(--accent)] font-semibold underline cursor-pointer"
                             >
                                 Bỏ qua từ này (Mất 1 tim) →
                             </button>

@@ -173,6 +173,27 @@ class SoundEffects {
 
 const sfx = new SoundEffects();
 
+function speakChinese(text: string) {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+    try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'zh-CN';
+        utterance.rate = 0.82; // Tốc độ chuẩn cho người học nghe rõ thanh điệu
+        utterance.pitch = 1.0;
+
+        const voices = window.speechSynthesis.getVoices();
+        const zhVoice = voices.find(v => v.lang.startsWith('zh') || v.lang.includes('cmn'));
+        if (zhVoice) {
+            utterance.voice = zhVoice;
+        }
+
+        window.speechSynthesis.speak(utterance);
+    } catch {
+        // Trình duyệt không hỗ trợ Web Speech
+    }
+}
+
 export default function GameClient() {
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
     const [gameState, setGameState] = useState<'idle' | 'playing' | 'gameover'>('idle');
@@ -185,6 +206,7 @@ export default function GameClient() {
     const [lives, setLives] = useState(3);
     const [showPinyin, setShowPinyin] = useState(true);
     const [soundOn, setSoundOn] = useState(true);
+    const [autoVoice, setAutoVoice] = useState(true); // Tự động phát âm
     const [isDissolving, setIsDissolving] = useState(false);
     const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; color: string; size: number }>>([]);
     const [wrongShake, setWrongShake] = useState(false);
@@ -222,10 +244,13 @@ export default function GameClient() {
         if (picked) {
             setCurrentWord(picked);
             setTimeLeft(10);
+            if (autoVoice) {
+                setTimeout(() => speakChinese(picked.hanzi), 200);
+            }
         } else {
             setGameState('gameover');
         }
-    }, [getFilteredWords]);
+    }, [getFilteredWords, autoVoice]);
 
     // Start game
     const startGame = () => {
@@ -478,10 +503,22 @@ export default function GameClient() {
                                 <button
                                     type="button"
                                     onClick={toggleSound}
-                                    title={soundOn ? 'Tắt âm thanh' : 'Bật âm thanh'}
+                                    title={soundOn ? 'Tắt âm thanh hiệu ứng' : 'Bật âm thanh hiệu ứng'}
                                     className="w-10 h-10 rounded-xl bg-white/70 border border-[var(--border)] flex items-center justify-center text-base hover:bg-white transition"
                                 >
-                                    {soundOn ? '🔊' : '🔇'}
+                                    {soundOn ? '🔔' : '🔕'}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setAutoVoice(prev => !prev)}
+                                    title="Tự động phát âm tiếng Trung khi từ mới xuất hiện"
+                                    className={`px-3 py-2 rounded-xl text-xs font-bold border transition ${
+                                        autoVoice
+                                            ? 'bg-rose-100 text-rose-800 border-rose-300'
+                                            : 'bg-white/70 text-[var(--muted)] border-[var(--border)]'
+                                    }`}
+                                >
+                                    🗣️ {autoVoice ? 'Đọc: BẬT' : 'Đọc: TẮT'}
                                 </button>
                                 <button
                                     type="button"
@@ -565,10 +602,22 @@ export default function GameClient() {
                                 </div>
 
                                 {showPinyin && (
-                                    <div className="text-lg sm:text-2xl font-medium text-[var(--muted)] tracking-wide">
+                                    <div className="text-lg sm:text-2xl font-medium text-[var(--muted)] tracking-wide mb-3">
                                         [{currentWord.pinyin}]
                                     </div>
                                 )}
+
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        speakChinese(currentWord.hanzi);
+                                    }}
+                                    className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/80 hover:bg-white text-xs font-bold text-[var(--accent)] border border-[var(--border)] shadow-sm hover:scale-105 active:scale-95 transition cursor-pointer"
+                                    title="Nghe phát âm chuẩn tiếng Trung"
+                                >
+                                    <span>🔊</span> Nghe phát âm
+                                </button>
                             </div>
 
                             {isDissolving && (
@@ -680,6 +729,14 @@ export default function GameClient() {
                                             }`}
                                         >
                                             <div className="flex items-center gap-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => speakChinese(item.hanzi)}
+                                                    className="p-1 rounded-lg bg-white/70 hover:bg-white text-sm shadow-xs hover:scale-110 active:scale-95 transition cursor-pointer"
+                                                    title="Bấm để nghe phát âm từ này"
+                                                >
+                                                    🔊
+                                                </button>
                                                 <span className="font-bold text-base font-[family:var(--font-serif)]">{item.hanzi}</span>
                                                 <span className="text-xs opacity-75">[{item.pinyin}]</span>
                                                 <span>👉 {item.meaning}</span>

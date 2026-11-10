@@ -479,6 +479,12 @@ export default function GameClient() {
     const [wrongShake, setWrongShake] = useState(false);
     const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
     const [showHint, setShowHint] = useState(false);
+    const [isRevealingWrong, setIsRevealingWrong] = useState(false);
+    const [revealedAnswer, setRevealedAnswer] = useState<{
+        typed: string;
+        correctMeaning: string;
+        isSkip?: boolean;
+    } | null>(null);
 
     // Lịch sử kết quả cho từng từ trong 16 từ
     const [history, setHistory] = useState<Array<{
@@ -521,6 +527,8 @@ export default function GameClient() {
         setHistory([]);
         setFeedbackMessage(null);
         setShowHint(false);
+        setIsRevealingWrong(false);
+        setRevealedAnswer(null);
         setIsDissolving(false);
         setParticles([]);
         setGameState('playing');
@@ -650,20 +658,94 @@ export default function GameClient() {
                 moveToNextWord(true);
             });
         } else if (isExplicitSubmit) {
-            // Nhấn gửi hoặc Enter nhưng đáp án sai
+            // Khi bấm Gửi hoặc nhấn Enter nhưng đáp án sai:
+            // 1. Hiện ra kết quả đáp án đúng ngay lập tức
+            // 2. Ghi nhận lỗi đó là SAI vào lịch sử
+            // 3. Tự động chuyển sang câu tiếp theo sau 1.6 giây
             sfx.playWrong();
             setWrongShake(true);
             setTimeout(() => setWrongShake(false), 500);
-            setFeedbackMessage(`❌ "${text.trim()}" chưa chính xác! Hãy thử lại hoặc bấm "Xem gợi ý".`);
+            setStreak(0);
+
+            setIsRevealingWrong(true);
+            setRevealedAnswer({
+                typed: text.trim(),
+                correctMeaning: currentWord.meanings[0],
+                isSkip: false,
+            });
+
+            // Ghi nhận lỗi SAI ngay lập tức
+            setHistory(prev => [
+                ...prev,
+                {
+                    hanzi: currentWord.hanzi,
+                    pinyin: currentWord.pinyin,
+                    meaning: currentWord.meanings[0],
+                    correct: false,
+                },
+            ]);
+
+            setTimeout(() => {
+                setIsRevealingWrong(false);
+                setRevealedAnswer(null);
+                setFeedbackMessage(null);
+                setShowHint(false);
+
+                const nextIdx = currentIndex + 1;
+                if (nextIdx >= roundWords.length) {
+                    endGame('completed');
+                } else {
+                    setCurrentIndex(nextIdx);
+                    if (autoVoice && roundWords[nextIdx]) {
+                        setTimeout(() => speakChinese(roundWords[nextIdx].hanzi), 200);
+                    }
+                }
+            }, 1600);
         }
     };
 
-    // Bỏ qua từ hiện tại
+    // Bỏ qua từ hiện tại -> Hiện đáp án đúng và ghi nhận sai
     const handleSkip = () => {
-        if (!currentWord || isDissolving) return;
+        if (!currentWord || isDissolving || isRevealingWrong || gameState !== 'playing') return;
         sfx.playWrong();
         setStreak(0);
-        moveToNextWord(false);
+        setWrongShake(true);
+        setTimeout(() => setWrongShake(false), 500);
+
+        setIsRevealingWrong(true);
+        setRevealedAnswer({
+            typed: '',
+            correctMeaning: currentWord.meanings[0],
+            isSkip: true,
+        });
+
+        // Ghi nhận sai
+        setHistory(prev => [
+            ...prev,
+            {
+                hanzi: currentWord.hanzi,
+                pinyin: currentWord.pinyin,
+                meaning: currentWord.meanings[0],
+                correct: false,
+            },
+        ]);
+
+        setTimeout(() => {
+            setIsRevealingWrong(false);
+            setRevealedAnswer(null);
+            setFeedbackMessage(null);
+            setShowHint(false);
+
+            const nextIdx = currentIndex + 1;
+            if (nextIdx >= roundWords.length) {
+                endGame('completed');
+            } else {
+                setCurrentIndex(nextIdx);
+                if (autoVoice && roundWords[nextIdx]) {
+                    setTimeout(() => speakChinese(roundWords[nextIdx].hanzi), 200);
+                }
+            }
+        }, 1500);
     };
 
     // Bộ đếm thời gian 60 giây (1 phút) cho cả lượt chơi
@@ -959,6 +1041,34 @@ export default function GameClient() {
                                     </span>
                                 </div>
                             )}
+
+                            {/* Hiển thị kết quả đáp án đúng khi bấm sai */}
+                            {isRevealingWrong && revealedAnswer && (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center bg-rose-950/85 backdrop-blur-md rounded-[3rem] p-6 text-white z-30 animate-fade-in text-center select-none shadow-2xl border-2 border-rose-500/50">
+                                    <div className="text-4xl mb-1 animate-bounce">
+                                        ❌
+                                    </div>
+                                    <div className="text-xl sm:text-2xl font-black text-rose-200 tracking-wide uppercase">
+                                        {revealedAnswer.isSkip ? 'ĐÃ BỎ QUA CÂU NÀY' : 'CHƯA CHÍNH XÁC!'}
+                                    </div>
+                                    {revealedAnswer.typed && (
+                                        <div className="text-xs text-rose-300 mt-1">
+                                            Từ bạn vừa gõ: <span className="line-through font-bold text-white px-2 py-0.5 rounded bg-black/30">&quot;{revealedAnswer.typed}&quot;</span>
+                                        </div>
+                                    )}
+                                    <div className="mt-3.5 py-2.5 px-6 bg-white/15 rounded-2xl border border-white/25 shadow-inner">
+                                        <div className="text-[11px] uppercase tracking-wider text-amber-300 font-extrabold">
+                                            Đáp án đúng là:
+                                        </div>
+                                        <div className="text-xl sm:text-2xl font-extrabold text-white mt-0.5">
+                                            {revealedAnswer.correctMeaning}
+                                        </div>
+                                    </div>
+                                    <div className="text-[11px] text-white/70 mt-3 animate-pulse">
+                                        Đang chuyển sang câu tiếp theo...
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Ô nhập nghĩa tiếng Việt độc lập (Không bị gián đoạn bộ đệm Telex/Unikey) */}
@@ -966,7 +1076,7 @@ export default function GameClient() {
                             wrongShake ? 'animate-[shake_0.5s_ease-in-out]' : ''
                         }`}>
                             <GameInput
-                                disabled={isDissolving}
+                                disabled={isDissolving || isRevealingWrong}
                                 feedbackMessage={feedbackMessage}
                                 currentWordId={currentWord.id}
                                 onCheckAnswer={checkAnswer}
@@ -1009,8 +1119,9 @@ export default function GameClient() {
                             </div>
                             <button
                                 type="button"
+                                disabled={isDissolving || isRevealingWrong}
                                 onClick={handleSkip}
-                                className="hover:text-[var(--accent)] font-semibold underline cursor-pointer"
+                                className="hover:text-[var(--accent)] font-semibold underline cursor-pointer disabled:opacity-40"
                             >
                                 Bỏ qua câu này →
                             </button>

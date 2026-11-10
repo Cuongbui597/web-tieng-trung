@@ -13,6 +13,7 @@ export default function HeaderServer() {
         { label: '🏭 Giao tiếp Công xưởng', href: '/khoa-hoc/cong-xuong' },
         { label: '🏢 Giao tiếp Công ty', href: '/khoa-hoc/cong-ty' },
         { label: '🎨 Tiếng Trung Trẻ em', href: '/tre-em' },
+        { label: '🎮 Game Từ Vựng', href: '/tro-choi' },
     ];
 
     return (
@@ -126,6 +127,9 @@ export default function HeaderServer() {
                         </Link>
                         <Link href="/gioi-thieu" prefetch={true} className="text-sm font-medium text-[var(--muted)] hover:text-[var(--text)] transition-all px-3 py-2 rounded-md hover:bg-white/60">
                             Giới thiệu
+                        </Link>
+                        <Link href="/tro-choi" prefetch={true} className="text-sm font-bold text-[var(--accent)] hover:opacity-80 transition-all px-3 py-2 rounded-md hover:bg-white/60 flex items-center gap-1.5 border border-[var(--accent)]/30 bg-[var(--accent)]/5">
+                            <span>🎮</span> Game Từ Vựng
                         </Link>
                     </nav>
 

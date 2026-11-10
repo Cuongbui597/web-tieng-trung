@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f6f7f2"/>
+      <stop offset="0.55" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#eef2ea"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1a7f57" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#1a7f57" stop-opacity="0.04"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="980" cy="180" r="260" fill="url(#leaf)"/>
+  <circle cx="260" cy="520" r="320" fill="url(#leaf)"/>
+
+  <g font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif" fill="#0d1b15">
+    <text x="90" y="260" font-size="64" font-weight="700" letter-spacing="-1">Cây Cảnh Sài Gòn</text>
+    <text x="90" y="332" font-size="34" font-weight="500" fill="#4b5b53">Cây cảnh đẹp • Dễ chăm • Giao nhanh</text>
+  </g>
+
+  <g>
+    <rect x="90" y="380" rx="24" ry="24" width="380" height="76" fill="#1a7f57"/>
+    <text x="130" y="430" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif" font-size="28" font-weight="700" fill="#ffffff">chamsoccanhquan.com</text>
+  </g>
+</svg>

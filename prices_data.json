@@ -1,0 +1,662 @@
+[
+    {
+        "name": "Bàng Đài Loan",
+        "root_diameter": "8cm",
+        "height": "4-5m",
+        "price": 600000
+    },
+    {
+        "name": "Bàng Đài Loan",
+        "root_diameter": "9cm",
+        "height": "4-5m",
+        "price": 700000
+    },
+    {
+        "name": "Bàng Đài Loan",
+        "root_diameter": "10cm",
+        "height": "4-5m",
+        "price": 800000
+    },
+    {
+        "name": "Bàng Đài Loan",
+        "root_diameter": "11cm",
+        "height": "4-5m",
+        "price": 900000
+    },
+    {
+        "name": "Bàng Đài Loan",
+        "root_diameter": "12cm",
+        "height": "4-5m",
+        "price": 950000
+    },
+    {
+        "name": "Bàng Đài Loan",
+        "root_diameter": "13cm",
+        "height": "4-5m",
+        "price": 1100000
+    },
+    {
+        "name": "Bàng Đài Loan",
+        "root_diameter": "15cm",
+        "height": "4-5m",
+        "price": 1300000
+    },
+    {
+        "name": "Bàng Đài Loan",
+        "root_diameter": "16cm",
+        "height": "4-5m",
+        "price": 1600000
+    },
+    {
+        "name": "Bàng Đài Loan",
+        "root_diameter": "18cm",
+        "height": "4-5m",
+        "price": 2000000
+    },
+    {
+        "name": "Bàng Đài Loan",
+        "root_diameter": "20cm",
+        "height": "4-5m",
+        "price": 3000000
+    },
+    {
+        "name": "Giáng Hương",
+        "root_diameter": "8cm",
+        "height": "4-5m",
+        "price": 600000
+    },
+    {
+        "name": "Giáng Hương",
+        "root_diameter": "9cm",
+        "height": "4-5m",
+        "price": 700000
+    },
+    {
+        "name": "Giáng Hương",
+        "root_diameter": "10cm",
+        "height": "4-5m",
+        "price": 800000
+    },
+    {
+        "name": "Giáng Hương",
+        "root_diameter": "11cm",
+        "height": "4-5m",
+        "price": 900000
+    },
+    {
+        "name": "Giáng Hương",
+        "root_diameter": "12cm",
+        "height": "4-5m",
+        "price": 950000
+    },
+    {
+        "name": "Giáng Hương",
+        "root_diameter": "13cm",
+        "height": "4-5m",
+        "price": 1100000
+    },
+    {
+        "name": "Giáng Hương",
+        "root_diameter": "15cm",
+        "height": "4-5m",
+        "price": 1300000
+    },
+    {
+        "name": "Giáng Hương",
+        "root_diameter": "16cm",
+        "height": "4-5m",
+        "price": 1600000
+    },
+    {
+        "name": "Giáng Hương",
+        "root_diameter": "18cm",
+        "height": "4-5m",
+        "price": 2000000
+    },
+    {
+        "name": "Giáng Hương",
+        "root_diameter": "20cm",
+        "height": "4-5m",
+        "price": 3000000
+    },
+    {
+        "name": "Sao Đen",
+        "root_diameter": "8cm",
+        "height": "4-5m",
+        "price": 600000
+    },
+    {
+        "name": "Sao Đen",
+        "root_diameter": "9cm",
+        "height": "4-5m",
+        "price": 700000
+    },
+    {
+        "name": "Sao Đen",
+        "root_diameter": "10cm",
+        "height": "4-5m",
+        "price": 800000
+    },
+    {
+        "name": "Sao Đen",
+        "root_diameter": "11cm",
+        "height": "4-5m",
+        "price": 900000
+    },
+    {
+        "name": "Sao Đen",
+        "root_diameter": "12cm",
+        "height": "4-5m",
+        "price": 950000
+    },
+    {
+        "name": "Sao Đen",
+        "root_diameter": "13cm",
+        "height": "4-5m",
+        "price": 1100000
+    },
+    {
+        "name": "Sao Đen",
+        "root_diameter": "15cm",
+        "height": "4-5m",
+        "price": 1300000
+    },
+    {
+        "name": "Sao Đen",
+        "root_diameter": "16cm",
+        "height": "4-5m",
+        "price": 1600000
+    },
+    {
+        "name": "Sao Đen",
+        "root_diameter": "18cm",
+        "height": "4-5m",
+        "price": 2000000
+    },
+    {
+        "name": "Sao Đen",
+        "root_diameter": "20cm",
+        "height": "4-5m",
+        "price": 3000000
+    },
+    {
+        "name": "Cẩm Lai",
+        "root_diameter": "8cm",
+        "height": "4-5m",
+        "price": 600000
+    },
+    {
+        "name": "Cẩm Lai",
+        "root_diameter": "9cm",
+        "height": "4-5m",
+        "price": 700000
+    },
+    {
+        "name": "Cẩm Lai",
+        "root_diameter": "10cm",
+        "height": "4-5m",
+        "price": 800000
+    },
+    {
+        "name": "Cẩm Lai",
+        "root_diameter": "11cm",
+        "height": "4-5m",
+        "price": 900000
+    },
+    {
+        "name": "Cẩm Lai",
+        "root_diameter": "12cm",
+        "height": "4-5m",
+        "price": 950000
+    },
+    {
+        "name": "Cẩm Lai",
+        "root_diameter": "13cm",
+        "height": "4-5m",
+        "price": 1100000
+    },
+    {
+        "name": "Cẩm Lai",
+        "root_diameter": "15cm",
+        "height": "4-5m",
+        "price": 1300000
+    },
+    {
+        "name": "Cẩm Lai",
+        "root_diameter": "16cm",
+        "height": "4-5m",
+        "price": 1600000
+    },
+    {
+        "name": "Cẩm Lai",
+        "root_diameter": "18cm",
+        "height": "4-5m",
+        "price": 2000000
+    },
+    {
+        "name": "Cẩm Lai",
+        "root_diameter": "20cm",
+        "height": "4-5m",
+        "price": 3000000
+    },
+    {
+        "name": "Lộc Vừng",
+        "root_diameter": "8cm",
+        "height": "4-5m",
+        "price": 600000
+    },
+    {
+        "name": "Lộc Vừng",
+        "root_diameter": "9cm",
+        "height": "4-5m",
+        "price": 700000
+    },
+    {
+        "name": "Lộc Vừng",
+        "root_diameter": "10cm",
+        "height": "4-5m",
+        "price": 800000
+    },
+    {
+        "name": "Lộc Vừng",
+        "root_diameter": "11cm",
+        "height": "4-5m",
+        "price": 900000
+    },
+    {
+        "name": "Lộc Vừng",
+        "root_diameter": "12cm",
+        "height": "4-5m",
+        "price": 950000
+    },
+    {
+        "name": "Lộc Vừng",
+        "root_diameter": "13cm",
+        "height": "4-5m",
+        "price": 1100000
+    },
+    {
+        "name": "Lộc Vừng",
+        "root_diameter": "15cm",
+        "height": "4-5m",
+        "price": 1300000
+    },
+    {
+        "name": "Lộc Vừng",
+        "root_diameter": "16cm",
+        "height": "4-5m",
+        "price": 1600000
+    },
+    {
+        "name": "Lộc Vừng",
+        "root_diameter": "18cm",
+        "height": "4-5m",
+        "price": 2000000
+    },
+    {
+        "name": "Lộc Vừng",
+        "root_diameter": "20cm",
+        "height": "4-5m",
+        "price": 3000000
+    },
+    {
+        "name": "Bằng Lăng",
+        "root_diameter": "8cm",
+        "height": "4-5m",
+        "price": 600000
+    },
+    {
+        "name": "Bằng Lăng",
+        "root_diameter": "9cm",
+        "height": "4-5m",
+        "price": 700000
+    },
+    {
+        "name": "Bằng Lăng",
+        "root_diameter": "10cm",
+        "height": "4-5m",
+        "price": 800000
+    },
+    {
+        "name": "Bằng Lăng",
+        "root_diameter": "11cm",
+        "height": "4-5m",
+        "price": 900000
+    },
+    {
+        "name": "Bằng Lăng",
+        "root_diameter": "12cm",
+        "height": "4-5m",
+        "price": 950000
+    },
+    {
+        "name": "Bằng Lăng",
+        "root_diameter": "13cm",
+        "height": "4-5m",
+        "price": 1100000
+    },
+    {
+        "name": "Bằng Lăng",
+        "root_diameter": "15cm",
+        "height": "4-5m",
+        "price": 1300000
+    },
+    {
+        "name": "Bằng Lăng",
+        "root_diameter": "16cm",
+        "height": "4-5m",
+        "price": 1600000
+    },
+    {
+        "name": "Bằng Lăng",
+        "root_diameter": "18cm",
+        "height": "4-5m",
+        "price": 2000000
+    },
+    {
+        "name": "Bằng Lăng",
+        "root_diameter": "20cm",
+        "height": "4-5m",
+        "price": 3000000
+    },
+    {
+        "name": "Phượng Vĩ",
+        "root_diameter": "8cm",
+        "height": "4-5m",
+        "price": 600000
+    },
+    {
+        "name": "Phượng Vĩ",
+        "root_diameter": "9cm",
+        "height": "4-5m",
+        "price": 700000
+    },
+    {
+        "name": "Phượng Vĩ",
+        "root_diameter": "10cm",
+        "height": "4-5m",
+        "price": 800000
+    },
+    {
+        "name": "Phượng Vĩ",
+        "root_diameter": "11cm",
+        "height": "4-5m",
+        "price": 900000
+    },
+    {
+        "name": "Phượng Vĩ",
+        "root_diameter": "12cm",
+        "height": "4-5m",
+        "price": 950000
+    },
+    {
+        "name": "Phượng Vĩ",
+        "root_diameter": "13cm",
+        "height": "4-5m",
+        "price": 1100000
+    },
+    {
+        "name": "Phượng Vĩ",
+        "root_diameter": "15cm",
+        "height": "4-5m",
+        "price": 1300000
+    },
+    {
+        "name": "Phượng Vĩ",
+        "root_diameter": "16cm",
+        "height": "4-5m",
+        "price": 1600000
+    },
+    {
+        "name": "Phượng Vĩ",
+        "root_diameter": "18cm",
+        "height": "4-5m",
+        "price": 2000000
+    },
+    {
+        "name": "Phượng Vĩ",
+        "root_diameter": "20cm",
+        "height": "4-5m",
+        "price": 3000000
+    },
+    {
+        "name": "Lim Xẹt",
+        "root_diameter": "8cm",
+        "height": "4-5m",
+        "price": 600000
+    },
+    {
+        "name": "Lim Xẹt",
+        "root_diameter": "9cm",
+        "height": "4-5m",
+        "price": 700000
+    },
+    {
+        "name": "Lim Xẹt",
+        "root_diameter": "10cm",
+        "height": "4-5m",
+        "price": 800000
+    },
+    {
+        "name": "Lim Xẹt",
+        "root_diameter": "11cm",
+        "height": "4-5m",
+        "price": 900000
+    },
+    {
+        "name": "Lim Xẹt",
+        "root_diameter": "12cm",
+        "height": "4-5m",
+        "price": 950000
+    },
+    {
+        "name": "Lim Xẹt",
+        "root_diameter": "13cm",
+        "height": "4-5m",
+        "price": 1100000
+    },
+    {
+        "name": "Lim Xẹt",
+        "root_diameter": "15cm",
+        "height": "4-5m",
+        "price": 1300000
+    },
+    {
+        "name": "Lim Xẹt",
+        "root_diameter": "16cm",
+        "height": "4-5m",
+        "price": 1600000
+    },
+    {
+        "name": "Lim Xẹt",
+        "root_diameter": "18cm",
+        "height": "4-5m",
+        "price": 2000000
+    },
+    {
+        "name": "Lim Xẹt",
+        "root_diameter": "20cm",
+        "height": "4-5m",
+        "price": 3000000
+    },
+    {
+        "name": "Kèn Hồng",
+        "root_diameter": "8cm",
+        "height": "4-5m",
+        "price": 600000
+    },
+    {
+        "name": "Kèn Hồng",
+        "root_diameter": "9cm",
+        "height": "4-5m",
+        "price": 700000
+    },
+    {
+        "name": "Kèn Hồng",
+        "root_diameter": "10cm",
+        "height": "4-5m",
+        "price": 800000
+    },
+    {
+        "name": "Kèn Hồng",
+        "root_diameter": "11cm",
+        "height": "4-5m",
+        "price": 900000
+    },
+    {
+        "name": "Kèn Hồng",
+        "root_diameter": "12cm",
+        "height": "4-5m",
+        "price": 950000
+    },
+    {
+        "name": "Kèn Hồng",
+        "root_diameter": "13cm",
+        "height": "4-5m",
+        "price": 1100000
+    },
+    {
+        "name": "Kèn Hồng",
+        "root_diameter": "15cm",
+        "height": "4-5m",
+        "price": 1300000
+    },
+    {
+        "name": "Kèn Hồng",
+        "root_diameter": "16cm",
+        "height": "4-5m",
+        "price": 1600000
+    },
+    {
+        "name": "Kèn Hồng",
+        "root_diameter": "18cm",
+        "height": "4-5m",
+        "price": 2000000
+    },
+    {
+        "name": "Kèn Hồng",
+        "root_diameter": "20cm",
+        "height": "4-5m",
+        "price": 3000000
+    },
+    {
+        "name": "Móng Bò",
+        "root_diameter": "8cm",
+        "height": "4-5m",
+        "price": 600000
+    },
+    {
+        "name": "Móng Bò",
+        "root_diameter": "9cm",
+        "height": "4-5m",
+        "price": 700000
+    },
+    {
+        "name": "Móng Bò",
+        "root_diameter": "10cm",
+        "height": "4-5m",
+        "price": 800000
+    },
+    {
+        "name": "Móng Bò",
+        "root_diameter": "11cm",
+        "height": "4-5m",
+        "price": 900000
+    },
+    {
+        "name": "Móng Bò",
+        "root_diameter": "12cm",
+        "height": "4-5m",
+        "price": 950000
+    },
+    {
+        "name": "Móng Bò",
+        "root_diameter": "13cm",
+        "height": "4-5m",
+        "price": 1100000
+    },
+    {
+        "name": "Móng Bò",
+        "root_diameter": "15cm",
+        "height": "4-5m",
+        "price": 1300000
+    },
+    {
+        "name": "Móng Bò",
+        "root_diameter": "16cm",
+        "height": "4-5m",
+        "price": 1600000
+    },
+    {
+        "name": "Móng Bò",
+        "root_diameter": "18cm",
+        "height": "4-5m",
+        "price": 2000000
+    },
+    {
+        "name": "Móng Bò",
+        "root_diameter": "20cm",
+        "height": "4-5m",
+        "price": 3000000
+    },
+    {
+        "name": "Dầu Rái",
+        "root_diameter": "8cm",
+        "height": "4-5m",
+        "price": 600000
+    },
+    {
+        "name": "Dầu Rái",
+        "root_diameter": "9cm",
+        "height": "4-5m",
+        "price": 700000
+    },
+    {
+        "name": "Dầu Rái",
+        "root_diameter": "10cm",
+        "height": "4-5m",
+        "price": 800000
+    },
+    {
+        "name": "Dầu Rái",
+        "root_diameter": "11cm",
+        "height": "4-5m",
+        "price": 900000
+    },
+    {
+        "name": "Dầu Rái",
+        "root_diameter": "12cm",
+        "height": "4-5m",
+        "price": 950000
+    },
+    {
+        "name": "Dầu Rái",
+        "root_diameter": "13cm",
+        "height": "4-5m",
+        "price": 1100000
+    },
+    {
+        "name": "Dầu Rái",
+        "root_diameter": "15cm",
+        "height": "4-5m",
+        "price": 1300000
+    },
+    {
+        "name": "Dầu Rái",
+        "root_diameter": "16cm",
+        "height": "4-5m",
+        "price": 1600000
+    },
+    {
+        "name": "Dầu Rái",
+        "root_diameter": "18cm",
+        "height": "4-5m",
+        "price": 2000000
+    },
+    {
+        "name": "Dầu Rái",
+        "root_diameter": "20cm",
+        "height": "4-5m",
+        "price": 3000000
+    }
+]

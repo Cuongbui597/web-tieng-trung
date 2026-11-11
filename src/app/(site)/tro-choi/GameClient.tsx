@@ -2,14 +2,19 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
+import { GARMENT_VOCAB_DATABASE, GARMENT_LESSONS, GarmentLessonInfo } from './garmentVocab';
 
 interface WordItem {
     id: string;
     hanzi: string;
     pinyin: string;
     meanings: string[]; // Các nghĩa tiếng Việt chấp nhận được
-    category: 'hsk-1' | 'hsk-2' | 'hsk-3' | 'cong-xuong' | 'tre-em';
+    category: 'hsk-1' | 'hsk-2' | 'hsk-3' | 'cong-xuong' | 'tre-em' | 'may-mac';
     categoryLabel: string;
+    lesson?: string;
+    lessonLabel?: string;
+    lessonTopic?: string;
+    isReview?: boolean;
 }
 
 const TOTAL_ROUND_WORDS = 16;
@@ -196,6 +201,11 @@ const VOCAB_DATABASE: WordItem[] = [
     { id: 'te_28', hanzi: '小船', pinyin: 'xiǎochuán', meanings: ['thuyền nhỏ', 'con thuyền', 'thuyen nho'], category: 'tre-em', categoryLabel: 'Trẻ em' },
     { id: 'te_29', hanzi: '花', pinyin: 'huā', meanings: ['hoa', 'bông hoa', 'bong hoa'], category: 'tre-em', categoryLabel: 'Trẻ em' },
     { id: 'te_30', hanzi: '树', pinyin: 'shù', meanings: ['cây', 'cái cây', 'cay'], category: 'tre-em', categoryLabel: 'Trẻ em' },
+];
+
+const ALL_VOCAB_DATABASE: WordItem[] = [
+    ...VOCAB_DATABASE,
+    ...(GARMENT_VOCAB_DATABASE as WordItem[]),
 ];
 
 function removeVietnameseAccents(str: string): string {
@@ -457,11 +467,12 @@ function GameInput({
 }
 
 export default function GameClient() {
-    const [selectedCategory, setSelectedCategory] = useState<string>('all');
+    const [selectedCategory, setSelectedCategory] = useState<string>('may-mac');
+    const [selectedLesson, setSelectedLesson] = useState<string>('b1');
     const [gameState, setGameState] = useState<'idle' | 'playing' | 'gameover'>('idle');
     const [endReason, setEndReason] = useState<'completed' | 'timeout'>('completed');
 
-    // Bộ 16 từ duy nhất được chọn ngẫu nhiên cho mỗi lượt chơi (Không lặp lại)
+    // Bộ 16 từ cho mỗi lượt chơi (Tuần tự theo bài học hoặc ngẫu nhiên)
     const [roundWords, setRoundWords] = useState<WordItem[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -505,19 +516,39 @@ export default function GameClient() {
         if (saved) setBestScore(parseInt(saved, 10));
     }, []);
 
-    // Lọc danh sách từ theo chủ đề
+    // Lọc danh sách từ theo chủ đề và bài học
     const getFilteredWords = useCallback(() => {
-        if (selectedCategory === 'all') return VOCAB_DATABASE;
-        return VOCAB_DATABASE.filter(w => w.category === selectedCategory);
-    }, [selectedCategory]);
+        if (selectedCategory === 'all') return ALL_VOCAB_DATABASE;
+        if (selectedCategory === 'may-mac') {
+            if (selectedLesson === 'all') {
+                return ALL_VOCAB_DATABASE.filter(w => w.category === 'may-mac');
+            }
+            return ALL_VOCAB_DATABASE.filter(w => w.category === 'may-mac' && w.lesson === selectedLesson);
+        }
+        return ALL_VOCAB_DATABASE.filter(w => w.category === selectedCategory);
+    }, [selectedCategory, selectedLesson]);
 
-    // Bắt đầu lượt chơi mới (Lấy chính xác 16 từ ngẫu nhiên không lặp lại)
-    const startGame = () => {
+    // Bắt đầu lượt chơi mới (16 từ)
+    const startGame = (overrideLesson?: string) => {
         sfx.init();
-        const pool = getFilteredWords();
-        // Xáo trộn mảng ngẫu nhiên và lấy đúng 16 từ duy nhất
-        const shuffled = [...pool].sort(() => Math.random() - 0.5);
-        const selected16 = shuffled.slice(0, TOTAL_ROUND_WORDS);
+        const activeLesson = overrideLesson !== undefined ? overrideLesson : selectedLesson;
+        if (overrideLesson !== undefined) {
+            setSelectedLesson(overrideLesson);
+        }
+
+        let selected16: WordItem[] = [];
+
+        if (selectedCategory === 'may-mac' && activeLesson !== 'all') {
+            // Lấy 16 từ của bài đã chọn THEO ĐÚNG THỨ TỰ TỪ TRÊN XUỐNG DƯỚI (Không xáo trộn)
+            const lessonPool = ALL_VOCAB_DATABASE.filter(w => w.category === 'may-mac' && w.lesson === activeLesson);
+            selected16 = lessonPool.slice(0, TOTAL_ROUND_WORDS);
+        } else {
+            const pool = selectedCategory === 'all'
+                ? ALL_VOCAB_DATABASE
+                : ALL_VOCAB_DATABASE.filter(w => w.category === selectedCategory);
+            const shuffled = [...pool].sort(() => Math.random() - 0.5);
+            selected16 = shuffled.slice(0, TOTAL_ROUND_WORDS);
+        }
 
         setRoundWords(selected16);
         setCurrentIndex(0);
@@ -820,9 +851,10 @@ export default function GameClient() {
                         </p>
 
                         {/* Danh sách chủ đề */}
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
                             {[
-                                { id: 'all', label: 'Tất cả chủ đề', icon: '🌟', count: '170+ từ' },
+                                { id: 'may-mac', label: 'Ngành May Mặc', icon: '🧵', count: '180+ từ (12 Bài)', highlight: true },
+                                { id: 'all', label: 'Tất cả chủ đề', icon: '🌟', count: '350+ từ' },
                                 { id: 'hsk-1', label: 'HSK 1 (Sơ cấp)', icon: '🎯', count: '35 từ' },
                                 { id: 'hsk-2', label: 'HSK 2 (Cơ bản)', icon: '📗', count: '35 từ' },
                                 { id: 'hsk-3', label: 'HSK 3 (Trung cấp)', icon: '📘', count: '35 từ' },
@@ -833,14 +865,19 @@ export default function GameClient() {
                                     key={cat.id}
                                     type="button"
                                     onClick={() => setSelectedCategory(cat.id)}
-                                    className={`p-4 rounded-2xl border text-sm font-semibold transition-all flex flex-col items-center gap-1 cursor-pointer ${
+                                    className={`p-3.5 sm:p-4 rounded-2xl border text-sm font-semibold transition-all flex flex-col items-center gap-1 cursor-pointer relative ${
                                         selectedCategory === cat.id
-                                            ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-md scale-105'
-                                            : 'bg-white/60 text-[var(--text)] border-[var(--border)] hover:bg-white'
-                                    }`}
+                                            ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-md scale-105 ring-2 ring-[var(--accent)]/30'
+                                            : 'bg-white/60 text-[var(--text)] border-[var(--border)] hover:bg-white hover:scale-102'
+                                    } ${cat.highlight && selectedCategory !== cat.id ? 'border-rose-300 bg-rose-50/50' : ''}`}
                                 >
+                                    {cat.highlight && selectedCategory !== cat.id && (
+                                        <span className="absolute -top-2.5 -right-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-rose-500 text-white shadow-xs">
+                                            Mới ✨
+                                        </span>
+                                    )}
                                     <span className="text-2xl">{cat.icon}</span>
-                                    <span>{cat.label}</span>
+                                    <span className="line-clamp-1">{cat.label}</span>
                                     <span className={`text-[10px] ${selectedCategory === cat.id ? 'text-white/80' : 'text-[var(--muted)]'}`}>
                                         {cat.count}
                                     </span>
@@ -848,14 +885,84 @@ export default function GameClient() {
                             ))}
                         </div>
 
+                        {/* Bộ chia 12 Bài học Mỗi ngày theo tài liệu dệt may (Khi chọn ngành may mặc) */}
+                        {selectedCategory === 'may-mac' && (
+                            <div className="mb-8 text-left bg-gradient-to-br from-amber-50/80 via-white/80 to-rose-50/60 p-5 sm:p-6 rounded-3xl border border-amber-200 shadow-sm animate-fade-in">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-amber-200/60">
+                                    <div>
+                                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-amber-100 text-amber-900 uppercase tracking-wider mb-1">
+                                            <span>📅</span> Lộ trình học 16 từ mỗi ngày (Từ trên xuống dưới)
+                                        </div>
+                                        <h3 className="text-base sm:text-lg font-extrabold text-[var(--text)]">
+                                            Chọn Ngày / Bài Học Ngành May Mặc & Dệt Sợi
+                                        </h3>
+                                        <p className="text-xs text-[var(--muted)]">
+                                            Đã chia sẵn 12 bài theo đúng thứ tự file Word tài liệu. Mỗi ngày học chuẩn 16 từ!
+                                        </p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setSelectedLesson('all')}
+                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer border ${
+                                            selectedLesson === 'all'
+                                                ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-sm'
+                                                : 'bg-white text-[var(--muted)] border-gray-200 hover:text-[var(--text)]'
+                                        }`}
+                                    >
+                                        🎲 Trộn ngẫu nhiên (16 từ)
+                                    </button>
+                                </div>
+
+                                {/* 12 bài dạng lưới */}
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+                                    {GARMENT_LESSONS.map(lesson => {
+                                        const isSelected = selectedLesson === lesson.id;
+                                        return (
+                                            <button
+                                                key={lesson.id}
+                                                type="button"
+                                                onClick={() => setSelectedLesson(lesson.id)}
+                                                className={`p-3 rounded-2xl border text-left transition-all cursor-pointer relative flex flex-col justify-between gap-1 ${
+                                                    isSelected
+                                                        ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-md scale-102 ring-2 ring-[var(--accent)]/30'
+                                                        : 'bg-white/80 hover:bg-white text-[var(--text)] border-amber-100 hover:border-amber-300 shadow-xs'
+                                                }`}
+                                            >
+                                                <div className="flex items-center justify-between gap-1">
+                                                    <span className="text-xl">{lesson.icon}</span>
+                                                    <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md ${
+                                                        isSelected ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-900'
+                                                    }`}>
+                                                        Ngày {lesson.number}
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <div className="text-xs sm:text-sm font-bold line-clamp-1">
+                                                        {lesson.title}
+                                                    </div>
+                                                    <div className={`text-[11px] mt-0.5 ${isSelected ? 'text-white/80' : 'text-[var(--muted)]'}`}>
+                                                        {lesson.wordRange}
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
                         {/* Nút bắt đầu */}
                         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                             <button
                                 type="button"
-                                onClick={startGame}
+                                onClick={() => startGame()}
                                 className="btn btn-primary px-10 py-4 text-lg font-bold shadow-xl hover:scale-105 active:scale-95 transition-all w-full sm:w-auto cursor-pointer"
                             >
-                                Bắt Đầu 16 Từ (1 Phút) 🔥
+                                {selectedCategory === 'may-mac' && selectedLesson !== 'all' ? (
+                                    <span>Bắt Đầu {GARMENT_LESSONS.find(l => l.id === selectedLesson)?.title || 'Bài Học'} (16 Từ) 🔥</span>
+                                ) : (
+                                    <span>Bắt Đầu 16 Từ (1 Phút) 🔥</span>
+                                )}
                             </button>
                         </div>
 
@@ -978,7 +1085,7 @@ export default function GameClient() {
                             {/* Category badge */}
                             <div className="absolute top-5 left-6">
                                 <span className="badge-gradient text-xs px-3 py-1 rounded-full font-bold">
-                                    {currentWord.categoryLabel}
+                                    {currentWord.categoryLabel} {currentWord.lessonLabel ? `• ${currentWord.lessonLabel}` : ''}
                                 </span>
                             </div>
 
@@ -1220,19 +1327,40 @@ export default function GameClient() {
 
                         {/* Nút hành động */}
                         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-                            <button
-                                type="button"
-                                onClick={startGame}
-                                className="btn btn-primary px-8 py-3.5 font-bold text-base shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
-                            >
-                                🔄 Chơi Lại 16 Từ Mới
-                            </button>
+                            {selectedCategory === 'may-mac' && selectedLesson !== 'all' ? (
+                                <>
+                                    <button
+                                        type="button"
+                                        onClick={() => startGame(selectedLesson)}
+                                        className="btn btn-primary px-8 py-3.5 font-bold text-base shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                                    >
+                                        🔄 Luyện Lại Bài {selectedLesson.replace('b', '')}
+                                    </button>
+                                    {parseInt(selectedLesson.replace('b', '')) < 12 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => startGame(`b${parseInt(selectedLesson.replace('b', '')) + 1}`)}
+                                            className="btn px-8 py-3.5 font-bold text-base bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                                        >
+                                            Học Tiếp Bài {parseInt(selectedLesson.replace('b', '')) + 1} ➡️
+                                        </button>
+                                    )}
+                                </>
+                            ) : (
+                                <button
+                                    type="button"
+                                    onClick={() => startGame()}
+                                    className="btn btn-primary px-8 py-3.5 font-bold text-base shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                                >
+                                    🔄 Chơi Lại 16 Từ Mới
+                                </button>
+                            )}
                             <button
                                 type="button"
                                 onClick={() => setGameState('idle')}
                                 className="btn btn-secondary px-8 py-3.5 font-bold text-base cursor-pointer"
                             >
-                                📋 Chọn Cấp Độ Khác
+                                📋 Chọn Bài / Cấp Độ Khác
                             </button>
                         </div>
                     </div>

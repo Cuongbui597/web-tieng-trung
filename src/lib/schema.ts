@@ -40,8 +40,16 @@ export function getLocalBusinessSchema() {
         image: `${BASE_URL}/og.svg`,
         logo: `${BASE_URL}/logo.png`,
         url: BASE_URL,
-        telephone: '+84931152486',
+        telephone: '+84972910319',
         priceRange: '1200000VND-2500000VND',
+        founder: {
+            '@type': 'Person',
+            name: 'Lê Nguyễn Hồng Yên',
+            jobTitle: 'Founder & Giảng Viên Phụ Trách Chuyên Môn',
+            telephone: '+84972910319',
+            alumniOf: 'Trường Đại học Ngoại ngữ - Đại học Đà Nẵng',
+            knowsAbout: ['Tiếng Trung Thực Chiến', 'HSK 6', 'Phiên dịch Giày da Đài Loan', 'Đào tạo tiếng Trung'],
+        },
         hasMap: 'https://maps.app.goo.gl/example',
         address: {
             '@type': 'PostalAddress',

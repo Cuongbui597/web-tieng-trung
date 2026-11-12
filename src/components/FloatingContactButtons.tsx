@@ -1,5 +1,7 @@
+import { SITE_PHONE } from '@/lib/constants';
+
 export default function FloatingContactButtons() {
-    const phone = '0931152486';
+    const phone = SITE_PHONE;
 
     return (
         <div className="fixed bottom-6 right-4 z-50 flex flex-col gap-4 sm:right-6">
@@ -28,8 +30,8 @@ export default function FloatingContactButtons() {
                 <a
                     href={`tel:${phone}`}
                     className="group relative flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-gradient-to-tr from-green-600 to-green-500 text-white shadow-[0_8px_30px_rgba(34,197,94,0.3)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(34,197,94,0.5)] border border-green-400/50"
-                    aria-label="Gọi 0931152486"
-                    title="Gọi 0931152486"
+                    aria-label={`Gọi ${phone}`}
+                    title={`Gọi ${phone}`}
                 >
                     <svg
                         width="26"

@@ -51,7 +51,7 @@ export default function ContactPage() {
                         <div className="card p-8 rounded-3xl bg-white/35 backdrop-blur-xl border border-white/40 shadow-lg">
                             <div className="text-3xl mb-3">📞</div>
                             <h3 className="text-base font-bold text-[var(--text)]">Hotline & Zalo Tuyển Sinh</h3>
-                            <p className="text-xs text-[var(--muted)] mt-1">Hỗ trợ tư vấn và giải đáp thắc mắc</p>
+                            <p className="text-xs text-[var(--muted)] mt-1">Tư vấn lộ trình học cùng cô Lê Nguyễn Hồng Yên</p>
                             <a href={`tel:${SITE_PHONE}`} className="mt-3 inline-block text-lg font-bold link-accent">
                                 {SITE_PHONE}
                             </a>

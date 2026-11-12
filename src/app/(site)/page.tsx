@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getAllArticles } from '@/lib/server';
 import { HeroBackground } from '@/components/HeroBackground';
 import { getBreadcrumbSchema, toJsonLd } from '@/lib/schema';
+import { AUTHOR_INFO } from '@/lib/constants';
 import { Metadata } from 'next';
 
 export const revalidate = 3600;
@@ -175,6 +176,86 @@ export default async function Home() {
                                     <p className="text-sm text-[var(--muted)]">{f.desc}</p>
                                 </div>
                             ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* Founder & Lead Teacher Section */}
+                <section className="py-20 px-4 bg-gradient-to-r from-amber-50/40 via-white/50 to-rose-50/40">
+                    <div className="container-app">
+                        <div className="card rounded-[2.5rem] p-8 md:p-12 bg-white/40 backdrop-blur-xl border border-white/50 shadow-2xl relative overflow-hidden">
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                                {/* Left: Profile Card */}
+                                <div className="lg:col-span-5 flex flex-col items-center text-center p-6 rounded-3xl bg-white/70 border border-white/70 shadow-lg">
+                                    <div className="w-36 h-36 rounded-full bg-gradient-to-tr from-rose-500 via-amber-500 to-rose-400 p-1 shadow-xl mb-3 flex items-center justify-center">
+                                        <div className="w-full h-full rounded-full bg-white flex flex-col items-center justify-center">
+                                            <span className="text-5xl">👩‍🏫</span>
+                                            <span className="text-[11px] font-black text-rose-700 uppercase mt-1">Cô Hồng Yên</span>
+                                        </div>
+                                    </div>
+                                    <h3 className="text-2xl font-black text-[var(--text)]">
+                                        {AUTHOR_INFO.name}
+                                    </h3>
+                                    <p className="text-xs text-rose-700 font-bold mt-0.5">
+                                        {AUTHOR_INFO.role}
+                                    </p>
+                                    <p className="text-[11px] text-[var(--muted)] mt-1 font-semibold">
+                                        Sinh năm {AUTHOR_INFO.birthYear} • Hotline / Zalo: {AUTHOR_INFO.phone}
+                                    </p>
+
+                                    <div className="flex flex-wrap gap-1.5 justify-center mt-3">
+                                        <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-rose-100 text-rose-800 border border-rose-200">
+                                            HSK 6 Quốc Tế
+                                        </span>
+                                        <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-200">
+                                            HSK 5+ Xuất Sắc
+                                        </span>
+                                        <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-900 border border-emerald-200">
+                                            Bằng Giỏi ĐH Ngoại Ngữ
+                                        </span>
+                                    </div>
+
+                                    <a
+                                        href={AUTHOR_INFO.zaloUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="btn btn-primary w-full mt-4 py-2.5 rounded-xl text-xs font-bold shadow-md hover:scale-102 transition-all block text-center"
+                                    >
+                                        💬 Chat Zalo Cùng Cô Yên ({AUTHOR_INFO.phone})
+                                    </a>
+                                </div>
+
+                                {/* Right: Credentials & Message */}
+                                <div className="lg:col-span-7">
+                                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-rose-100/80 text-rose-800 uppercase tracking-wider mb-3">
+                                        <span>🌟</span> Giảng Viên Trực Tiếp Đào Tạo
+                                    </div>
+                                    <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--text)] mb-4 leading-tight">
+                                        Học Tiếng Trung Thực Chiến Cùng Chuyên Gia Phiên Dịch
+                                    </h2>
+                                    <p className="text-sm md:text-base text-[var(--muted)] leading-relaxed mb-4">
+                                        Cô <strong>Lê Nguyễn Hồng Yên</strong> tốt nghiệp loại <strong>Giỏi khoa Tiếng Trung trường Đại học Ngoại ngữ – ĐH Đà Nẵng</strong>, đạt chứng chỉ <strong>HSK 6</strong> quốc tế cùng hơn <strong>3 năm kinh nghiệm làm phiên dịch viên</strong> cho các tập đoàn giày da Đài Loan xuất khẩu.
+                                    </p>
+                                    <p className="text-sm md:text-base text-[var(--muted)] leading-relaxed mb-6">
+                                        Phương pháp giảng dạy trực quan, xóa bỏ lối học vẹt. Học viên được trực tiếp rèn luyện phản xạ ngữ cảnh thực tế, thuật ngữ nhà xưởng và kỹ năng giao tiếp công xưởng - doanh nghiệp để ứng dụng vào công việc ngay sau khóa học.
+                                    </p>
+
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
+                                        <div className="p-3 rounded-2xl bg-white/60 border border-white/60 text-center">
+                                            <div className="text-lg font-black text-rose-600">3+ Năm</div>
+                                            <div className="text-[11px] text-[var(--muted)] font-semibold">Dịch Thuật Giày Da</div>
+                                        </div>
+                                        <div className="p-3 rounded-2xl bg-white/60 border border-white/60 text-center">
+                                            <div className="text-lg font-black text-amber-600">3+ Năm</div>
+                                            <div className="text-[11px] text-[var(--muted)] font-semibold">Kinh Nghiệm Giảng Dạy</div>
+                                        </div>
+                                        <div className="p-3 rounded-2xl bg-white/60 border border-white/60 text-center col-span-2 sm:col-span-1">
+                                            <div className="text-lg font-black text-emerald-600">100%</div>
+                                            <div className="text-[11px] text-[var(--muted)] font-semibold">Theo Sát Từng Học Viên</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>

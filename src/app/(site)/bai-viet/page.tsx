@@ -8,16 +8,16 @@ import { Metadata } from 'next';
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-    title: "Kiến Thức Cảnh Quan & Cây Xanh",
-    description: "Tổng hợp kiến thức chuyên sâu về thiết kế, thi công sân vườn, bảo dưỡng cảnh quan và kinh nghiệm chăm sóc cây xanh từ chuyên gia.",
-    keywords: ["kiến thức cảnh quan", "kinh nghiệm thi công sân vườn", "hướng dẫn chăm sóc cây", "xu hướng thiết kế sân vườn", "bảo dưỡng cảnh quan"],
+    title: "Góc Học Tập & Mẹo Học Tiếng Trung",
+    description: "Tổng hợp mẹo học tiếng Trung, luyện thi HSK 1-3 bứt tốc, từ vựng công xưởng giày da - may mặc và kinh nghiệm phiên dịch thực chiến từ cô Lê Nguyễn Hồng Yên.",
+    keywords: ["học tiếng trung", "mẹo thi hsk", "từ vựng công xưởng", "tiếng trung giao tiếp", "phiên dịch tiếng trung"],
     alternates: {
-        canonical: "https://chamsoccanhquan.com/bai-viet"
+        canonical: "https://tiengtrunghsk.vn/bai-viet"
     },
     openGraph: {
-        title: "Kiến Thức Cảnh Quan & Cây Xanh - Cây Cảnh Đà Nẵng",
-        description: "Chia sẻ kinh nghiệm thực tế về thi công, thiết kế và bảo dưỡng không gian xanh.",
-        url: "https://chamsoccanhquan.com/bai-viet",
+        title: "Góc Học Tập & Mẹo Học Tiếng Trung - Tiếng Trung HSK Việt",
+        description: "Chia sẻ kinh nghiệm luyện thi HSK, tiếng Trung công xưởng và kỹ năng phiên dịch thực tế.",
+        url: "https://tiengtrunghsk.vn/bai-viet",
         type: "website"
     }
 };
@@ -55,8 +55,8 @@ export default async function ArticleListPage({ searchParams }: { searchParams: 
             {/* Header */}
             <section className="py-24 px-4 bg-gradient-sage">
                 <div className="max-w-2xl mx-auto text-center">
-                    <h1 className="text-4xl md:text-5xl font-semibold text-gradient-accent mb-4 tracking-tight font-serif">Kiến Thức & Kinh Nghiệm</h1>
-                    <p className="text-lg text-[var(--muted)] mx-auto">Chia sẻ chuyên sâu về thi công cảnh quan, thiết kế sân vườn và chăm sóc cây xanh</p>
+                    <h1 className="text-4xl md:text-5xl font-semibold text-gradient-accent mb-4 tracking-tight font-serif">Góc Học Tập & Blog</h1>
+                    <p className="text-lg text-[var(--muted)] mx-auto">Chia sẻ phương pháp học tiếng Trung, lộ trình thi HSK và kinh nghiệm phiên dịch thực chiến từ cô Lê Nguyễn Hồng Yên</p>
                 </div>
             </section>
 

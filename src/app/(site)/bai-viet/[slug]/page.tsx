@@ -8,6 +8,7 @@ import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import { absoluteUrl, getBlogPostingSchema, getBreadcrumbSchema, getFAQSchema, toJsonLd } from '@/lib/schema';
 import { Article } from '@/lib/articles';
+import { AUTHOR_INFO, SITE_URL } from '@/lib/constants';
 
 // Helper types
 interface TocItem {
@@ -137,25 +138,26 @@ export async function generateMetadata({ params }: PageProps) {
     }
 
     const info = result.data;
-    const imagePath = info.image || '/placeholder-plant.svg';
-    const ogImage = imagePath.startsWith('http') ? imagePath : `https://chamsoccanhquan.com${imagePath}`;
+    const imagePath = info.image || '/og.svg';
+    const ogImage = imagePath.startsWith('http') ? imagePath : `${SITE_URL}${imagePath}`;
+    const authorName = info.author || AUTHOR_INFO.name;
 
     return {
         title: info.title,
         description: info.description,
-        keywords: (info.tags && info.tags.length > 0) ? info.tags : ["bài viết", info.title || "Bài viết", "cây cảnh"],
-        authors: [{ name: info.author }],
+        keywords: (info.tags && info.tags.length > 0) ? info.tags : ["học tiếng trung", "hsk", info.title || "Bài viết", "tiếng trung thực chiến"],
+        authors: [{ name: authorName }],
         alternates: {
-            canonical: `https://chamsoccanhquan.com/bai-viet/${slug}`
+            canonical: `${SITE_URL}/bai-viet/${slug}`
         },
         openGraph: {
             title: info.title,
             description: info.description,
-            url: `https://chamsoccanhquan.com/bai-viet/${slug}`,
+            url: `${SITE_URL}/bai-viet/${slug}`,
             type: "article",
             publishedTime: info.date,
             modifiedTime: info.updated || undefined,
-            authors: [info.author],
+            authors: [authorName],
             tags: info.tags,
             images: [
                 {
@@ -369,9 +371,47 @@ export default async function ArticlePage({ params }: PageProps) {
                     <hr className="my-12 border-[var(--border)]" />
 
                     {/* Author Box */}
-                    <div className="card-gradient p-6 mb-10">
-                        <h3 className="text-lg font-bold text-[var(--title)] mb-2 font-serif">Về tác giả</h3>
-                        <p className="text-[var(--muted)]">{info.author} là chuyên gia về chăm sóc cây cảnh với kinh nghiệm nhiều năm.</p>
+                    <div className="card p-6 sm:p-8 rounded-[2rem] bg-white/40 backdrop-blur-xl border border-white/50 shadow-lg mb-10">
+                        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
+                            <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-rose-500 via-amber-500 to-rose-400 p-1 shadow-md shrink-0 flex items-center justify-center">
+                                <div className="w-full h-full rounded-full bg-white flex flex-col items-center justify-center text-center">
+                                    <span className="text-3xl">👩‍🏫</span>
+                                </div>
+                            </div>
+                            <div className="text-center sm:text-left flex-1">
+                                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-1">
+                                    <h3 className="text-lg font-bold text-[var(--title)] font-serif">
+                                        Về tác giả: {AUTHOR_INFO.name}
+                                    </h3>
+                                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-800 border border-rose-200">
+                                        HSK 6 Quốc Tế
+                                    </span>
+                                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-200">
+                                        HSK 5+ Xuất Sắc
+                                    </span>
+                                </div>
+                                <p className="text-xs text-rose-700 font-bold mb-2">
+                                    {AUTHOR_INFO.role} • Cử nhân Bằng Giỏi ĐH Ngoại ngữ Đà Nẵng
+                                </p>
+                                <p className="text-xs sm:text-sm text-[var(--muted)] leading-relaxed">
+                                    Cô <strong>Lê Nguyễn Hồng Yên</strong> sở hữu chứng chỉ HSK 6, HSK 5+ cùng hơn 3 năm kinh nghiệm làm phiên dịch viên cao cấp cho các tập đoàn & doanh nghiệp Đài Loan chuyên ngành <strong>Giày da – May mặc xuất khẩu</strong> và 3 năm trực tiếp đào tạo tiếng Trung thực chiến, luyện thi chứng chỉ HSK 1–3.
+                                </p>
+                                <div className="mt-3 pt-3 border-t border-[var(--border)] flex flex-wrap items-center justify-center sm:justify-start gap-4">
+                                    <a
+                                        href={AUTHOR_INFO.zaloUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-xs font-bold text-rose-700 hover:underline inline-flex items-center gap-1"
+                                    >
+                                        💬 Chat Zalo cùng cô Yên: {AUTHOR_INFO.phone}
+                                    </a>
+                                    <span className="text-xs text-[var(--muted)]">•</span>
+                                    <Link href="/su-menh" className="text-xs font-semibold link-accent">
+                                        Xem tầm nhìn & sứ mệnh →
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Related Articles */}

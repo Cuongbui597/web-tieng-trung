@@ -1,30 +1,66 @@
 import { NextRequest, NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
 import { sql, ensureDbReady } from '@/lib/db';
+import { getRandomArticleImage } from '@/lib/wordFormatter';
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
     try {
         const { slug } = await params;
         const body = await request.json();
-        const { title, author, date, image, description, content, tags, image_alt } = body;
+        const { title, author, date, description, content, tags, image_alt } = body;
+        let { image } = body;
 
-        const tagsJson = JSON.stringify(tags || []);
+        if (!image || !String(image).trim()) {
+            image = getRandomArticleImage();
+        }
 
-        await ensureDbReady();
-        const result = await sql`
-            UPDATE articles
-            SET title = ${title},
-                author = ${author || ''},
-                date = ${date || ''},
-                image = ${image || ''},
-                description = ${description || ''},
-                content = ${content || ''},
-                image_alt = ${image_alt || ''},
-                tags = ${tagsJson}
-            WHERE slug = ${slug}
-        `;
+        const tagsList = Array.isArray(tags) ? tags : (typeof tags === 'string' ? tags.split(',').map((s: string) => s.trim()) : []);
+        const tagsJson = JSON.stringify(tagsList);
+        const finalAuthor = author || 'Cô Lê Nguyễn Hồng Yên';
+        const finalDate = date || new Date().toISOString().split('T')[0];
+        const finalDesc = description || title;
 
-        if (result.rowCount === 0) {
-            return NextResponse.json({ ok: false, error: 'Không tìm thấy bài viết' }, { status: 404 });
+        // 1. Cập nhật file markdown
+        try {
+            const blogDir = path.join(process.cwd(), 'src', 'content', 'blog');
+            const mdFilePath = path.join(blogDir, `${slug}.md`);
+            const frontmatter = [
+                '---',
+                `title: "${title.replace(/"/g, '\\"')}"`,
+                `slug: ${slug}`,
+                `description: "${finalDesc.replace(/"/g, '\\"')}"`,
+                `date: "${finalDate}"`,
+                `image: "${image}"`,
+                `author: "${finalAuthor.replace(/"/g, '\\"')}"`,
+                `tags: ${tagsJson}`,
+                '---',
+                '',
+                content || '',
+            ].join('\n');
+
+            fs.writeFileSync(mdFilePath, frontmatter, 'utf8');
+        } catch (fsErr) {
+            console.warn('Ghi file markdown cập nhật:', fsErr);
+        }
+
+        // 2. Cập nhật Database nếu có
+        try {
+            await ensureDbReady();
+            await sql`
+                UPDATE articles
+                SET title = ${title},
+                    author = ${finalAuthor},
+                    date = ${finalDate},
+                    image = ${image},
+                    description = ${finalDesc},
+                    content = ${content || ''},
+                    image_alt = ${image_alt || ''},
+                    tags = ${tagsJson}
+                WHERE slug = ${slug}
+            `;
+        } catch (dbErr: any) {
+            console.warn('Cập nhật DB cảnh báo:', dbErr.message);
         }
 
         return NextResponse.json({ ok: true });
@@ -37,13 +73,22 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     try {
         const { slug } = await params;
 
-        await ensureDbReady();
-        const result = await sql`
-            DELETE FROM articles WHERE slug = ${slug}
-        `;
+        // 1. Xóa file markdown nếu có
+        try {
+            const mdFilePath = path.join(process.cwd(), 'src', 'content', 'blog', `${slug}.md`);
+            if (fs.existsSync(mdFilePath)) {
+                fs.unlinkSync(mdFilePath);
+            }
+        } catch (fsErr) {
+            console.warn('Xóa file markdown cảnh báo:', fsErr);
+        }
 
-        if (result.rowCount === 0) {
-            return NextResponse.json({ ok: false, error: 'Không tìm thấy bài viết' }, { status: 404 });
+        // 2. Xóa trong database
+        try {
+            await ensureDbReady();
+            await sql`DELETE FROM articles WHERE slug = ${slug}`;
+        } catch (dbErr: any) {
+            console.warn('Xóa DB cảnh báo:', dbErr.message);
         }
 
         return NextResponse.json({ ok: true });

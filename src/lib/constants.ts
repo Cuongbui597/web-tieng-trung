@@ -13,7 +13,7 @@ export const STORE_CATEGORIES = COURSE_CATEGORIES.map(c => c.label);
 export const SITE_NAME = 'Trung Tâm Tiếng Trung HSK Việt';
 export const SITE_PHONE = '0972910319';
 export const SITE_EMAIL = 'hoc@tiengtrunghsk.vn';
-export const SITE_ADDRESS = '485 Ngô Quyền, Sơn Trà, Đà Nẵng';
+export const SITE_ADDRESS = 'Xã Phú Ninh, TP Đà Nẵng';
 export const SITE_URL = 'https://tiengtrunghsk.vn';
 export const SITE_HOURS = '08:00 – 20:00';
 

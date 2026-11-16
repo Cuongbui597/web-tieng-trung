@@ -53,7 +53,7 @@ export function getLocalBusinessSchema() {
         hasMap: 'https://maps.app.goo.gl/example',
         address: {
             '@type': 'PostalAddress',
-            streetAddress: '485 Ngô Quyền',
+            streetAddress: 'Xã Phú Ninh',
             addressLocality: 'Đà Nẵng',
             addressRegion: 'Đà Nẵng',
             postalCode: '550000',

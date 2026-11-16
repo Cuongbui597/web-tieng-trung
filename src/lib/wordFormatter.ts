@@ -1,6 +1,7 @@
 /**
  * Chuyển đổi và chuẩn hóa nội dung sao chép từ Microsoft Word hoặc Google Docs
  * thành định dạng Markdown chuẩn với các cấp tiêu đề H1, H2, H3 tương xứng.
+ * Giải mã toàn bộ HTML Entities (&#299;, &#7843;, &#183;...) thành chữ tiếng Việt và Pinyin có dấu chuẩn.
  */
 
 export const RANDOM_ARTICLE_IMAGES = [
@@ -24,75 +25,107 @@ export function getRandomArticleImage(): string {
 }
 
 /**
- * Chuẩn hóa một chuỗi văn bản hoặc HTML từ Word thành Markdown
+ * Giải mã triệt để tất cả HTML Entities (Decimal, Hex, Named) sang ký tự Unicode thực tế
+ * Ví dụ: &#299; -> ī, &#249; -> ù, &#7843; -> ả, &#183; -> ·, &nbsp; -> khoảng trắng
+ */
+export function decodeAllHtmlEntities(str: string): string {
+    if (!str) return '';
+    return str
+        // Decimal entities: &#299;, &#7843;...
+        .replace(/&#(\d+);?/g, (_, dec) => {
+            try {
+                const code = parseInt(dec, 10);
+                return code ? String.fromCodePoint(code) : '';
+            } catch {
+                return '';
+            }
+        })
+        // Hex entities: &#x1F600;, &#x00B7;...
+        .replace(/&#x([0-9a-f]+);?/gi, (_, hex) => {
+            try {
+                const code = parseInt(hex, 16);
+                return code ? String.fromCodePoint(code) : '';
+            } catch {
+                return '';
+            }
+        })
+        // Named entities thông dụng
+        .replace(/&nbsp;/gi, ' ')
+        .replace(/&amp;/gi, '&')
+        .replace(/&lt;/gi, '<')
+        .replace(/&gt;/gi, '>')
+        .replace(/&quot;/gi, '"')
+        .replace(/&#39;/gi, "'")
+        .replace(/&apos;/gi, "'")
+        .replace(/&middot;/gi, '·')
+        .replace(/&bull;/gi, '•')
+        .replace(/&ndash;/gi, '–')
+        .replace(/&mdash;/gi, '—');
+}
+
+/**
+ * Chuẩn hóa một chuỗi văn bản hoặc HTML từ Word thành Markdown chuẩn
  */
 export function convertWordToMarkdown(input: string): { content: string; detectedTitle?: string } {
     if (!input || !input.trim()) {
         return { content: '' };
     }
 
-    let text = input;
+    // Bước 1: Luôn giải mã toàn bộ HTML Entities trước
+    let text = decodeAllHtmlEntities(input);
     let detectedTitle: string | undefined;
 
-    const isHtml = /<[a-z][\s\S]*>/i.test(input);
+    const isHtml = /<[a-z][\s\S]*>/i.test(text);
 
     if (isHtml) {
-        // 1. Loại bỏ các thẻ rác đặc thù của Word Office
+        // Loại bỏ thẻ rác của Word
         text = text.replace(/<!--[\s\S]*?-->/gi, '');
         text = text.replace(/<style[\s\S]*?<\/style>/gi, '');
         text = text.replace(/<xml[\s\S]*?<\/xml>/gi, '');
         text = text.replace(/<o:p[\s\S]*?<\/o:p>/gi, '');
 
-        // 2. Trích xuất tiêu đề nếu có thẻ Title của Word
+        // Trích xuất tiêu đề nếu có thẻ Title của Word
         const titleMatch = text.match(/<p[^>]*class="?(?:MsoTitle|Title)"?[^>]*>([\s\S]*?)<\/p>/i);
         if (titleMatch) {
-            detectedTitle = cleanHtmlText(titleMatch[1]);
+            detectedTitle = decodeAllHtmlEntities(cleanHtmlText(titleMatch[1]));
         }
 
-        // 3. Chuẩn hóa các cấp tiêu đề Word HTML sang Markdown
-        // H1 hoặc MsoTitle / MsoHeading1
+        // Chuyển đổi các thẻ Heading HTML
         text = text.replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, '\n\n# $1\n\n');
         text = text.replace(/<p[^>]*class="?(?:MsoHeading1|Heading1)"?[^>]*>([\s\S]*?)<\/p>/gi, '\n\n## $1\n\n');
 
-        // H2 hoặc MsoHeading2
         text = text.replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, '\n\n## $1\n\n');
         text = text.replace(/<p[^>]*class="?(?:MsoHeading2|Heading2)"?[^>]*>([\s\S]*?)<\/p>/gi, '\n\n## $1\n\n');
 
-        // H3 hoặc MsoHeading3
         text = text.replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, '\n\n### $1\n\n');
         text = text.replace(/<p[^>]*class="?(?:MsoHeading3|Heading3)"?[^>]*>([\s\S]*?)<\/p>/gi, '\n\n### $1\n\n');
 
-        // H4, H5, H6
         text = text.replace(/<h4[^>]*>([\s\S]*?)<\/h4>/gi, '\n\n### $1\n\n');
         text = text.replace(/<h[56][^>]*>([\s\S]*?)<\/h[56]>/gi, '\n\n### $1\n\n');
 
-        // 4. In đậm, in nghiêng
+        // In đậm, in nghiêng
         text = text.replace(/<(?:b|strong)[^>]*>([\s\S]*?)<\/(?:b|strong)>/gi, '**$1**');
         text = text.replace(/<(?:i|em)[^>]*>([\s\S]*?)<\/(?:i|em)>/gi, '*$1*');
 
-        // 5. Danh sách
+        // Danh sách gạch đầu dòng từ Word
         text = text.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, '- $1\n');
         text = text.replace(/<p[^>]*class="?(?:MsoListParagraph|ListParagraph)"?[^>]*>([\s\S]*?)<\/p>/gi, '- $1\n');
 
-        // 6. Đoạn văn và ngắt dòng
+        // Đoạn văn
         text = text.replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, '\n\n$1\n\n');
         text = text.replace(/<br\s*\/?>/gi, '\n');
 
-        // 7. Bỏ các thẻ HTML còn lại
+        // Bỏ các thẻ HTML còn lại
         text = text.replace(/<[^>]+>/g, '');
 
-        // 8. Giải mã các ký tự HTML thực thể
-        text = text
-            .replace(/&nbsp;/gi, ' ')
-            .replace(/&amp;/gi, '&')
-            .replace(/&lt;/gi, '<')
-            .replace(/&gt;/gi, '>')
-            .replace(/&quot;/gi, '"')
-            .replace(/&#39;/gi, "'")
-            .replace(/&bull;/gi, '•');
+        // Giải mã lần 2 cho phần ruột thẻ
+        text = decodeAllHtmlEntities(text);
     }
 
-    // 9. Xử lý logic phát hiện tiêu đề theo quy tắc đề mục thông dụng tại Việt Nam (Dù là paste HTML hay Text thô)
+    // Bước 2: Dọn dẹp asterisks thừa như **** do lồng thẻ bold từ Word
+    text = text.replace(/\*{4,}/g, '');
+
+    // Bước 3: Chuẩn hóa theo từng dòng
     const lines = text.split(/\r?\n/);
     const formattedLines: string[] = [];
 
@@ -103,45 +136,51 @@ export function convertWordToMarkdown(input: string): { content: string; detecte
             continue;
         }
 
-        // Nếu đã có đánh dấu Markdown (#, ##, ###) thì giữ nguyên
+        // Bỏ dấu **** thừa ở cuối dòng (chỉ xóa nếu có 3 dấu * trở lên, tránh xóa dấu ** của bold)
+        line = line.replace(/\*{3,}$/, '').trim();
+
+        // Nếu dòng đã có đánh dấu Markdown (#, ##, ###)
         if (/^#{1,6}\s+/.test(line)) {
             formattedLines.push(line);
             continue;
         }
 
-        // Quy tắc A: La Mã lớn (I., II., III., IV., V., VI., VII., VIII., IX., X.) -> H2
-        if (/^(?:I|II|III|IV|V|VI|VII|VIII|IX|X)[\.\:\-\s]+(.+)$/i.test(line)) {
-            line = line.replace(/^\*{2}([\s\S]+)\*{2}$/, '$1'); // gỡ bớt bold thừa
-            formattedLines.push(`\n## ${line}`);
+        // Quy tắc 1: Dấu chấm đầu dòng (bullet point của Word: ·, •, &#183;, -, *)
+        if (/^[\u00B7\u2022\u25E6\u2219\*\-]\s*(.*)$/.test(line)) {
+            const bulletContent = line.replace(/^[\u00B7\u2022\u25E6\u2219\*\-]\s*/, '').trim();
+            formattedLines.push(`- ${bulletContent}`);
             continue;
         }
 
-        // Quy tắc B: Phần, Chương, Bài (Phần 1., Chương I., Bài 1:...) -> H2
-        if (/^(?:PHẦN|Phần|CHƯƠNG|Chương|BÀI|Bài|MỤC|Mục)\s+[0-9A-Za-zIVXLCDM]+[\.\:\-\s]+(.+)$/i.test(line)) {
-            line = line.replace(/^\*{2}([\s\S]+)\*{2}$/, '$1');
-            formattedLines.push(`\n## ${line}`);
+        // Quy tắc 2: Tiêu đề cấp cao (BUỔI 1:, CHƯƠNG 1:, PHẦN A:, I., II., III.) -> H2 (##)
+        if (
+            /^(?:BUỔI|Buổi|CHƯƠNG|Chương|PHẦN|Phần)\s+[0-9A-Za-zIVXLCDM]+[\.\:\-\s]+(.+)$/i.test(line) ||
+            /^(?:I|II|III|IV|V|VI|VII|VIII|IX|X)[\.\:\-\s]+(.+)$/i.test(line)
+        ) {
+            line = line.replace(/^\*{2}([\s\S]+)\*{2}$/, '$1').trim();
+            formattedLines.push(`\n## ${line}\n`);
             continue;
         }
 
-        // Quy tắc C: Số phân cấp nhỏ (1.1, 1.2, 2.1, 2.2, a), b)...) -> H3
+        // Quy tắc 3: Từ vựng có đánh số thứ tự (1. 你好..., 7. 织物样本..., 8. 衣料样品卡...) -> H3 (###)
+        if (/^\d+[\.\:\-\)]\s+(.+)$/.test(line)) {
+            line = line.replace(/^\*{2}([\s\S]+)\*{2}$/, '$1').trim();
+            formattedLines.push(`\n### ${line}\n`);
+            continue;
+        }
+
+        // Quy tắc 4: Phân cấp nhỏ hơn (1.1, 1.2, 2.1, 2.2, a), b)...) -> H3 (###)
         if (/^\d+\.\d+(?:\.\d+)?[\.\:\-\s]+(.+)$/.test(line)) {
-            line = line.replace(/^\*{2}([\s\S]+)\*{2}$/, '$1');
-            formattedLines.push(`\n### ${line}`);
+            line = line.replace(/^\*{2}([\s\S]+)\*{2}$/, '$1').trim();
+            formattedLines.push(`\n### ${line}\n`);
             continue;
         }
 
-        // Quy tắc D: Đánh số 1., 2., 3. nếu toàn chữ hoa hoặc in đậm đứng một mình -> H2 hoặc H3
-        if (/^\d+[\.\:\s]+([A-ZÀ-Ỹ0-9\s\(\)\-\,\.\/]{4,80})$/.test(line) && !line.endsWith('.')) {
-            line = line.replace(/^\*{2}([\s\S]+)\*{2}$/, '$1');
-            formattedLines.push(`\n## ${line}`);
-            continue;
-        }
-
-        // Quy tắc E: Dòng in hoa toàn bộ ngắn gọn (từ 5 đến 70 ký tự, không dấu chấm cuối câu) -> H2
+        // Quy tắc 5: Dòng in hoa toàn bộ ngắn gọn (từ 5 đến 70 ký tự, không kết thúc bằng dấu chấm) -> H2 (##)
         const isAllCaps = line === line.toUpperCase() && /[A-ZÀ-Ỹ]/.test(line) && line.length >= 5 && line.length <= 70;
         if (isAllCaps && !/[.,:;]$/.test(line)) {
-            line = line.replace(/^\*{2}([\s\S]+)\*{2}$/, '$1');
-            formattedLines.push(`\n## ${line}`);
+            line = line.replace(/^\*{2}([\s\S]+)\*{2}$/, '$1').trim();
+            formattedLines.push(`\n## ${line}\n`);
             continue;
         }
 
@@ -155,11 +194,17 @@ export function convertWordToMarkdown(input: string): { content: string; detecte
         .replace(/\n{3,}/g, '\n\n')
         .replace(/^\s+|\s+$/g, '');
 
-    // Nếu chưa trích xuất được tiêu đề, xem dòng đầu tiên có phải là H1 hoặc H2 không
+    // Nếu chưa trích xuất được tiêu đề, xem dòng đầu tiên có thể làm tiêu đề không
     if (!detectedTitle) {
         const firstLineMatch = finalContent.match(/^#+\s+(.+)$/m);
         if (firstLineMatch) {
             detectedTitle = firstLineMatch[1].replace(/\*\*/g, '').trim();
+        } else {
+            // Lấy dòng đầu tiên nếu ngắn gọn
+            const firstLine = finalContent.split('\n')[0]?.trim();
+            if (firstLine && firstLine.length <= 100) {
+                detectedTitle = firstLine.replace(/^#+\s*/, '').replace(/\*\*/g, '').trim();
+            }
         }
     }
 

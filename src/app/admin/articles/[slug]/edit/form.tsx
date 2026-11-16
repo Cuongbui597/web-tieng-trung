@@ -37,23 +37,21 @@ export default function EditArticleForm({ article }: { article: any }) {
         const inputToConvert = html || text;
         if (!inputToConvert) return;
 
-        if (html || /^(?:I|II|III|IV|V|\d+\.\d+|Phần|Chương|Bài)/m.test(text)) {
-            e.preventDefault();
-            const { content: formatted, detectedTitle } = convertWordToMarkdown(inputToConvert);
+        e.preventDefault();
+        const { content: formatted, detectedTitle } = convertWordToMarkdown(inputToConvert);
 
-            const textarea = e.currentTarget;
-            const start = textarea.selectionStart;
-            const end = textarea.selectionEnd;
-            const newContent = content.substring(0, start) + formatted + content.substring(end);
-            setContent(newContent);
+        const textarea = e.currentTarget;
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const newContent = content.substring(0, start) + formatted + content.substring(end);
+        setContent(newContent);
 
-            if (!title && detectedTitle) {
-                setTitle(detectedTitle);
-            }
-
-            setWordNotice('✨ Đã tự động nhận diện và chuẩn hóa các đề mục H1, H2, H3 từ Word!');
-            setTimeout(() => setWordNotice(null), 4000);
+        if (!title.trim() && detectedTitle) {
+            setTitle(detectedTitle);
         }
+
+        setWordNotice('✨ Đã tự động giải mã font tiếng Việt/Pinyin và chuẩn hóa các đề mục H1, H2, H3!');
+        setTimeout(() => setWordNotice(null), 5000);
     }
 
     // Nút thủ công: Chuẩn hóa nội dung hiện tại
@@ -64,11 +62,11 @@ export default function EditArticleForm({ article }: { article: any }) {
         }
         const { content: formatted, detectedTitle } = convertWordToMarkdown(content);
         setContent(formatted);
-        if (!title && detectedTitle) {
+        if (!title.trim() && detectedTitle) {
             setTitle(detectedTitle);
         }
-        setWordNotice('✨ Đã chuẩn hóa toàn bộ nội dung thành H1, H2, H3 chuẩn SEO!');
-        setTimeout(() => setWordNotice(null), 4000);
+        setWordNotice('✨ Đã giải mã toàn bộ ký tự & chuẩn hóa H1, H2, H3 thành công!');
+        setTimeout(() => setWordNotice(null), 5000);
     }
 
     async function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -76,22 +74,21 @@ export default function EditArticleForm({ article }: { article: any }) {
         setLoading(true);
         setError('');
 
-        if (!title.trim()) {
-            setError('Tiêu đề không được để trống');
-            setLoading(false);
-            return;
-        }
+        // Tự động chuẩn hóa nội dung lần cuối trước khi gửi
+        const { content: cleanContent, detectedTitle } = convertWordToMarkdown(content);
+        setContent(cleanContent);
 
+        const finalTitle = title.trim() || detectedTitle || 'Bài viết';
         const finalImage = imageUrl.trim() || getRandomArticleImage();
 
         const data = {
-            title: title.trim(),
+            title: finalTitle,
             author: author.trim() || 'Cô Lê Nguyễn Hồng Yên',
             date: date,
             image: finalImage,
-            description: description.trim() || title.trim(),
-            content: content.trim(),
-            tags: ['tiếng trung', 'hsk', 'kinh nghiệm học'],
+            description: description.trim() || finalTitle,
+            content: cleanContent,
+            tags: ['tiếng trung', 'hsk', 'kinh nghiệm học', 'may mặc'],
         };
 
         try {

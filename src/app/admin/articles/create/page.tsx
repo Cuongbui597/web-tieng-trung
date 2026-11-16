@@ -4,7 +4,7 @@ import { useState, FormEvent, ChangeEvent, ClipboardEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { convertWordToMarkdown, getRandomArticleImage, RANDOM_ARTICLE_IMAGES } from '@/lib/wordFormatter';
+import { convertWordToMarkdown, decodeAllHtmlEntities, getRandomArticleImage, RANDOM_ARTICLE_IMAGES } from '@/lib/wordFormatter';
 
 export default function CreateArticlePage() {
     const router = useRouter();
@@ -48,7 +48,7 @@ export default function CreateArticlePage() {
         setImageUrl(nextImg);
     }
 
-    // Tự động chuẩn hóa định dạng khi Paste từ Word vào ô nội dung
+    // Tự động chuẩn hóa định dạng khi Paste (Ctrl + V) từ Word vào ô nội dung
     function handleContentPaste(e: ClipboardEvent<HTMLTextAreaElement>) {
         const html = e.clipboardData.getData('text/html');
         const text = e.clipboardData.getData('text/plain');
@@ -56,30 +56,27 @@ export default function CreateArticlePage() {
         const inputToConvert = html || text;
         if (!inputToConvert) return;
 
-        // Nếu nội dung có dấu hiệu từ Word (chứa thẻ html, Mso, hoặc phân cấp đề mục)
-        if (html || /^(?:I|II|III|IV|V|\d+\.\d+|Phần|Chương|Bài)/m.test(text)) {
-            e.preventDefault();
-            const { content: formatted, detectedTitle } = convertWordToMarkdown(inputToConvert);
+        e.preventDefault();
+        const { content: formatted, detectedTitle } = convertWordToMarkdown(inputToConvert);
 
-            // Nối tiếp hoặc thay thế nội dung
-            const textarea = e.currentTarget;
-            const start = textarea.selectionStart;
-            const end = textarea.selectionEnd;
-            const newContent = content.substring(0, start) + formatted + content.substring(end);
-            setContent(newContent);
+        // Chèn vào vị trí con trỏ hoặc thay thế vùng chọn
+        const textarea = e.currentTarget;
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const newContent = content.substring(0, start) + formatted + content.substring(end);
+        setContent(newContent);
 
-            // Nếu chưa có tiêu đề và Word có tiêu đề -> tự điền tiêu đề
-            if (!title && detectedTitle) {
-                setTitle(detectedTitle);
-                setSlug(generateSlug(detectedTitle));
-            }
-
-            setWordNotice('✨ Đã tự động nhận diện và chuẩn hóa các đề mục H1, H2, H3 từ Word!');
-            setTimeout(() => setWordNotice(null), 4000);
+        // Tự động điền tiêu đề nếu ô tiêu đề đang trống
+        if (!title.trim() && detectedTitle) {
+            setTitle(detectedTitle);
+            setSlug(generateSlug(detectedTitle));
         }
+
+        setWordNotice('✨ Đã tự động giải mã font tiếng Việt/Pinyin và chuẩn hóa các đề mục H1, H2, H3!');
+        setTimeout(() => setWordNotice(null), 5000);
     }
 
-    // Nút thủ công: Chuẩn hóa toàn bộ nội dung hiện tại theo định dạng Word
+    // Nút thủ công: Chuẩn hóa toàn bộ nội dung hiện tại
     function handleFormatNow() {
         if (!content.trim()) {
             alert('Vui lòng dán hoặc nhập nội dung vào ô bài viết trước.');
@@ -87,12 +84,12 @@ export default function CreateArticlePage() {
         }
         const { content: formatted, detectedTitle } = convertWordToMarkdown(content);
         setContent(formatted);
-        if (!title && detectedTitle) {
+        if (!title.trim() && detectedTitle) {
             setTitle(detectedTitle);
             setSlug(generateSlug(detectedTitle));
         }
-        setWordNotice('✨ Đã chuẩn hóa toàn bộ nội dung thành H1, H2, H3 chuẩn SEO!');
-        setTimeout(() => setWordNotice(null), 4000);
+        setWordNotice('✨ Đã giải mã toàn bộ ký tự & chuẩn hóa H1, H2, H3 thành công!');
+        setTimeout(() => setWordNotice(null), 5000);
     }
 
     async function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -100,25 +97,23 @@ export default function CreateArticlePage() {
         setLoading(true);
         setError('');
 
-        if (!title.trim()) {
-            setError('Vui lòng nhập tiêu đề bài viết');
-            setLoading(false);
-            return;
-        }
+        // Tự động chuẩn hóa nội dung lần cuối trước khi gửi (đảm bảo không còn ký tự &#...;)
+        const { content: cleanContent, detectedTitle } = convertWordToMarkdown(content);
+        setContent(cleanContent);
 
-        // Tự động chọn hình ngẫu nhiên nếu ô ảnh bị trống
+        const finalTitle = title.trim() || detectedTitle || 'Bài viết Tiếng Trung May Mặc & Dệt Sợi';
+        const finalSlug = slug.trim() || generateSlug(finalTitle);
         const finalImage = imageUrl.trim() || getRandomArticleImage();
-        const finalSlug = slug.trim() || generateSlug(title);
 
         const data = {
-            title: title.trim(),
+            title: finalTitle,
             slug: finalSlug,
             author: author.trim() || 'Cô Lê Nguyễn Hồng Yên',
             date: new Date().toISOString().split('T')[0],
             image: finalImage,
-            description: description.trim() || title.trim(),
-            content: content.trim(),
-            tags: ['tiếng trung', 'hsk', 'kinh nghiệm học'],
+            description: description.trim() || finalTitle,
+            content: cleanContent,
+            tags: ['tiếng trung', 'hsk', 'may mặc', 'dệt sợi'],
         };
 
         try {
@@ -152,7 +147,7 @@ export default function CreateArticlePage() {
                         href="/admin/articles"
                         className="text-xs font-bold text-slate-500 hover:text-slate-800 transition inline-flex items-center gap-1 mb-1"
                     >
-                        ← Quay lại danh sách
+                        ← Quay lại danh sách bài viết
                     </Link>
                     <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
                         Thêm Bài Viết Mới
@@ -175,7 +170,7 @@ export default function CreateArticlePage() {
             )}
 
             {wordNotice && (
-                <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm font-bold rounded-2xl flex items-center gap-2">
+                <div className="p-3.5 bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs sm:text-sm font-bold rounded-2xl flex items-center gap-2 shadow-xs">
                     <span>{wordNotice}</span>
                 </div>
             )}
@@ -187,14 +182,13 @@ export default function CreateArticlePage() {
                         <label className="block text-sm font-extrabold text-slate-900">
                             1. Tiêu đề bài viết <span className="text-rose-600">*</span>
                         </label>
-                        <span className="text-xs text-slate-400">Tự động tạo đường dẫn (slug)</span>
+                        <span className="text-xs text-slate-400">Tự động điền nếu dán từ Word có tiêu đề</span>
                     </div>
                     <input
                         type="text"
-                        required
                         value={title}
                         onChange={handleTitleChange}
-                        placeholder="Nhập tiêu đề bài viết (Ví dụ: Kinh nghiệm đạt điểm tối đa HSK 3 trong 2 tháng)..."
+                        placeholder="Nhập tiêu đề bài viết (Ví dụ: Từ Vựng Chuyên Ngành Dệt Sợi May Mặc & Kiểm Hàng QC)..."
                         className="w-full px-4 py-3.5 rounded-2xl border-2 border-slate-200 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10 outline-none text-base sm:text-lg font-bold text-slate-900 placeholder:text-slate-400 transition"
                     />
                 </div>
@@ -207,10 +201,9 @@ export default function CreateArticlePage() {
                         </label>
                         <input
                             type="text"
-                            required
                             value={slug}
                             onChange={(e) => setSlug(e.target.value)}
-                            placeholder="kinh-nghiem-dat-diem-toi-da-hsk-3"
+                            placeholder="tu-vung-chuyen-nganh-det-soi-may-mac"
                             className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono bg-slate-50 text-slate-700 focus:bg-white focus:border-rose-500 outline-none transition"
                         />
                     </div>
@@ -233,10 +226,10 @@ export default function CreateArticlePage() {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div>
                             <label className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
-                                <span>🖼️</span> 2. Ảnh bài viết (Hệ thống tự chọn ngẫu nhiên khi đăng)
+                                <span>🖼️</span> 2. Ảnh đại diện (Hệ thống tự chọn ngẫu nhiên khi đăng)
                             </label>
                             <p className="text-[11px] text-slate-500 mt-0.5">
-                                Bạn không cần tìm ảnh, hệ thống tự động gán ảnh học thuật chất lượng cao. Bấm nút để đổi ngẫu nhiên nếu muốn.
+                                Tự động gán hình ảnh đẹp mắt không bị trống. Bấm nút bên cạnh để đổi hình khác nếu muốn.
                             </p>
                         </div>
                         <button
@@ -260,7 +253,7 @@ export default function CreateArticlePage() {
                         </div>
                         <div className="flex-1 min-w-0">
                             <span className="text-[11px] font-bold text-slate-500 block mb-1">
-                                Đường dẫn ảnh đang dùng:
+                                Đường dẫn ảnh:
                             </span>
                             <input
                                 type="text"
@@ -292,10 +285,10 @@ export default function CreateArticlePage() {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-2">
                         <div>
                             <label className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
-                                <span>📄</span> 3. Nội dung bài viết (Tự sửa định dạng H1, H2, H3 từ Word)
+                                <span>📄</span> 3. Nội dung bài viết (Tự động giải mã font & sửa H1, H2, H3 từ Word)
                             </label>
                             <span className="text-[11px] text-slate-500">
-                                Khi copy bài từ Word và dán vào đây, tiêu đề lớn nhỏ (I, II, 1., 1.1) sẽ tự đổi thành H1, H2, H3.
+                                Dán (Ctrl+V) trực tiếp từ Word: chữ có dấu, pinyin và các mục số 1., 2., 7., 8. sẽ tự thành tiêu đề đẹp!
                             </span>
                         </div>
 
@@ -303,10 +296,10 @@ export default function CreateArticlePage() {
                             <button
                                 type="button"
                                 onClick={handleFormatNow}
-                                className="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold border border-indigo-200 transition cursor-pointer flex items-center gap-1 shadow-2xs"
-                                title="Bấm để quét và chuẩn hóa toàn bộ nội dung trong ô thành H1, H2, H3"
+                                className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition cursor-pointer flex items-center gap-1.5 shadow-sm"
+                                title="Bấm để quét và sửa lại toàn bộ chữ có dấu, gạch đầu dòng và tiêu đề H2, H3"
                             >
-                                <span>🪄</span> Chuẩn hóa H1, H2, H3
+                                <span>🪄</span> Chuẩn hóa H1, H2, H3 từ Word
                             </button>
 
                             <div className="inline-flex rounded-xl bg-slate-100 p-0.5 text-xs font-bold">
@@ -340,11 +333,11 @@ export default function CreateArticlePage() {
                         <div className="relative">
                             <textarea
                                 required
-                                rows={16}
+                                rows={18}
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
                                 onPaste={handleContentPaste}
-                                placeholder="Hãy dán (Ctrl+V) nội dung copy từ file Word của bạn vào đây.&#10;&#10;Hệ thống sẽ tự nhận diện:&#10;- Tiêu đề lớn -> ## H2&#10;- Các mục nhỏ 1.1, 1.2 -> ### H3&#10;- Chữ in đậm, danh sách dấu gạch đầu dòng..."
+                                placeholder="Hãy dán (Ctrl+V) nội dung copy từ file Word của bạn vào đây.&#10;&#10;Hệ thống sẽ tự động:&#10;1. Giải mã toàn bộ font tiếng Việt và Pinyin (loại bỏ sạch sẽ các mã &#299;, &#7843;...)&#10;2. Biến các mục số 1., 2., 7., 8. thành tiêu đề H3 (###)&#10;3. Biến các dấu chấm đầu dòng thành gạch đầu dòng danh sách Markdown chuẩn"
                                 className="w-full p-4 rounded-2xl border-2 border-slate-200 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10 outline-none font-mono text-sm leading-relaxed text-slate-800 placeholder:text-slate-400 bg-slate-50/50 focus:bg-white transition"
                             />
                         </div>
@@ -360,7 +353,7 @@ export default function CreateArticlePage() {
                                         return <h2 key={idx} className="text-xl font-extrabold text-slate-900 border-b pb-1.5 mt-5 mb-2 text-rose-700">{trimmed.replace(/^##\s+/, '')}</h2>;
                                     }
                                     if (trimmed.startsWith('### ')) {
-                                        return <h3 key={idx} className="text-base font-bold text-slate-800 mt-4 mb-1.5 text-indigo-700">{trimmed.replace(/^###\s+/, '')}</h3>;
+                                        return <h3 key={idx} className="text-base font-bold text-slate-900 mt-4 mb-1.5 text-indigo-700 border-l-4 border-indigo-500 pl-2.5 bg-indigo-50/50 py-1 rounded-r-lg">{trimmed.replace(/^###\s+/, '')}</h3>;
                                     }
                                     if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
                                         const items = trimmed.split('\n');
@@ -384,7 +377,7 @@ export default function CreateArticlePage() {
                 {/* Nút lưu xuất bản */}
                 <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="text-xs text-slate-500">
-                        Bài viết sau khi đăng sẽ hiển thị trực tiếp tại trang blog <strong>/bai-viet</strong>.
+                        Bài viết sau khi đăng sẽ tự động lưu và hiển thị trực tiếp tại trang blog <strong>/bai-viet</strong>.
                     </div>
                     <button
                         type="submit"

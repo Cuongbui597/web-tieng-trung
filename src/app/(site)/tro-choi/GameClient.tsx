@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { GARMENT_VOCAB_DATABASE, GARMENT_LESSONS, GarmentLessonInfo } from './garmentVocab';
 import { BUOI_1_VOCAB, BUOI_1_INFO } from './buoi1Vocab';
+import { ALL_HSK_EXTRA_VOCAB } from './hskVocab';
 
 interface WordItem {
     id: string;
@@ -209,6 +210,7 @@ const VOCAB_DATABASE: WordItem[] = [
 
 const ALL_VOCAB_DATABASE: WordItem[] = [
     ...VOCAB_DATABASE,
+    ...(ALL_HSK_EXTRA_VOCAB as WordItem[]),
     ...(GARMENT_VOCAB_DATABASE as WordItem[]),
     ...(BUOI_1_VOCAB as WordItem[]),
 ];
@@ -867,10 +869,10 @@ export default function GameClient() {
                             {[
                                 { id: 'buoi-1', label: 'Buổi 1: QC May Mặc', icon: '📋', count: '16 từ cốt lõi', highlight: true },
                                 { id: 'may-mac', label: '12 Bài Dệt May', icon: '🧵', count: '180+ từ (12 Bài)' },
-                                { id: 'all', label: 'Tất cả chủ đề', icon: '🌟', count: '370+ từ' },
-                                { id: 'hsk-1', label: 'HSK 1 (Sơ cấp)', icon: '🎯', count: '35 từ' },
-                                { id: 'hsk-2', label: 'HSK 2 (Cơ bản)', icon: '📗', count: '35 từ' },
-                                { id: 'hsk-3', label: 'HSK 3 (Trung cấp)', icon: '📘', count: '35 từ' },
+                                { id: 'all', label: 'Tất cả chủ đề', icon: '🌟', count: '670+ từ' },
+                                { id: 'hsk-1', label: 'HSK 1 (Sơ cấp)', icon: '🎯', count: '135 từ' },
+                                { id: 'hsk-2', label: 'HSK 2 (Cơ bản)', icon: '📗', count: '135 từ' },
+                                { id: 'hsk-3', label: 'HSK 3 (Trung cấp)', icon: '📘', count: '135 từ' },
                                 { id: 'cong-xuong', label: 'Công xưởng', icon: '🏭', count: '35 từ' },
                                 { id: 'tre-em', label: 'Trẻ em', icon: '🎨', count: '30 từ' },
                             ].map(cat => (

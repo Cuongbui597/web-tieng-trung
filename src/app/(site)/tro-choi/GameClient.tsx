@@ -5,13 +5,14 @@ import Link from 'next/link';
 import { GARMENT_VOCAB_DATABASE, GARMENT_LESSONS, GarmentLessonInfo } from './garmentVocab';
 import { BUOI_1_VOCAB, BUOI_1_INFO } from './buoi1Vocab';
 import { ALL_HSK_EXTRA_VOCAB } from './hskVocab';
+import { FACTORY_EXTRA_VOCAB } from './factoryVocab';
 
 interface WordItem {
     id: string;
     hanzi: string;
     pinyin: string;
     meanings: string[]; // Các nghĩa tiếng Việt chấp nhận được
-    category: 'hsk-1' | 'hsk-2' | 'hsk-3' | 'cong-xuong' | 'tre-em' | 'may-mac' | 'buoi-1';
+    category: 'hsk-1' | 'hsk-2' | 'hsk-3' | 'cong-xuong' | 'may-mac' | 'buoi-1';
     categoryLabel: string;
     lesson?: string;
     lessonLabel?: string;
@@ -174,43 +175,12 @@ const VOCAB_DATABASE: WordItem[] = [
     { id: 'cx_33', hanzi: '盘点', pinyin: 'pándiǎn', meanings: ['kiểm kê', 'đếm hàng', 'kiem ke'], category: 'cong-xuong', categoryLabel: 'Công xưởng' },
     { id: 'cx_34', hanzi: '标准', pinyin: 'biāozhǔn', meanings: ['tiêu chuẩn', 'chuẩn', 'tieu chuan'], category: 'cong-xuong', categoryLabel: 'Công xưởng' },
     { id: 'cx_35', hanzi: '按时', pinyin: 'ànshí', meanings: ['đúng giờ', 'dung gio'], category: 'cong-xuong', categoryLabel: 'Công xưởng' },
-
-    // ==================== TRẺ EM / THIẾU NHI (30 TỪ) ====================
-    { id: 'te_1', hanzi: '红色', pinyin: 'hóngsè', meanings: ['màu đỏ', 'đỏ', 'mau do', 'do'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_2', hanzi: '黄色', pinyin: 'huángsè', meanings: ['màu vàng', 'vàng', 'mau vang', 'vang'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_3', hanzi: '蓝色', pinyin: 'lánsè', meanings: ['màu xanh', 'xanh dương', 'màu xanh dương', 'xanh lam', 'xanh da trời'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_4', hanzi: '绿色', pinyin: 'lǜsè', meanings: ['màu xanh lá', 'xanh lục', 'xanh lá cây', 'mau xanh la'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_5', hanzi: '白色', pinyin: 'báisè', meanings: ['màu trắng', 'trắng', 'mau trang', 'trang'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_6', hanzi: '黑色', pinyin: 'hēisè', meanings: ['màu đen', 'đen', 'mau den', 'den'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_7', hanzi: '大熊猫', pinyin: 'dàxióngmāo', meanings: ['gấu trúc', 'gau truc', 'gấu trúc khổng lồ'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_8', hanzi: '兔子', pinyin: 'tùzi', meanings: ['thỏ', 'con thỏ', 'tho', 'con tho'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_9', hanzi: '鸟', pinyin: 'niǎo', meanings: ['chim', 'con chim', 'chim non'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_10', hanzi: '鱼', pinyin: 'yú', meanings: ['cá', 'con cá', 'ca', 'con ca'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_11', hanzi: '太阳', pinyin: 'tàiyáng', meanings: ['mặt trời', 'ông mặt trời', 'mat troi'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_12', hanzi: '月亮', pinyin: 'yuèliang', meanings: ['mặt trăng', 'ông trăng', 'mat trang', 'trăng'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_13', hanzi: '星星', pinyin: 'xīngxing', meanings: ['ngôi sao', 'ông sao', 'sao', 'ngoi sao'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_14', hanzi: '玩具', pinyin: 'wánjù', meanings: ['đồ chơi', 'do choi'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_15', hanzi: '气球', pinyin: 'qìqiú', meanings: ['bóng bay', 'bong bóng', 'bong bay'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_16', hanzi: '画画', pinyin: 'huàhuà', meanings: ['vẽ tranh', 'vẽ', 've tranh', 've'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_17', hanzi: '拍手', pinyin: 'pāishǒu', meanings: ['vỗ tay', 'vo tay'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_18', hanzi: '鼻子', pinyin: 'bízi', meanings: ['mũi', 'cái mũi', 'mui', 'cai mui'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_19', hanzi: '嘴巴', pinyin: 'zuǐba', meanings: ['miệng', 'cái miệng', 'mieng', 'cai mieng'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_20', hanzi: '耳朵', pinyin: 'ěrduo', meanings: ['tai', 'cái tai', 'tai lang'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_21', hanzi: '手', pinyin: 'shǒu', meanings: ['tay', 'bàn tay', 'tay me'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_22', hanzi: '脚', pinyin: 'jiǎo', meanings: ['chân', 'bàn chân', 'chan'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_23', hanzi: '西瓜', pinyin: 'xīguā', meanings: ['dưa hấu', 'quả dưa hấu', 'dua hau'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_24', hanzi: '香蕉', pinyin: 'xiāngjiāo', meanings: ['chuối', 'quả chuối', 'chuoi', 'qua chuoi'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_25', hanzi: '牛奶', pinyin: 'niúnǎi', meanings: ['sữa bò', 'sữa', 'sua bo', 'sua'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_26', hanzi: '糖果', pinyin: 'tángguǒ', meanings: ['kẹo', 'kẹo ngọt', 'keo', 'keo ngot'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_27', hanzi: '冰淇淋', pinyin: 'bīngqílín', meanings: ['kem', 'cây kem', 'kem que'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_28', hanzi: '小船', pinyin: 'xiǎochuán', meanings: ['thuyền nhỏ', 'con thuyền', 'thuyen nho'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_29', hanzi: '花', pinyin: 'huā', meanings: ['hoa', 'bông hoa', 'bong hoa'], category: 'tre-em', categoryLabel: 'Trẻ em' },
-    { id: 'te_30', hanzi: '树', pinyin: 'shù', meanings: ['cây', 'cái cây', 'cay'], category: 'tre-em', categoryLabel: 'Trẻ em' },
 ];
 
 const ALL_VOCAB_DATABASE: WordItem[] = [
     ...VOCAB_DATABASE,
     ...(ALL_HSK_EXTRA_VOCAB as WordItem[]),
+    ...(FACTORY_EXTRA_VOCAB as WordItem[]),
     ...(GARMENT_VOCAB_DATABASE as WordItem[]),
     ...(BUOI_1_VOCAB as WordItem[]),
 ];
@@ -869,12 +839,11 @@ export default function GameClient() {
                             {[
                                 { id: 'buoi-1', label: 'Buổi 1: QC May Mặc', icon: '📋', count: '16 từ cốt lõi', highlight: true },
                                 { id: 'may-mac', label: '12 Bài Dệt May', icon: '🧵', count: '180+ từ (12 Bài)' },
-                                { id: 'all', label: 'Tất cả chủ đề', icon: '🌟', count: '670+ từ' },
+                                { id: 'all', label: 'Tất cả chủ đề', icon: '🌟', count: '730+ từ' },
+                                { id: 'cong-xuong', label: 'Công xưởng', icon: '🏭', count: '135 từ' },
                                 { id: 'hsk-1', label: 'HSK 1 (Sơ cấp)', icon: '🎯', count: '135 từ' },
                                 { id: 'hsk-2', label: 'HSK 2 (Cơ bản)', icon: '📗', count: '135 từ' },
                                 { id: 'hsk-3', label: 'HSK 3 (Trung cấp)', icon: '📘', count: '135 từ' },
-                                { id: 'cong-xuong', label: 'Công xưởng', icon: '🏭', count: '35 từ' },
-                                { id: 'tre-em', label: 'Trẻ em', icon: '🎨', count: '30 từ' },
                             ].map(cat => (
                                 <button
                                     key={cat.id}

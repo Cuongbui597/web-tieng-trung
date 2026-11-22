@@ -1,18 +1,27 @@
+import { Suspense } from 'react';
 import { Metadata } from 'next';
-import GameClient from './GameClient';
+import GameHubClient from './GameHubClient';
 
 export const metadata: Metadata = {
-    title: 'Game Luyện Phản Xạ Từ Vựng Tiếng Trung | HSK Việt',
-    description: 'Mini game luyện phản xạ từ vựng tiếng Trung HSK 1-3, công xưởng và trẻ em. Gõ nghĩa tiếng Việt để làm tan biến từ vựng và ghi điểm combo.',
-    keywords: ['game tiếng trung', 'luyện phản xạ từ vựng', 'game hsk', 'học tiếng trung qua trò chơi'],
+    title: 'Đấu Trường Trò Chơi Tiếng Trung | Từ Vựng & Bậc Thầy Ghép Câu | HSK Việt',
+    description: 'Trung tâm game học tiếng Trung tương tác: Từ vựng tan biến 60s và Bậc thầy ghép câu thực chiến (Buổi 1 & Buổi 2). Luyện phản xạ từ vựng, câu chữ 把, lượng từ và bổ ngữ.',
+    keywords: ['game tiếng trung', 'ghép câu tiếng trung', 'bậc thầy ghép câu', 'luyện phản xạ từ vựng', 'game hsk', 'học tiếng trung qua trò chơi'],
     openGraph: {
-        title: 'Game Luyện Phản Xạ Từ Vựng Tiếng Trung - HSK Việt',
-        description: 'Chữ Hán xuất hiện, gõ nghĩa tiếng Việt để làm tan biến từ vựng trước khi hết giờ!',
+        title: 'Đấu Trường Trò Chơi Tiếng Trung - HSK Việt',
+        description: 'Luyện phản xạ từ vựng và câu giao tiếp thực chiến qua trò chơi tương tác sinh động.',
         url: 'https://tiengtrunghsk.vn/tro-choi',
         type: 'website',
     },
 };
 
 export default function TroChoiPage() {
-    return <GameClient />;
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="animate-spin text-3xl">🎮</div>
+            </div>
+        }>
+            <GameHubClient />
+        </Suspense>
+    );
 }

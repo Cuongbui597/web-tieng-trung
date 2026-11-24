@@ -144,10 +144,11 @@ export default function SentenceGame() {
     const [voiceSpeed, setVoiceSpeed] = useState<number>(0.70); // Tốc độ mặc định 0.70x: rất chậm rãi, chuẩn âm điệu
     const [isSpeaking, setIsSpeaking] = useState(false);
 
-    // Phản hồi đáp án
+    // Phản hồi đáp án & Chuyển câu
     const [isChecking, setIsChecking] = useState(false);
     const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
     const [shake, setShake] = useState(false);
+    const [isLoadingNext, setIsLoadingNext] = useState(false);
 
     // Điểm số & Combo
     const [score, setScore] = useState(0);
@@ -426,38 +427,31 @@ export default function SentenceGame() {
         }
     };
 
-    // Bỏ qua câu này để xem đáp án
+    // Đổi sang câu khác ngay lập tức, ngắt âm thanh cũ, không đọc lại
     const handleSkip = () => {
-        if (!currentSentence || isChecking) return;
-        setIsChecking(true);
-        setIsCorrect(false);
-        sfx.playWrong();
+        if (!currentSentence || isChecking || isLoadingNext) return;
+
+        // Dừng ngay mọi âm thanh đang phát
+        stopSpeech();
+        sfx.playTap();
         setStreak(0);
+        setIsLoadingNext(true);
 
-        // Tự động sắp xếp đúng vào ô
-        const correctOrder = currentSentence.chunks.map((txt, idx) => ({
-            id: `correct_${idx}`,
-            text: txt,
-            originalIndex: idx,
-        }));
-        setSelectedChunks(correctOrder);
-        setAvailableChunks([]);
-
+        // Ghi lại lịch sử câu cũ đã đổi
         setHistory(prev => [
             ...prev,
             {
                 sentence: currentSentence,
                 correct: false,
-                userAnswer: 'Đã bỏ qua (Xem đáp án)',
+                userAnswer: 'Đã đổi sang câu khác',
             },
         ]);
 
-        // Đọc câu đáp án mẫu chậm rãi, sau khi đọc xong mới chuyển sang câu tiếp
-        speakSentence(currentSentence.fullHanzi, voiceSpeed, () => {
-            setTimeout(() => {
-                moveToNextSentence();
-            }, 800);
-        });
+        // Chuyển sang câu mới sau hiệu ứng tải nhẹ (250ms)
+        setTimeout(() => {
+            setIsLoadingNext(false);
+            moveToNextSentence();
+        }, 250);
     };
 
     // Bật/tắt âm thanh
@@ -620,9 +614,17 @@ export default function SentenceGame() {
                         </div>
 
                         {/* Thẻ câu hỏi trung tâm */}
-                        <div className={`card p-6 sm:p-8 rounded-[2rem] bg-white/85 backdrop-blur-xl border border-white/60 shadow-xl relative transition-all ${
+                        <div className={`card p-6 sm:p-8 rounded-[2rem] bg-white/85 backdrop-blur-xl border border-white/60 shadow-xl relative transition-all overflow-hidden ${
                             shake ? 'animate-shake border-rose-300' : ''
                         } ${isCorrect === true ? 'border-emerald-400 bg-emerald-50/40' : ''}`}>
+
+                            {/* Lớp phủ Đang tải khi đổi câu khác */}
+                            {isLoadingNext && (
+                                <div className="absolute inset-0 bg-white/92 backdrop-blur-sm z-30 flex flex-col items-center justify-center gap-2.5 animate-fade-in">
+                                    <div className="w-8 h-8 border-3 border-rose-500 border-t-transparent rounded-full animate-spin" />
+                                    <span className="text-xs font-bold text-slate-700">Đang tải câu mới...</span>
+                                </div>
+                            )}
 
                             {/* Badge ngữ pháp & Nút nghe */}
                             <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
@@ -814,10 +816,13 @@ export default function SentenceGame() {
                                     )}
                                     <button
                                         type="button"
+                                        disabled={isLoadingNext || isChecking}
                                         onClick={handleSkip}
-                                        className="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 transition cursor-pointer"
+                                        className="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition cursor-pointer flex items-center gap-1.5"
+                                        title="Chuyển ngay sang câu khác"
                                     >
-                                        Bỏ qua câu này
+                                        <span>⏭</span>
+                                        <span>{isLoadingNext ? 'Đang tải...' : 'Đổi sang câu khác'}</span>
                                     </button>
                                 </div>
 

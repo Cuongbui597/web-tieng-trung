@@ -365,16 +365,15 @@ function GameInput({
     const inputRef = useRef<HTMLInputElement>(null);
     const isComposingRef = useRef(false);
 
-    // Khi chuyển sang từ mới thì reset input và focus
+    // Tự động focus input khi không bị disabled
     useEffect(() => {
-        setVal('');
         if (!disabled && inputRef.current) {
             const timer = setTimeout(() => {
                 inputRef.current?.focus();
             }, 60);
             return () => clearTimeout(timer);
         }
-    }, [currentWordId, disabled]);
+    }, [disabled]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -458,7 +457,15 @@ export default function GameClient() {
 
     const [score, setScore] = useState(0);
     const [streak, setStreak] = useState(0);
-    const [bestScore, setBestScore] = useState(0);
+    const [bestScore, setBestScore] = useState<number>(() => {
+        if (typeof window === 'undefined') return 0;
+        try {
+            const saved = localStorage.getItem('hsk_game_highscore_16');
+            return saved ? parseInt(saved, 10) : 0;
+        } catch {
+            return 0;
+        }
+    });
     const [showPinyin, setShowPinyin] = useState(true);
     const [soundOn, setSoundOn] = useState(true);
     const [autoVoice, setAutoVoice] = useState(true);
@@ -486,12 +493,6 @@ export default function GameClient() {
 
     // Từ hiện tại đang hiển thị
     const currentWord = roundWords[currentIndex] || null;
-
-    // Load High score từ localStorage
-    useEffect(() => {
-        const saved = localStorage.getItem('hsk_game_highscore_16');
-        if (saved) setBestScore(parseInt(saved, 10));
-    }, []);
 
     // Lọc danh sách từ theo chủ đề và bài học
     const getFilteredWords = useCallback(() => {
@@ -1266,6 +1267,7 @@ export default function GameClient() {
                             wrongShake ? 'animate-[shake_0.5s_ease-in-out]' : ''
                         }`}>
                             <GameInput
+                                key={currentWord.id}
                                 disabled={isDissolving || isRevealingWrong}
                                 feedbackMessage={feedbackMessage}
                                 currentWordId={currentWord.id}

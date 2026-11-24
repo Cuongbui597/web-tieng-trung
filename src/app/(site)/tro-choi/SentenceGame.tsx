@@ -152,7 +152,15 @@ export default function SentenceGame() {
     // Điểm số & Combo
     const [score, setScore] = useState(0);
     const [streak, setStreak] = useState(0);
-    const [bestScore, setBestScore] = useState(0);
+    const [bestScore, setBestScore] = useState<number>(() => {
+        if (typeof window === 'undefined') return 0;
+        try {
+            const saved = localStorage.getItem('sentence_builder_highscore');
+            return saved ? parseInt(saved, 10) : 0;
+        } catch {
+            return 0;
+        }
+    });
 
     // Lịch sử lượt chơi
     const [history, setHistory] = useState<Array<{
@@ -166,11 +174,8 @@ export default function SentenceGame() {
 
     const currentSentence = roundSentences[currentIndex] || null;
 
-    // Load High score & Khởi tạo giọng đọc chuẩn
+    // Khởi tạo giọng đọc chuẩn
     useEffect(() => {
-        const saved = localStorage.getItem('sentence_builder_highscore');
-        if (saved) setBestScore(parseInt(saved, 10));
-
         if (typeof window !== 'undefined' && window.speechSynthesis) {
             cachedChineseVoice = getChineseVoice();
             window.speechSynthesis.onvoiceschanged = () => {

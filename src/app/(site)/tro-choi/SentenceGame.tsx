@@ -111,27 +111,18 @@ class SoundEffects {
 
 const sfx = new SoundEffects();
 
-function speakChinese(text: string) {
-    if (typeof window === 'undefined' || !window.speechSynthesis) return;
-    try {
-        window.speechSynthesis.cancel();
-        // Làm sạch ký tự dấu câu khi phát âm
-        const clean = text.replace(/[。？！，、]/g, ' ');
-        const utterance = new SpeechSynthesisUtterance(clean);
-        utterance.lang = 'zh-CN';
-        utterance.rate = 0.85;
-        utterance.pitch = 1.0;
+// Quản lý giọng đọc chuẩn tiếng Trung (zh-CN)
+let cachedChineseVoice: SpeechSynthesisVoice | null = null;
 
-        const voices = window.speechSynthesis.getVoices();
-        const zhVoice = voices.find(v => v.lang.startsWith('zh') || v.lang.includes('cmn'));
-        if (zhVoice) {
-            utterance.voice = zhVoice;
-        }
-
-        window.speechSynthesis.speak(utterance);
-    } catch {
-        // Fallback
-    }
+function getChineseVoice(): SpeechSynthesisVoice | null {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return null;
+    const voices = window.speechSynthesis.getVoices();
+    if (!voices || voices.length === 0) return null;
+    // Ưu tiên giọng phổ thông zh-CN (Microsoft Huihui, Yaoyao, Kangkang, Google 普通话)
+    const zhCN = voices.find(v => v.lang === 'zh-CN' || v.lang === 'zh_CN');
+    if (zhCN) return zhCN;
+    const anyZh = voices.find(v => v.lang.startsWith('zh') || v.lang.includes('cmn'));
+    return anyZh || null;
 }
 
 const QUESTIONS_PER_ROUND = 10;
@@ -146,11 +137,12 @@ export default function SentenceGame() {
     const [availableChunks, setAvailableChunks] = useState<ChunkItem[]>([]);
     const [selectedChunks, setSelectedChunks] = useState<ChunkItem[]>([]);
 
-    // Tùy chọn học tập
+    // Tùy chọn học tập & Âm thanh
     const [showPinyin, setShowPinyin] = useState(true);
     const [showHint, setShowHint] = useState(false);
     const [soundOn, setSoundOn] = useState(true);
-    const [autoVoice, setAutoVoice] = useState(true);
+    const [voiceSpeed, setVoiceSpeed] = useState<number>(0.75); // Tốc độ vừa phải, chậm rãi
+    const [isSpeaking, setIsSpeaking] = useState(false);
 
     // Phản hồi đáp án
     const [isChecking, setIsChecking] = useState(false);
@@ -174,11 +166,81 @@ export default function SentenceGame() {
 
     const currentSentence = roundSentences[currentIndex] || null;
 
-    // Load High score từ localStorage
+    // Load High score & Khởi tạo giọng đọc chuẩn
     useEffect(() => {
         const saved = localStorage.getItem('sentence_builder_highscore');
         if (saved) setBestScore(parseInt(saved, 10));
+
+        if (typeof window !== 'undefined' && window.speechSynthesis) {
+            cachedChineseVoice = getChineseVoice();
+            window.speechSynthesis.onvoiceschanged = () => {
+                cachedChineseVoice = getChineseVoice();
+            };
+        }
+
+        return () => {
+            if (typeof window !== 'undefined' && window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+        };
     }, []);
+
+    // Dừng phát âm an toàn
+    const stopSpeech = useCallback(() => {
+        if (typeof window !== 'undefined' && window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+            setIsSpeaking(false);
+        }
+    }, []);
+
+    // Phát âm câu tiếng Trung với kiểm soát tốc độ và sự kiện kết thúc
+    const speakSentence = useCallback((text: string, rate: number = voiceSpeed, onComplete?: () => void) => {
+        if (typeof window === 'undefined' || !window.speechSynthesis) {
+            onComplete?.();
+            return;
+        }
+        try {
+            window.speechSynthesis.cancel();
+            setIsSpeaking(true);
+
+            // Làm sạch ký tự dấu câu khi phát âm
+            const clean = text.replace(/[。？！，、]/g, ' ');
+            const utterance = new SpeechSynthesisUtterance(clean);
+            utterance.lang = 'zh-CN';
+            utterance.rate = rate;
+            utterance.pitch = 1.0;
+
+            const voice = cachedChineseVoice || getChineseVoice();
+            if (voice) {
+                utterance.voice = voice;
+            }
+
+            utterance.onend = () => {
+                setIsSpeaking(false);
+                onComplete?.();
+            };
+
+            utterance.onerror = (e) => {
+                setIsSpeaking(false);
+                if (e.error !== 'canceled' && e.error !== 'interrupted') {
+                    onComplete?.();
+                }
+            };
+
+            // Trì hoãn 40ms trên Chrome/Edge Windows để tránh lỗi kẹt sau khi cancel()
+            setTimeout(() => {
+                if (typeof window !== 'undefined' && window.speechSynthesis) {
+                    if (window.speechSynthesis.paused) {
+                        window.speechSynthesis.resume();
+                    }
+                    window.speechSynthesis.speak(utterance);
+                }
+            }, 40);
+        } catch {
+            setIsSpeaking(false);
+            onComplete?.();
+        }
+    }, [voiceSpeed]);
 
     // Xáo trộn mảng
     const shuffleArray = <T,>(arr: T[]): T[] => {
@@ -206,6 +268,7 @@ export default function SentenceGame() {
 
     // Bắt đầu ván chơi mới
     const startGame = (lessonFilter: 'all' | 'buoi-1' | 'buoi-2' = selectedLesson) => {
+        stopSpeech();
         sfx.init();
         setSelectedLesson(lessonFilter);
 
@@ -224,9 +287,7 @@ export default function SentenceGame() {
 
         if (shuffled[0]) {
             loadSentenceChunks(shuffled[0]);
-            if (autoVoice) {
-                setTimeout(() => speakChinese(shuffled[0].fullHanzi), 350);
-            }
+            // Không tự động đọc to đáp án khi vừa bước vào câu mới
         }
     };
 
@@ -282,9 +343,6 @@ export default function SentenceGame() {
             sfx.playCorrect();
             triggerConfetti();
 
-            // Phát âm toàn bộ câu
-            speakChinese(currentSentence.fullHanzi);
-
             const multiplier = streak >= 3 ? 2 : 1;
             const points = 20 * multiplier;
             setScore(prev => prev + points);
@@ -300,10 +358,12 @@ export default function SentenceGame() {
                 },
             ]);
 
-            // Chuyển sang câu tiếp sau 1.6s
-            setTimeout(() => {
-                moveToNextSentence();
-            }, 1600);
+            // Phát âm câu đúng chậm rãi, rõ ràng và ĐỢI ĐỌC XONG MỚI CHUYỂN CÂU
+            speakSentence(currentSentence.fullHanzi, voiceSpeed, () => {
+                setTimeout(() => {
+                    moveToNextSentence();
+                }, 600);
+            });
         } else {
             // Sai!
             setIsCorrect(false);
@@ -328,6 +388,7 @@ export default function SentenceGame() {
 
     // Chuyển sang câu tiếp theo hoặc kết thúc
     const moveToNextSentence = () => {
+        stopSpeech();
         setIsChecking(false);
         setIsCorrect(null);
 
@@ -350,9 +411,7 @@ export default function SentenceGame() {
             setCurrentIndex(nextIdx);
             const nextSentence = roundSentences[nextIdx];
             loadSentenceChunks(nextSentence);
-            if (autoVoice) {
-                setTimeout(() => speakChinese(nextSentence.fullHanzi), 350);
-            }
+            // Để người học tự tư duy với câu hỏi mới, không tự động đọc to trước
         }
     };
 
@@ -373,8 +432,6 @@ export default function SentenceGame() {
         setSelectedChunks(correctOrder);
         setAvailableChunks([]);
 
-        speakChinese(currentSentence.fullHanzi);
-
         setHistory(prev => [
             ...prev,
             {
@@ -384,9 +441,12 @@ export default function SentenceGame() {
             },
         ]);
 
-        setTimeout(() => {
-            moveToNextSentence();
-        }, 2200);
+        // Đọc câu đáp án mẫu chậm rãi, sau khi đọc xong mới chuyển sang câu tiếp
+        speakSentence(currentSentence.fullHanzi, voiceSpeed, () => {
+            setTimeout(() => {
+                moveToNextSentence();
+            }, 800);
+        });
     };
 
     // Bật/tắt âm thanh
@@ -507,7 +567,10 @@ export default function SentenceGame() {
                         <div className="flex items-center justify-between p-3.5 bg-white/70 backdrop-blur-md rounded-2xl border border-white/50 shadow-xs">
                             <button
                                 type="button"
-                                onClick={() => setGameState('idle')}
+                                onClick={() => {
+                                    stopSpeech();
+                                    setGameState('idle');
+                                }}
                                 className="text-xs font-bold text-slate-500 hover:text-slate-800 transition inline-flex items-center gap-1 cursor-pointer"
                             >
                                 ✕ Thoát
@@ -563,7 +626,48 @@ export default function SentenceGame() {
                                     </span>
                                 </div>
 
-                                <div className="flex items-center gap-2">
+                                <div className="flex flex-wrap items-center gap-2">
+                                    {/* Nút chọn tốc độ phát âm */}
+                                    <div className="inline-flex items-center bg-slate-100/90 rounded-xl p-0.5 border border-slate-200 text-[11px] font-bold">
+                                        <button
+                                            type="button"
+                                            onClick={() => setVoiceSpeed(0.70)}
+                                            className={`px-2 py-0.5 rounded-lg transition cursor-pointer ${
+                                                voiceSpeed === 0.70
+                                                    ? 'bg-white text-rose-600 shadow-2xs font-extrabold'
+                                                    : 'text-slate-500 hover:text-slate-800'
+                                            }`}
+                                            title="Tốc độ chậm (0.7x) - Rõ nét từng thanh điệu"
+                                        >
+                                            🐢 0.7x
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setVoiceSpeed(0.78)}
+                                            className={`px-2 py-0.5 rounded-lg transition cursor-pointer ${
+                                                voiceSpeed === 0.78
+                                                    ? 'bg-white text-rose-600 shadow-2xs font-extrabold'
+                                                    : 'text-slate-500 hover:text-slate-800'
+                                            }`}
+                                            title="Tốc độ vừa phải (0.8x) - Khuyến nghị"
+                                        >
+                                            🔉 0.8x
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setVoiceSpeed(0.95)}
+                                            className={`px-2 py-0.5 rounded-lg transition cursor-pointer ${
+                                                voiceSpeed === 0.95
+                                                    ? 'bg-white text-rose-600 shadow-2xs font-extrabold'
+                                                    : 'text-slate-500 hover:text-slate-800'
+                                            }`}
+                                            title="Tốc độ tự nhiên (1.0x)"
+                                        >
+                                            ⚡ 1.0x
+                                        </button>
+                                    </div>
+
+                                    {/* Nút bật/tắt Pinyin */}
                                     <button
                                         type="button"
                                         onClick={() => setShowPinyin(prev => !prev)}
@@ -576,13 +680,25 @@ export default function SentenceGame() {
                                         Pinyin {showPinyin ? '✓' : '✗'}
                                     </button>
 
+                                    {/* Nút phát âm có hiệu ứng sóng âm khi đang nói */}
                                     <button
                                         type="button"
-                                        onClick={() => speakChinese(currentSentence.fullHanzi)}
-                                        className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer text-sm shadow-2xs"
-                                        title="Phát âm câu tiếng Trung"
+                                        onClick={() => {
+                                            if (isSpeaking) {
+                                                stopSpeech();
+                                            } else {
+                                                speakSentence(currentSentence.fullHanzi, voiceSpeed);
+                                            }
+                                        }}
+                                        className={`px-2.5 py-1 rounded-xl transition cursor-pointer text-xs font-bold flex items-center gap-1.5 shadow-2xs ${
+                                            isSpeaking
+                                                ? 'bg-rose-600 text-white animate-pulse ring-2 ring-rose-400'
+                                                : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                                        }`}
+                                        title={isSpeaking ? 'Đang đọc... Bấm để dừng' : 'Bấm để nghe phát âm cả câu'}
                                     >
-                                        🔊
+                                        <span>{isSpeaking ? '⏹' : '🔊'}</span>
+                                        <span className="hidden sm:inline">{isSpeaking ? 'Đang đọc...' : 'Nghe câu'}</span>
                                     </button>
                                 </div>
                             </div>
@@ -737,12 +853,22 @@ export default function SentenceGame() {
                                 Danh sách câu trong lượt chơi:
                             </div>
                             {history.map((h, i) => (
-                                <div key={i} className="flex items-start gap-2 py-1.5 border-b border-slate-200/60 last:border-none">
-                                    <span className="shrink-0">{h.correct ? '✅' : '❌'}</span>
-                                    <div className="flex-1">
-                                        <div className="font-bold text-slate-900">{h.sentence.fullHanzi}</div>
-                                        <div className="text-[11px] text-slate-500">{h.sentence.vietnamese}</div>
+                                <div key={i} className="flex items-start justify-between gap-2 py-1.5 border-b border-slate-200/60 last:border-none">
+                                    <div className="flex items-start gap-2">
+                                        <span className="shrink-0">{h.correct ? '✅' : '❌'}</span>
+                                        <div className="flex-1">
+                                            <div className="font-bold text-slate-900">{h.sentence.fullHanzi}</div>
+                                            <div className="text-[11px] text-slate-500">{h.sentence.vietnamese}</div>
+                                        </div>
                                     </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => speakSentence(h.sentence.fullHanzi, voiceSpeed)}
+                                        className="p-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition cursor-pointer text-xs shrink-0"
+                                        title="Nghe phát âm câu này"
+                                    >
+                                        🔊
+                                    </button>
                                 </div>
                             ))}
                         </div>

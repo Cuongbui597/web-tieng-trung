@@ -212,6 +212,9 @@ class SoundEffects {
                 this.ctx = new AudioCtx();
             }
         }
+        if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume().catch(() => {});
+        }
     }
 
     playCorrect() {
@@ -323,22 +326,40 @@ class SoundEffects {
 
 const sfx = new SoundEffects();
 
+// Haptic feedback nhẹ cho mobile
+function triggerHaptic(pattern: number | number[] = 15) {
+    if (typeof window !== 'undefined' && 'navigator' in window && typeof window.navigator.vibrate === 'function') {
+        try {
+            window.navigator.vibrate(pattern);
+        } catch {}
+    }
+}
+
 function speakChinese(text: string) {
     if (typeof window === 'undefined' || !window.speechSynthesis) return;
     try {
         window.speechSynthesis.cancel();
+        if (window.speechSynthesis.paused) {
+            window.speechSynthesis.resume();
+        }
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'zh-CN';
-        utterance.rate = 0.82; // Tốc độ chuẩn cho người học nghe rõ thanh điệu
+        utterance.rate = 0.80; // Tốc độ chuẩn cho người học nghe rõ thanh điệu
         utterance.pitch = 1.0;
 
         const voices = window.speechSynthesis.getVoices();
-        const zhVoice = voices.find(v => v.lang.startsWith('zh') || v.lang.includes('cmn'));
+        const zhVoice = voices.find(v => v.lang === 'zh-CN' || v.lang === 'zh_CN' || v.lang === 'cmn-Hans-CN') ||
+            voices.find(v => v.name.includes('Ting-Ting') || v.name.includes('Yaoyao') || v.name.includes('Huihui') || v.name.includes('Chinese')) ||
+            voices.find(v => v.lang.startsWith('zh') || v.lang.includes('cmn'));
         if (zhVoice) {
             utterance.voice = zhVoice;
         }
 
-        window.speechSynthesis.speak(utterance);
+        setTimeout(() => {
+            if (typeof window !== 'undefined' && window.speechSynthesis) {
+                window.speechSynthesis.speak(utterance);
+            }
+        }, 30);
     } catch {
         // Fallback
     }
@@ -403,8 +424,8 @@ function GameInput({
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-3">
-            <label className="block text-xs font-bold uppercase tracking-wider text-[var(--muted)] text-center">
+        <form onSubmit={handleSubmit} className="space-y-2 sm:space-y-3">
+            <label className="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[var(--muted)] text-center">
                 Gõ nghĩa tiếng Việt vào đây (nhấn Enter hoặc bấm Gửi):
             </label>
             <div className="flex gap-2">
@@ -417,7 +438,7 @@ function GameInput({
                     onCompositionStart={handleCompositionStart}
                     onCompositionEnd={handleCompositionEnd}
                     placeholder="Ví dụ: xin chào, cảm ơn, trà..."
-                    className={`w-full px-5 py-4 text-center rounded-2xl border-2 bg-white/85 text-lg sm:text-xl font-bold text-[var(--text)] placeholder:text-[var(--muted)]/50 focus:outline-none focus:ring-4 focus:ring-[var(--accent)]/20 transition-all shadow-inner ${
+                    className={`w-full px-4 py-3 sm:px-5 sm:py-4 text-center rounded-xl sm:rounded-2xl border-2 bg-white/85 text-base sm:text-xl font-bold text-[var(--text)] placeholder:text-[var(--muted)]/50 focus:outline-none focus:ring-4 focus:ring-[var(--accent)]/20 transition-all shadow-inner touch-manipulation ${
                         feedbackMessage?.startsWith('❌')
                             ? 'border-rose-400 bg-rose-50/60'
                             : feedbackMessage?.startsWith('⚠️')
@@ -432,7 +453,7 @@ function GameInput({
                 <button
                     type="submit"
                     disabled={disabled}
-                    className="btn btn-primary px-6 rounded-2xl font-bold shrink-0 text-base shadow-md hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    className="btn btn-primary px-4 sm:px-6 rounded-xl sm:rounded-2xl font-bold shrink-0 text-sm sm:text-base shadow-md hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-1 cursor-pointer disabled:opacity-50 touch-manipulation select-none"
                 >
                     <span>Gửi</span>
                     <span>→</span>
@@ -581,6 +602,7 @@ export default function GameClient() {
     // Hiệu ứng hạt nổ tan biến chữ Hán khi trả lời đúng
     const triggerDissolve = (onComplete: () => void) => {
         setIsDissolving(true);
+        triggerHaptic([25, 40, 30]);
         sfx.playDissolve();
         sfx.playCorrect();
 
@@ -678,6 +700,7 @@ export default function GameClient() {
             // 1. Hiện ra kết quả đáp án đúng ngay lập tức
             // 2. Ghi nhận lỗi đó là SAI vào lịch sử
             // 3. Tự động chuyển sang câu tiếp theo sau 1.6 giây
+            triggerHaptic(50);
             sfx.playWrong();
             setWrongShake(true);
             setTimeout(() => setWrongShake(false), 500);
@@ -723,6 +746,7 @@ export default function GameClient() {
     // Bỏ qua từ hiện tại -> Hiện đáp án đúng và ghi nhận sai
     const handleSkip = () => {
         if (!currentWord || isDissolving || isRevealingWrong || gameState !== 'playing') return;
+        triggerHaptic(30);
         sfx.playWrong();
         setStreak(0);
         setWrongShake(true);
@@ -799,7 +823,7 @@ export default function GameClient() {
     const correctCount = history.filter(h => h.correct).length;
 
     return (
-        <div className="min-h-screen py-12 px-4 relative overflow-hidden">
+        <div className="min-h-screen py-3 sm:py-8 px-2.5 sm:px-4 relative overflow-hidden">
             {/* Background floating decor */}
             <div className="absolute top-10 left-10 text-9xl font-[family:var(--font-serif)] text-[var(--accent)]/5 select-none pointer-events-none">
                 字
@@ -810,8 +834,8 @@ export default function GameClient() {
 
             <div className="container-app max-w-3xl mx-auto relative z-10">
                 {/* Header title */}
-                <div className="text-center mb-8">
-                    <div className="inline-flex items-center gap-2 badge-gradient mb-3 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
+                <div className="text-center mb-4 sm:mb-8">
+                    <div className="inline-flex items-center gap-2 badge-gradient mb-2 sm:mb-3 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
                         <span>🎮</span> Thử Thách 16 Từ Trong 1 Phút
                     </div>
                     <h1 className="text-3xl sm:text-5xl font-extrabold text-[var(--text)] tracking-tight mb-2">
@@ -824,19 +848,19 @@ export default function GameClient() {
 
                 {/* ==================== MÀN HÌNH BẮT ĐẦU ==================== */}
                 {gameState === 'idle' && (
-                    <div className="card rounded-[2.5rem] p-8 sm:p-12 bg-white/40 backdrop-blur-xl border border-white/40 shadow-2xl text-center">
-                        <div className="text-6xl mb-4 animate-bounce">
+                    <div className="card rounded-[1.5rem] sm:rounded-[2.5rem] p-4 sm:p-12 bg-white/40 backdrop-blur-xl border border-white/40 shadow-2xl text-center">
+                        <div className="text-5xl sm:text-6xl mb-3 sm:mb-4 animate-bounce">
                             🏮
                         </div>
-                        <h2 className="text-2xl sm:text-3xl font-bold text-[var(--text)] mb-3">
+                        <h2 className="text-xl sm:text-3xl font-bold text-[var(--text)] mb-2 sm:mb-3">
                             Chọn Chủ Đề Luyện Tập
                         </h2>
-                        <p className="text-sm text-[var(--muted)] mb-8 max-w-md mx-auto">
+                        <p className="text-xs sm:text-sm text-[var(--muted)] mb-5 sm:mb-8 max-w-md mx-auto">
                             Mỗi lượt chơi gồm <strong>16 câu hỏi chọn lọc</strong> trong <strong>1 phút (60 giây)</strong>:
                         </p>
 
                         {/* Danh sách chủ đề */}
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-4 sm:mb-6">
                             {[
                                 { id: 'buoi-1', label: 'Buổi 1: QC May Mặc', icon: '📋', count: '16 từ cốt lõi', highlight: true },
                                 { id: 'may-mac', label: '12 Bài Dệt May', icon: '🧵', count: '180+ từ (12 Bài)' },
@@ -849,11 +873,11 @@ export default function GameClient() {
                                 <button
                                     key={cat.id}
                                     type="button"
-                                    onClick={() => setSelectedCategory(cat.id)}
-                                    className={`p-3.5 sm:p-4 rounded-2xl border text-sm font-semibold transition-all flex flex-col items-center gap-1 cursor-pointer relative ${
+                                    onClick={() => { triggerHaptic(10); setSelectedCategory(cat.id); }}
+                                    className={`p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border text-xs sm:text-sm font-semibold transition-all flex flex-col items-center gap-1 cursor-pointer relative touch-manipulation select-none active:scale-95 ${
                                         selectedCategory === cat.id
-                                            ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-md scale-105 ring-2 ring-[var(--accent)]/30'
-                                            : 'bg-white/60 text-[var(--text)] border-[var(--border)] hover:bg-white hover:scale-102'
+                                            ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-md scale-102 ring-2 ring-[var(--accent)]/30'
+                                            : 'bg-white/60 text-[var(--text)] border-[var(--border)] hover:bg-white'
                                     } ${cat.highlight && selectedCategory !== cat.id ? 'border-rose-300 bg-rose-50/50' : ''}`}
                                 >
                                     {cat.highlight && selectedCategory !== cat.id && (
@@ -1157,13 +1181,13 @@ export default function GameClient() {
 
                         {/* Thẻ hiển thị chữ Hán trung tâm */}
                         <div
-                            className={`card relative min-h-[260px] sm:min-h-[290px] rounded-[3rem] p-8 flex flex-col items-center justify-center bg-white/45 backdrop-blur-2xl border border-white/50 shadow-2xl transition-all duration-300 ${
+                            className={`card relative min-h-[210px] sm:min-h-[290px] rounded-[1.5rem] sm:rounded-[3rem] p-4 sm:p-8 flex flex-col items-center justify-center bg-white/45 backdrop-blur-2xl border border-white/50 shadow-2xl transition-all duration-300 ${
                                 wrongShake ? 'animate-[shake_0.5s_ease-in-out]' : ''
                             }`}
                         >
                             {/* Category badge */}
-                            <div className="absolute top-5 left-6 flex items-center gap-2">
-                                <span className="badge-gradient text-xs px-3 py-1 rounded-full font-bold">
+                            <div className="absolute top-3.5 left-4 sm:top-5 sm:left-6 flex items-center gap-1.5 sm:gap-2">
+                                <span className="badge-gradient text-[11px] sm:text-xs px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full font-bold">
                                     {currentWord.categoryLabel} {currentWord.part ? `• Phần ${currentWord.part}` : currentWord.lessonLabel ? `• ${currentWord.lessonLabel}` : ''}
                                 </span>
                                 {currentWord.note && (
@@ -1174,7 +1198,7 @@ export default function GameClient() {
                             </div>
 
                             {/* Question number badge */}
-                            <div className="absolute top-5 right-6 text-xs font-bold text-[var(--muted)] bg-white/80 px-3 py-1 rounded-full border border-white/60">
+                            <div className="absolute top-3.5 right-4 sm:top-5 sm:right-6 text-[11px] sm:text-xs font-bold text-[var(--muted)] bg-white/80 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full border border-white/60">
                                 #{currentIndex + 1} / 16
                             </div>
 
@@ -1202,12 +1226,12 @@ export default function GameClient() {
                                         : 'scale-100 blur-0 opacity-100'
                                 }`}
                             >
-                                <div className="text-6xl sm:text-8xl font-[family:var(--font-serif)] font-extrabold text-[var(--accent)] tracking-wider drop-shadow-sm mb-2">
+                                <div className="text-5xl sm:text-8xl font-[family:var(--font-serif)] font-extrabold text-[var(--accent)] tracking-wider drop-shadow-sm mb-1 sm:mb-2">
                                     {currentWord.hanzi}
                                 </div>
 
                                 {showPinyin && (
-                                    <div className="text-lg sm:text-2xl font-medium text-[var(--muted)] tracking-wide mb-3">
+                                    <div className="text-base sm:text-2xl font-medium text-[var(--muted)] tracking-wide mb-2 sm:mb-3">
                                         [{currentWord.pinyin}]
                                     </div>
                                 )}
@@ -1216,9 +1240,10 @@ export default function GameClient() {
                                     type="button"
                                     onClick={(e) => {
                                         e.stopPropagation();
+                                        triggerHaptic(10);
                                         speakChinese(currentWord.hanzi);
                                     }}
-                                    className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/80 hover:bg-white text-xs font-bold text-[var(--accent)] border border-[var(--border)] shadow-sm hover:scale-105 active:scale-95 transition cursor-pointer"
+                                    className="inline-flex items-center gap-1.5 px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full bg-white/80 hover:bg-white text-xs font-bold text-[var(--accent)] border border-[var(--border)] shadow-sm hover:scale-105 active:scale-95 transition cursor-pointer touch-manipulation select-none"
                                     title="Nghe phát âm chuẩn tiếng Trung"
                                 >
                                     <span>🔊</span> Nghe phát âm
@@ -1235,11 +1260,11 @@ export default function GameClient() {
 
                             {/* Hiển thị kết quả đáp án đúng khi bấm sai */}
                             {isRevealingWrong && revealedAnswer && (
-                                <div className="absolute inset-0 flex flex-col items-center justify-center bg-rose-950/85 backdrop-blur-md rounded-[3rem] p-6 text-white z-30 animate-fade-in text-center select-none shadow-2xl border-2 border-rose-500/50">
-                                    <div className="text-4xl mb-1 animate-bounce">
+                                <div className="absolute inset-0 flex flex-col items-center justify-center bg-rose-950/85 backdrop-blur-md rounded-[1.5rem] sm:rounded-[3rem] p-4 sm:p-6 text-white z-30 animate-fade-in text-center select-none shadow-2xl border-2 border-rose-500/50">
+                                    <div className="text-3xl sm:text-4xl mb-1 animate-bounce">
                                         ❌
                                     </div>
-                                    <div className="text-xl sm:text-2xl font-black text-rose-200 tracking-wide uppercase">
+                                    <div className="text-lg sm:text-2xl font-black text-rose-200 tracking-wide uppercase">
                                         {revealedAnswer.isSkip ? 'ĐÃ BỎ QUA CÂU NÀY' : 'CHƯA CHÍNH XÁC!'}
                                     </div>
                                     {revealedAnswer.typed && (
@@ -1247,15 +1272,15 @@ export default function GameClient() {
                                             Từ bạn vừa gõ: <span className="line-through font-bold text-white px-2 py-0.5 rounded bg-black/30">&quot;{revealedAnswer.typed}&quot;</span>
                                         </div>
                                     )}
-                                    <div className="mt-3.5 py-2.5 px-6 bg-white/15 rounded-2xl border border-white/25 shadow-inner">
-                                        <div className="text-[11px] uppercase tracking-wider text-amber-300 font-extrabold">
+                                    <div className="mt-2.5 sm:mt-3.5 py-2 px-4 sm:px-6 bg-white/15 rounded-xl sm:rounded-2xl border border-white/25 shadow-inner">
+                                        <div className="text-[10px] sm:text-[11px] uppercase tracking-wider text-amber-300 font-extrabold">
                                             Đáp án đúng là:
                                         </div>
-                                        <div className="text-xl sm:text-2xl font-extrabold text-white mt-0.5">
+                                        <div className="text-lg sm:text-2xl font-extrabold text-white mt-0.5">
                                             {revealedAnswer.correctMeaning}
                                         </div>
                                     </div>
-                                    <div className="text-[11px] text-white/70 mt-3 animate-pulse">
+                                    <div className="text-[10px] sm:text-[11px] text-white/70 mt-2 sm:mt-3 animate-pulse">
                                         Đang chuyển sang câu tiếp theo...
                                     </div>
                                 </div>
@@ -1263,7 +1288,7 @@ export default function GameClient() {
                         </div>
 
                         {/* Ô nhập nghĩa tiếng Việt độc lập (Không bị gián đoạn bộ đệm Telex/Unikey) */}
-                        <div className={`card p-4 sm:p-6 rounded-[2rem] bg-white/40 backdrop-blur-xl border border-white/40 shadow-xl transition-all ${
+                        <div className={`card p-3 sm:p-6 rounded-[1.25rem] sm:rounded-[2rem] bg-white/40 backdrop-blur-xl border border-white/40 shadow-xl transition-all ${
                             wrongShake ? 'animate-[shake_0.5s_ease-in-out]' : ''
                         }`}>
                             <GameInput
@@ -1290,21 +1315,27 @@ export default function GameClient() {
                             )}
                         </div>
 
-                        {/* Phím hỗ trợ và bỏ qua */}
-                        <div className="flex flex-wrap justify-between items-center text-xs text-[var(--muted)] px-2 gap-2">
-                            <div className="flex items-center gap-3">
-                                <span>Gõ có dấu hoặc không dấu đều đúng!</span>
+                        {/* Phím hỗ trợ và bỏ qua - Tối ưu mobile touch */}
+                        <div className="flex flex-col sm:flex-row justify-between items-center text-xs text-[var(--muted)] px-1 gap-2 select-none">
+                            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                                <span className="hidden sm:inline">Gõ có dấu hoặc không dấu đều đúng!</span>
                                 <button
                                     type="button"
-                                    onClick={() => setShowHint(prev => !prev)}
-                                    className="text-[var(--accent)] hover:underline font-bold inline-flex items-center gap-1 cursor-pointer"
+                                    onClick={() => {
+                                        triggerHaptic();
+                                        setShowHint(prev => !prev);
+                                    }}
+                                    className="px-2.5 py-1.5 rounded-lg bg-white/60 hover:bg-white text-[var(--accent)] font-bold inline-flex items-center gap-1 cursor-pointer border border-white/80 active:scale-95 transition touch-manipulation"
                                 >
                                     <span>💡</span> {showHint ? 'Ẩn gợi ý' : 'Xem gợi ý'}
                                 </button>
                                 <button
                                     type="button"
-                                    onClick={() => setShowPinyin(prev => !prev)}
-                                    className="hover:underline font-semibold text-[var(--text)] cursor-pointer"
+                                    onClick={() => {
+                                        triggerHaptic();
+                                        setShowPinyin(prev => !prev);
+                                    }}
+                                    className="px-2.5 py-1.5 rounded-lg bg-white/60 hover:bg-white font-semibold text-[var(--text)] cursor-pointer border border-white/80 active:scale-95 transition touch-manipulation"
                                 >
                                     Pinyin: {showPinyin ? 'BẬT' : 'TẮT'}
                                 </button>
@@ -1313,7 +1344,7 @@ export default function GameClient() {
                                 type="button"
                                 disabled={isDissolving || isRevealingWrong}
                                 onClick={handleSkip}
-                                className="hover:text-[var(--accent)] font-semibold underline cursor-pointer disabled:opacity-40"
+                                className="px-3 py-1.5 rounded-lg text-rose-600 sm:text-[var(--muted)] hover:text-rose-600 font-semibold underline sm:no-underline cursor-pointer disabled:opacity-40 active:scale-95 transition touch-manipulation"
                             >
                                 Bỏ qua câu này →
                             </button>
@@ -1411,12 +1442,15 @@ export default function GameClient() {
                         )}
 
                         {/* Nút hành động */}
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center pt-4">
                             {selectedCategory === 'buoi-1' ? (
                                 <button
                                     type="button"
-                                    onClick={() => startGame()}
-                                    className="btn btn-primary px-8 py-3.5 font-bold text-base shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                                    onClick={() => {
+                                        triggerHaptic();
+                                        startGame();
+                                    }}
+                                    className="btn btn-primary px-8 py-3.5 font-bold text-base shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer touch-manipulation select-none"
                                 >
                                     🔄 Luyện Lại Buổi 1 (16 Từ QC)
                                 </button>
@@ -1424,16 +1458,22 @@ export default function GameClient() {
                                 <>
                                     <button
                                         type="button"
-                                        onClick={() => startGame(selectedLesson)}
-                                        className="btn btn-primary px-8 py-3.5 font-bold text-base shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                                        onClick={() => {
+                                            triggerHaptic();
+                                            startGame(selectedLesson);
+                                        }}
+                                        className="btn btn-primary px-8 py-3.5 font-bold text-base shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer touch-manipulation select-none"
                                     >
                                         🔄 Luyện Lại Bài {selectedLesson.replace('b', '')}
                                     </button>
                                     {parseInt(selectedLesson.replace('b', '')) < 12 && (
                                         <button
                                             type="button"
-                                            onClick={() => startGame(`b${parseInt(selectedLesson.replace('b', '')) + 1}`)}
-                                            className="btn px-8 py-3.5 font-bold text-base bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                                            onClick={() => {
+                                                triggerHaptic();
+                                                startGame(`b${parseInt(selectedLesson.replace('b', '')) + 1}`);
+                                            }}
+                                            className="btn px-8 py-3.5 font-bold text-base bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer touch-manipulation select-none"
                                         >
                                             Học Tiếp Bài {parseInt(selectedLesson.replace('b', '')) + 1} ➡️
                                         </button>
@@ -1442,16 +1482,22 @@ export default function GameClient() {
                             ) : (
                                 <button
                                     type="button"
-                                    onClick={() => startGame()}
-                                    className="btn btn-primary px-8 py-3.5 font-bold text-base shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                                    onClick={() => {
+                                        triggerHaptic();
+                                        startGame();
+                                    }}
+                                    className="btn btn-primary px-8 py-3.5 font-bold text-base shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer touch-manipulation select-none"
                                 >
                                     🔄 Chơi Lại 16 Từ Mới
                                 </button>
                             )}
                             <button
                                 type="button"
-                                onClick={() => setGameState('idle')}
-                                className="btn btn-secondary px-8 py-3.5 font-bold text-base cursor-pointer"
+                                onClick={() => {
+                                    triggerHaptic();
+                                    setGameState('idle');
+                                }}
+                                className="btn btn-secondary px-8 py-3.5 font-bold text-base cursor-pointer touch-manipulation select-none"
                             >
                                 📋 Chọn Bài / Cấp Độ Khác
                             </button>

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import fs from 'fs';
 import path from 'path';
 import { sql, ensureDbReady } from '@/lib/db';
@@ -63,6 +64,13 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
             console.warn('Cập nhật DB cảnh báo:', dbErr.message);
         }
 
+        try {
+            (revalidateTag as any)('articles');
+            revalidatePath('/bai-viet');
+            revalidatePath(`/bai-viet/${slug}`);
+            revalidatePath('/');
+        } catch (_) {}
+
         return NextResponse.json({ ok: true });
     } catch (error: any) {
         return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
@@ -90,6 +98,13 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
         } catch (dbErr: any) {
             console.warn('Xóa DB cảnh báo:', dbErr.message);
         }
+
+        try {
+            (revalidateTag as any)('articles');
+            revalidatePath('/bai-viet');
+            revalidatePath(`/bai-viet/${slug}`);
+            revalidatePath('/');
+        } catch (_) {}
 
         return NextResponse.json({ ok: true });
     } catch (error: any) {

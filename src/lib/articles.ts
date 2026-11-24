@@ -105,35 +105,100 @@ async function getArticlesFromDb(): Promise<Article[]> {
     }
 }
 
+function getArticlesFromFs(): Article[] {
+    const folder = path.join(process.cwd(), 'src', 'content', 'blog');
+    if (!fs.existsSync(folder)) return [];
+    try {
+        const files = fs.readdirSync(folder).filter(f => f.endsWith('.md'));
+        return files.map(file => {
+            const content = fs.readFileSync(path.join(folder, file), 'utf8');
+            const matterResult = matter(content);
+            const slug = file.replace('.md', '');
+            const data = normalizeFrontmatter(matterResult.data);
+            return {
+                slug,
+                title: data.title || '',
+                author: data.author || '',
+                date: data.date || '',
+                image: data.image || '',
+                description: data.description || '',
+                updated: data.updated,
+                image_alt: data.image_alt,
+                tags: data.tags,
+                content: matterResult.content,
+            } as Article;
+        });
+    } catch (err) {
+        console.error('FS Read Articles Error:', err);
+        return [];
+    }
+}
+
+function getArticleFromFsBySlug(slug: string): { slug: string; data: Partial<Article>; content: string } | null {
+    const file = path.join(process.cwd(), 'src', 'content', 'blog', `${slug}.md`);
+    if (!fs.existsSync(file)) {
+        return null;
+    }
+    try {
+        const content = fs.readFileSync(file, 'utf8');
+        const matterResult = matter(content);
+        const data = normalizeFrontmatter(matterResult.data);
+        return {
+            slug,
+            data,
+            content: stripLeadingH1(matterResult.content),
+        };
+    } catch (err) {
+        console.error(`FS Read Article (${slug}) Error:`, err);
+        return null;
+    }
+}
+
+let hasSyncedArticles = false;
+
+async function syncFsArticlesToDb(): Promise<void> {
+    if (hasSyncedArticles) return;
+    try {
+        await ensureDbReady();
+        const fsArticles = getArticlesFromFs();
+        if (fsArticles.length === 0) return;
+
+        const existing = await sql`SELECT slug FROM articles`;
+        const existingSlugs = new Set((existing.rows as any[]).map(r => r.slug));
+
+        for (const a of fsArticles) {
+            if (!existingSlugs.has(a.slug)) {
+                const tagsJson = JSON.stringify(a.tags || []);
+                await sql`
+                    INSERT INTO articles (slug, title, author, date, image, description, content, image_alt, tags)
+                    VALUES (${a.slug}, ${a.title}, ${a.author}, ${a.date}, ${a.image}, ${a.description}, ${a.content || ''}, ${a.image_alt || ''}, ${tagsJson})
+                    ON CONFLICT (slug) DO UPDATE
+                    SET title = EXCLUDED.title,
+                        author = EXCLUDED.author,
+                        date = EXCLUDED.date,
+                        image = EXCLUDED.image,
+                        description = EXCLUDED.description,
+                        content = EXCLUDED.content,
+                        tags = EXCLUDED.tags;
+                `;
+            }
+        }
+        hasSyncedArticles = true;
+    } catch {
+        // Silently continue if DB is offline or not configured
+    }
+}
+
 export const getAllArticles = cache(
     unstable_cache(
         async function getAllArticles(): Promise<Article[]> {
+            await syncFsArticlesToDb();
+
             // 1. Fetch from DB
             const dbArticles = await getArticlesFromDb();
 
             // 2. Fetch from FS
-            let fsArticles: Article[] = [];
-            const folder = path.join(process.cwd(), 'src', 'content', 'blog');
-            if (fs.existsSync(folder)) {
-                const files = fs.readdirSync(folder).filter(f => f.endsWith('.md'));
-                fsArticles = files.map(file => {
-                    const content = fs.readFileSync(path.join(folder, file), 'utf8');
-                    const matterResult = matter(content);
-                    const slug = file.replace('.md', '');
-                    const data = normalizeFrontmatter(matterResult.data);
-                    return {
-                        slug,
-                        title: data.title || '',
-                        author: data.author || '',
-                        date: data.date || '',
-                        image: data.image || '',
-                        description: data.description || '',
-                        updated: data.updated,
-                        image_alt: data.image_alt,
-                        tags: data.tags,
-                    } as Article;
-                });
-            }
+            const fsArticles = getArticlesFromFs();
 
             // Combine and Dedup (DB takes precedence)
             const combined = [...dbArticles, ...fsArticles];
@@ -150,7 +215,7 @@ export const getAllArticles = cache(
             return deduped.sort((a, b) => toSortableTimestamp(b.date) - toSortableTimestamp(a.date));
         },
         ['articles-list'],
-        { tags: ['articles'] }
+        { tags: ['articles'], revalidate: 60 }
     )
 );
 
@@ -189,29 +254,23 @@ async function getArticleFromDbBySlug(slug: string): Promise<{ slug: string; dat
 }
 
 export const getArticleBySlug = cache(
-    unstable_cache(
-        async function getArticleBySlug(slug: string): Promise<{ slug: string; data: Partial<Article>; content: string } | null> {
-            // 1. Try DB first
-            const dbArticle = await getArticleFromDbBySlug(slug);
-            if (dbArticle) return dbArticle;
+    async function getArticleBySlug(slug: string): Promise<{ slug: string; data: Partial<Article>; content: string } | null> {
+        const cleanSlug = String(slug || '').trim();
+        if (!cleanSlug) return null;
 
-            // 2. Fallback to FS
-            const file = path.join(process.cwd(), 'src', 'content', 'blog', `${slug}.md`);
-            if (!fs.existsSync(file)) {
-                return null;
-            }
+        return unstable_cache(
+            async () => {
+                await syncFsArticlesToDb();
 
-            const content = fs.readFileSync(file, 'utf8');
-            const matterResult = matter(content);
-            const data = normalizeFrontmatter(matterResult.data);
+                // 1. Try DB first
+                const dbArticle = await getArticleFromDbBySlug(cleanSlug);
+                if (dbArticle) return dbArticle;
 
-            return {
-                slug,
-                data,
-                content: stripLeadingH1(matterResult.content),
-            };
-        },
-        ['article-by-slug'],
-        { tags: ['articles'] }
-    )
+                // 2. Fallback to FS
+                return getArticleFromFsBySlug(cleanSlug);
+            },
+            ['article-by-slug', cleanSlug],
+            { tags: ['articles'], revalidate: 60 }
+        )();
+    }
 );

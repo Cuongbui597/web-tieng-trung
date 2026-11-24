@@ -121,11 +121,9 @@ export async function generateStaticParams() {
     }));
 }
 
-export const dynamic = 'force-static';
-export const dynamicParams = false;
-
-// Revalidate every hour
-export const revalidate = 0;
+// Allow dynamic rendering for new or updated articles
+export const dynamicParams = true;
+export const revalidate = 60;
 
 export async function generateMetadata({ params }: PageProps) {
     const { slug } = await params;

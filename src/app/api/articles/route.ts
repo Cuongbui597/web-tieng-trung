@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import fs from 'fs';
 import path from 'path';
 import { sql, ensureDbReady } from '@/lib/db';
@@ -79,6 +80,13 @@ export async function POST(request: NextRequest) {
         } catch (dbErr: any) {
             console.warn('Lưu DB cảnh báo (đã lưu file markdown thành công):', dbErr.message);
         }
+
+        try {
+            (revalidateTag as any)('articles');
+            revalidatePath('/bai-viet');
+            revalidatePath(`/bai-viet/${slug}`);
+            revalidatePath('/');
+        } catch (_) {}
 
         return NextResponse.json({ ok: true, slug, image });
     } catch (error: any) {

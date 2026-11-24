@@ -4,8 +4,8 @@ import { getAllArticles } from '@/lib/server';
 import { getBreadcrumbSchema, toJsonLd } from '@/lib/schema';
 import { Metadata } from 'next';
 
-// Revalidate every hour
-export const revalidate = 3600;
+// Revalidate every minute
+export const revalidate = 60;
 
 export const metadata: Metadata = {
     title: "Góc Học Tập & Mẹo Học Tiếng Trung",

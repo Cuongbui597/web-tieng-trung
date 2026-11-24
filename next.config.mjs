@@ -2,6 +2,9 @@
 const nextConfig = {
   poweredByHeader: false,
   compress: true,
+  outputFileTracingIncludes: {
+    '/**': ['./src/content/blog/**/*'],
+  },
   async headers() {
     const immutable = 'public, max-age=31536000, immutable';
     const swrWeek = 'public, max-age=604800, stale-while-revalidate=86400';

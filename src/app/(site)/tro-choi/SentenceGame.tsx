@@ -141,7 +141,7 @@ export default function SentenceGame() {
     const [showPinyin, setShowPinyin] = useState(true);
     const [showHint, setShowHint] = useState(false);
     const [soundOn, setSoundOn] = useState(true);
-    const [voiceSpeed, setVoiceSpeed] = useState<number>(0.75); // Tốc độ vừa phải, chậm rãi
+    const [voiceSpeed, setVoiceSpeed] = useState<number>(0.70); // Tốc độ mặc định 0.70x: rất chậm rãi, chuẩn âm điệu
     const [isSpeaking, setIsSpeaking] = useState(false);
 
     // Phản hồi đáp án
@@ -287,7 +287,10 @@ export default function SentenceGame() {
 
         if (shuffled[0]) {
             loadSentenceChunks(shuffled[0]);
-            // Không tự động đọc to đáp án khi vừa bước vào câu mới
+            // Thì 1: Tự động phát âm câu mẫu khi bắt đầu câu mới (câu 1)
+            setTimeout(() => {
+                speakSentence(shuffled[0].fullHanzi, 0.70);
+            }, 350);
         }
     };
 
@@ -358,11 +361,11 @@ export default function SentenceGame() {
                 },
             ]);
 
-            // Phát âm câu đúng chậm rãi, rõ ràng và ĐỢI ĐỌC XONG MỚI CHUYỂN CÂU
+            // Thì 2: Tự động đọc lại câu hoàn chỉnh 1 LẦN NỮA trước khi chuyển sang câu tiếp theo
             speakSentence(currentSentence.fullHanzi, voiceSpeed, () => {
                 setTimeout(() => {
                     moveToNextSentence();
-                }, 600);
+                }, 500);
             });
         } else {
             // Sai!
@@ -411,7 +414,10 @@ export default function SentenceGame() {
             setCurrentIndex(nextIdx);
             const nextSentence = roundSentences[nextIdx];
             loadSentenceChunks(nextSentence);
-            // Để người học tự tư duy với câu hỏi mới, không tự động đọc to trước
+            // Thì 1: Tự động phát âm câu mẫu khi bắt đầu câu mới (từ câu 2 trở đi)
+            setTimeout(() => {
+                speakSentence(nextSentence.fullHanzi, voiceSpeed);
+            }, 350);
         }
     };
 
@@ -631,39 +637,39 @@ export default function SentenceGame() {
                                     <div className="inline-flex items-center bg-slate-100/90 rounded-xl p-0.5 border border-slate-200 text-[11px] font-bold">
                                         <button
                                             type="button"
+                                            onClick={() => setVoiceSpeed(0.65)}
+                                            className={`px-2 py-0.5 rounded-lg transition cursor-pointer ${
+                                                voiceSpeed === 0.65
+                                                    ? 'bg-white text-rose-600 shadow-2xs font-extrabold'
+                                                    : 'text-slate-500 hover:text-slate-800'
+                                            }`}
+                                            title="Tốc độ rất chậm (0.65x) - Nghe chi tiết từng âm tiết"
+                                        >
+                                            🐢 0.65x
+                                        </button>
+                                        <button
+                                            type="button"
                                             onClick={() => setVoiceSpeed(0.70)}
                                             className={`px-2 py-0.5 rounded-lg transition cursor-pointer ${
                                                 voiceSpeed === 0.70
                                                     ? 'bg-white text-rose-600 shadow-2xs font-extrabold'
                                                     : 'text-slate-500 hover:text-slate-800'
                                             }`}
-                                            title="Tốc độ chậm (0.7x) - Rõ nét từng thanh điệu"
+                                            title="Tốc độ chuẩn chậm vừa phải (0.70x) - Khuyến nghị"
                                         >
-                                            🐢 0.7x
+                                            🔉 0.70x
                                         </button>
                                         <button
                                             type="button"
-                                            onClick={() => setVoiceSpeed(0.78)}
+                                            onClick={() => setVoiceSpeed(0.85)}
                                             className={`px-2 py-0.5 rounded-lg transition cursor-pointer ${
-                                                voiceSpeed === 0.78
+                                                voiceSpeed === 0.85
                                                     ? 'bg-white text-rose-600 shadow-2xs font-extrabold'
                                                     : 'text-slate-500 hover:text-slate-800'
                                             }`}
-                                            title="Tốc độ vừa phải (0.8x) - Khuyến nghị"
+                                            title="Tốc độ đàm thoại tự nhiên (0.85x)"
                                         >
-                                            🔉 0.8x
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setVoiceSpeed(0.95)}
-                                            className={`px-2 py-0.5 rounded-lg transition cursor-pointer ${
-                                                voiceSpeed === 0.95
-                                                    ? 'bg-white text-rose-600 shadow-2xs font-extrabold'
-                                                    : 'text-slate-500 hover:text-slate-800'
-                                            }`}
-                                            title="Tốc độ tự nhiên (1.0x)"
-                                        >
-                                            ⚡ 1.0x
+                                            ⚡ 0.85x
                                         </button>
                                     </div>
 
@@ -786,6 +792,21 @@ export default function SentenceGame() {
                                     >
                                         💡 {showHint ? 'Ẩn mẹo' : 'Xem mẹo'}
                                     </button>
+                                    {selectedChunks.length > 0 && !isChecking && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                sfx.playTap();
+                                                setAvailableChunks(prev => [...prev, ...selectedChunks]);
+                                                setSelectedChunks([]);
+                                                setIsCorrect(null);
+                                            }}
+                                            className="px-3 py-1.5 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 border border-rose-200 transition cursor-pointer"
+                                            title="Gỡ toàn bộ khối từ đã chọn về kho từ"
+                                        >
+                                            ↺ Làm lại
+                                        </button>
+                                    )}
                                     <button
                                         type="button"
                                         onClick={handleSkip}

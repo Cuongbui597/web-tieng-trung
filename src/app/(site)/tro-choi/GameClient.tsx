@@ -6,13 +6,14 @@ import { GARMENT_VOCAB_DATABASE, GARMENT_LESSONS, GarmentLessonInfo } from './ga
 import { BUOI_1_VOCAB, BUOI_1_INFO } from './buoi1Vocab';
 import { ALL_HSK_EXTRA_VOCAB } from './hskVocab';
 import { FACTORY_EXTRA_VOCAB } from './factoryVocab';
+import { ALL_LIVING_VOCAB, LIVING_ROOM_VOCAB, DORM_VOCAB, BUOI_1_ROOM_INFO, BUOI_2_DORM_INFO, LivingWordItem } from './livingVocab';
 
 interface WordItem {
     id: string;
     hanzi: string;
     pinyin: string;
     meanings: string[]; // Các nghĩa tiếng Việt chấp nhận được
-    category: 'hsk-1' | 'hsk-2' | 'hsk-3' | 'cong-xuong' | 'may-mac' | 'buoi-1';
+    category: 'hsk-1' | 'hsk-2' | 'hsk-3' | 'cong-xuong' | 'may-mac' | 'buoi-1' | 'buoi-1-phong-o' | 'buoi-2-ktx' | string;
     categoryLabel: string;
     lesson?: string;
     lessonLabel?: string;
@@ -21,6 +22,12 @@ interface WordItem {
     part?: 'A' | 'B' | 'C';
     partTitle?: string;
     note?: string;
+    exampleSentence?: {
+        hanzi: string;
+        pinyin: string;
+        vietnamese: string;
+        grammarNote?: string;
+    };
 }
 
 const TOTAL_ROUND_WORDS = 16;
@@ -183,6 +190,7 @@ const ALL_VOCAB_DATABASE: WordItem[] = [
     ...(FACTORY_EXTRA_VOCAB as WordItem[]),
     ...(GARMENT_VOCAB_DATABASE as WordItem[]),
     ...(BUOI_1_VOCAB as WordItem[]),
+    ...(ALL_LIVING_VOCAB as WordItem[]),
 ];
 
 function removeVietnameseAccents(str: string): string {
@@ -508,6 +516,11 @@ export default function GameClient() {
         pinyin: string;
         meaning: string;
         correct: boolean;
+        example?: {
+            hanzi: string;
+            vietnamese: string;
+            grammarNote?: string;
+        };
     }>>([]);
 
     const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -520,6 +533,12 @@ export default function GameClient() {
         if (selectedCategory === 'all') return ALL_VOCAB_DATABASE;
         if (selectedCategory === 'buoi-1') {
             return ALL_VOCAB_DATABASE.filter(w => w.category === 'buoi-1');
+        }
+        if (selectedCategory === 'buoi-1-phong-o') {
+            return ALL_VOCAB_DATABASE.filter(w => w.category === 'buoi-1-phong-o');
+        }
+        if (selectedCategory === 'buoi-2-ktx') {
+            return ALL_VOCAB_DATABASE.filter(w => w.category === 'buoi-2-ktx');
         }
         if (selectedCategory === 'may-mac') {
             if (selectedLesson === 'all') {
@@ -544,6 +563,14 @@ export default function GameClient() {
             // Lấy 16 từ Buổi 1 THEO ĐÚNG THỨ TỰ TỪ TRÊN XUỐNG DƯỚI (Phần A -> Phần B -> Phần C)
             const buoi1Pool = ALL_VOCAB_DATABASE.filter(w => w.category === 'buoi-1');
             selected16 = buoi1Pool.slice(0, TOTAL_ROUND_WORDS);
+        } else if (selectedCategory === 'buoi-1-phong-o') {
+            // Lấy 16 từ Buổi 1 Phòng ở & Xưởng
+            const roomPool = ALL_VOCAB_DATABASE.filter(w => w.category === 'buoi-1-phong-o');
+            selected16 = roomPool.slice(0, TOTAL_ROUND_WORDS);
+        } else if (selectedCategory === 'buoi-2-ktx') {
+            // Lấy 16 từ Buổi 2 Ký túc xá & Đồ dùng sinh hoạt
+            const dormPool = ALL_VOCAB_DATABASE.filter(w => w.category === 'buoi-2-ktx');
+            selected16 = dormPool.slice(0, TOTAL_ROUND_WORDS);
         } else if (selectedCategory === 'may-mac' && activeLesson !== 'all') {
             // Lấy 16 từ của bài đã chọn THEO ĐÚNG THỨ TỰ TỪ TRÊN XUỐNG DƯỚI (Không xáo trộn)
             const lessonPool = ALL_VOCAB_DATABASE.filter(w => w.category === 'may-mac' && w.lesson === activeLesson);
@@ -639,6 +666,11 @@ export default function GameClient() {
                 pinyin: currentWord.pinyin,
                 meaning: currentWord.meanings[0],
                 correct: wasCorrect,
+                example: currentWord.exampleSentence ? {
+                    hanzi: currentWord.exampleSentence.hanzi,
+                    vietnamese: currentWord.exampleSentence.vietnamese,
+                    grammarNote: currentWord.exampleSentence.grammarNote,
+                } : undefined,
             },
         ]);
 
@@ -721,6 +753,11 @@ export default function GameClient() {
                     pinyin: currentWord.pinyin,
                     meaning: currentWord.meanings[0],
                     correct: false,
+                    example: currentWord.exampleSentence ? {
+                        hanzi: currentWord.exampleSentence.hanzi,
+                        vietnamese: currentWord.exampleSentence.vietnamese,
+                        grammarNote: currentWord.exampleSentence.grammarNote,
+                    } : undefined,
                 },
             ]);
 
@@ -767,6 +804,11 @@ export default function GameClient() {
                 pinyin: currentWord.pinyin,
                 meaning: currentWord.meanings[0],
                 correct: false,
+                example: currentWord.exampleSentence ? {
+                    hanzi: currentWord.exampleSentence.hanzi,
+                    vietnamese: currentWord.exampleSentence.vietnamese,
+                    grammarNote: currentWord.exampleSentence.grammarNote,
+                } : undefined,
             },
         ]);
 
@@ -860,11 +902,13 @@ export default function GameClient() {
                         </p>
 
                         {/* Danh sách chủ đề */}
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-4 sm:mb-6">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 mb-4 sm:mb-6">
                             {[
                                 { id: 'buoi-1', label: 'Buổi 1: QC May Mặc', icon: '📋', count: '16 từ cốt lõi', highlight: true },
+                                { id: 'buoi-1-phong-o', label: 'Buổi 1: Phòng Ở & Xưởng', icon: '🪑', count: '16 từ thực chiến', highlight: true },
+                                { id: 'buoi-2-ktx', label: 'Buổi 2: Ký Túc Xá', icon: '🛏️', count: '16 từ KTX & Vệ sinh', highlight: true },
                                 { id: 'may-mac', label: '12 Bài Dệt May', icon: '🧵', count: '180+ từ (12 Bài)' },
-                                { id: 'all', label: 'Tất cả chủ đề', icon: '🌟', count: '730+ từ' },
+                                { id: 'all', label: 'Tất cả chủ đề', icon: '🌟', count: '760+ từ' },
                                 { id: 'cong-xuong', label: 'Công xưởng', icon: '🏭', count: '135 từ' },
                                 { id: 'hsk-1', label: 'HSK 1 (Sơ cấp)', icon: '🎯', count: '135 từ' },
                                 { id: 'hsk-2', label: 'HSK 2 (Cơ bản)', icon: '📗', count: '135 từ' },
@@ -986,6 +1030,88 @@ export default function GameClient() {
                             </div>
                         )}
 
+                        {/* Hiển thị chi tiết nội dung BUỔI 1: PHÒNG Ở & BÀN LÀM VIỆC */}
+                        {selectedCategory === 'buoi-1-phong-o' && (
+                            <div className="mb-8 text-left bg-gradient-to-br from-emerald-50/90 via-white/90 to-blue-50/80 p-5 sm:p-7 rounded-3xl border-2 border-emerald-200 shadow-md animate-fade-in">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-4 border-b border-emerald-100">
+                                    <div>
+                                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-emerald-100 text-emerald-900 uppercase tracking-wider mb-1.5">
+                                            <span>🪑</span> BÀI HỌC GHÉP TỪ: BUỔI 1
+                                        </div>
+                                        <h3 className="text-base sm:text-xl font-black text-[var(--text)] tracking-tight">
+                                            BUỔI 1: ĐỒ VẬT PHÒNG Ở & BÀN LÀM VIỆC TẠI CÔNG XƯỞNG
+                                        </h3>
+                                        <p className="text-xs sm:text-sm text-emerald-900/80 font-medium mt-0.5">
+                                            16 từ thực chiến chọn lọc kèm câu ví dụ ngữ cảnh (câu chữ 把, lượng từ, cấu trúc vị trí)
+                                        </p>
+                                    </div>
+                                    <div className="px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white font-extrabold text-xs shadow-xs shrink-0 self-start sm:self-auto">
+                                        Chuẩn 16 Từ / 60 Giây
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                                    {LIVING_ROOM_VOCAB.map((w, idx) => (
+                                        <div key={w.id} className="p-2.5 rounded-xl bg-white/90 border border-emerald-100 shadow-xs flex flex-col justify-between">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
+                                                    #{idx + 1}
+                                                </span>
+                                                <span className="text-[10px] text-gray-500 font-medium">[{w.pinyin}]</span>
+                                            </div>
+                                            <div className="text-base sm:text-lg font-bold text-gray-900 my-1 font-[family:var(--font-serif)]">
+                                                {w.hanzi}
+                                            </div>
+                                            <div className="text-xs text-gray-600 line-clamp-1">
+                                                {w.meanings[0]}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Hiển thị chi tiết nội dung BUỔI 2: KÝ TÚC XÁ & VỆ SINH CÁ NHÂN */}
+                        {selectedCategory === 'buoi-2-ktx' && (
+                            <div className="mb-8 text-left bg-gradient-to-br from-indigo-50/90 via-white/90 to-purple-50/80 p-5 sm:p-7 rounded-3xl border-2 border-indigo-200 shadow-md animate-fade-in">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-4 border-b border-indigo-100">
+                                    <div>
+                                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-indigo-100 text-indigo-900 uppercase tracking-wider mb-1.5">
+                                            <span>🛏️</span> BÀI HỌC GHÉP TỪ: BUỔI 2
+                                        </div>
+                                        <h3 className="text-base sm:text-xl font-black text-[var(--text)] tracking-tight">
+                                            BUỔI 2: KÝ TÚC XÁ, ĐỒ DÙNG SINH HOẠT & VỆ SINH CÁ NHÂN
+                                        </h3>
+                                        <p className="text-xs sm:text-sm text-indigo-900/80 font-medium mt-0.5">
+                                            16 từ vựng thiết yếu về phòng ngủ, giặt giũ, sinh hoạt kèm bổ ngữ kết quả và câu ví dụ
+                                        </p>
+                                    </div>
+                                    <div className="px-3.5 py-1.5 rounded-xl bg-indigo-600 text-white font-extrabold text-xs shadow-xs shrink-0 self-start sm:self-auto">
+                                        Chuẩn 16 Từ / 60 Giây
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                                    {DORM_VOCAB.map((w, idx) => (
+                                        <div key={w.id} className="p-2.5 rounded-xl bg-white/90 border border-indigo-100 shadow-xs flex flex-col justify-between">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded">
+                                                    #{idx + 1}
+                                                </span>
+                                                <span className="text-[10px] text-gray-500 font-medium">[{w.pinyin}]</span>
+                                            </div>
+                                            <div className="text-base sm:text-lg font-bold text-gray-900 my-1 font-[family:var(--font-serif)]">
+                                                {w.hanzi}
+                                            </div>
+                                            <div className="text-xs text-gray-600 line-clamp-1">
+                                                {w.meanings[0]}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
                         {/* Bộ chia 12 Bài học Mỗi ngày theo tài liệu dệt may (Khi chọn ngành may mặc) */}
                         {selectedCategory === 'may-mac' && (
                             <div className="mb-8 text-left bg-gradient-to-br from-amber-50/80 via-white/80 to-rose-50/60 p-5 sm:p-6 rounded-3xl border border-amber-200 shadow-sm animate-fade-in">
@@ -1061,6 +1187,10 @@ export default function GameClient() {
                             >
                                 {selectedCategory === 'buoi-1' ? (
                                     <span>Bắt Đầu Buổi 1 (16 Từ QC May Mặc) 🔥</span>
+                                ) : selectedCategory === 'buoi-1-phong-o' ? (
+                                    <span>Bắt Đầu Buổi 1: Phòng Ở & Xưởng (16 Từ) 🔥</span>
+                                ) : selectedCategory === 'buoi-2-ktx' ? (
+                                    <span>Bắt Đầu Buổi 2: Ký Túc Xá & Đồ Dùng (16 Từ) 🔥</span>
                                 ) : selectedCategory === 'may-mac' && selectedLesson !== 'all' ? (
                                     <span>Bắt Đầu {GARMENT_LESSONS.find(l => l.id === selectedLesson)?.title || 'Bài Học'} (16 Từ) 🔥</span>
                                 ) : (
@@ -1309,8 +1439,20 @@ export default function GameClient() {
 
                             {/* Khối gợi ý */}
                             {showHint && currentWord && (
-                                <div className="mt-3 text-center text-xs sm:text-sm font-medium text-amber-900 bg-amber-50/90 py-2.5 px-4 rounded-xl border border-amber-200 animate-fade-in">
-                                    💡 <strong>Gợi ý:</strong> Từ này bắt đầu bằng chữ <strong className="text-rose-600 uppercase font-bold">&quot;{currentWord.meanings[0].charAt(0)}&quot;</strong> ({currentWord.meanings[0].split(' ').length} từ: {currentWord.meanings[0].slice(0, 3)}...)
+                                <div className="mt-3 text-center text-xs sm:text-sm font-medium text-amber-900 bg-amber-50/90 py-2.5 px-4 rounded-xl border border-amber-200 animate-fade-in space-y-1.5">
+                                    <div>
+                                        💡 <strong>Gợi ý:</strong> Từ này bắt đầu bằng chữ <strong className="text-rose-600 uppercase font-bold">&quot;{currentWord.meanings[0].charAt(0)}&quot;</strong> ({currentWord.meanings[0].split(' ').length} từ: {currentWord.meanings[0].slice(0, 3)}...)
+                                    </div>
+                                    {currentWord.note && (
+                                        <div className="text-[11px] sm:text-xs text-amber-800 font-normal">
+                                            <span>📌 <em>{currentWord.note}</em></span>
+                                        </div>
+                                    )}
+                                    {currentWord.exampleSentence && (
+                                        <div className="text-[11px] sm:text-xs text-amber-800 pt-1 border-t border-amber-200/70 font-normal">
+                                            <span>📝 <em>Ngữ cảnh thực tế: {currentWord.exampleSentence.vietnamese}</em></span>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -1415,26 +1557,40 @@ export default function GameClient() {
                                     {history.map((item, idx) => (
                                         <div
                                             key={idx}
-                                            className={`p-3 rounded-xl border flex items-center justify-between text-xs sm:text-sm ${
+                                            className={`p-3 rounded-xl border flex flex-col text-xs sm:text-sm gap-1.5 ${
                                                 item.correct
                                                     ? 'bg-emerald-50/80 border-emerald-200 text-emerald-900'
                                                     : 'bg-rose-50/80 border-rose-200 text-rose-900'
                                             }`}
                                         >
-                                            <div className="flex items-center gap-3">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => speakChinese(item.hanzi)}
-                                                    className="p-1 rounded-lg bg-white/70 hover:bg-white text-sm shadow-xs hover:scale-110 active:scale-95 transition cursor-pointer"
-                                                    title="Bấm để nghe phát âm từ này"
-                                                >
-                                                    🔊
-                                                </button>
-                                                <span className="font-bold text-base font-[family:var(--font-serif)]">{item.hanzi}</span>
-                                                <span className="text-xs opacity-75">[{item.pinyin}]</span>
-                                                <span>👉 {item.meaning}</span>
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2.5">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => speakChinese(item.hanzi)}
+                                                        className="p-1 rounded-lg bg-white/70 hover:bg-white text-sm shadow-xs hover:scale-110 active:scale-95 transition cursor-pointer touch-manipulation"
+                                                        title="Bấm để nghe phát âm từ này"
+                                                    >
+                                                        🔊
+                                                    </button>
+                                                    <span className="font-bold text-base font-[family:var(--font-serif)]">{item.hanzi}</span>
+                                                    <span className="text-xs opacity-75">[{item.pinyin}]</span>
+                                                    <span>👉 {item.meaning}</span>
+                                                </div>
+                                                <span className="font-bold shrink-0">{item.correct ? '✓ Đúng' : '✗ Bỏ qua / Sai'}</span>
                                             </div>
-                                            <span className="font-bold shrink-0">{item.correct ? '✓ Đúng' : '✗ Bỏ qua / Sai'}</span>
+                                            {item.example && (
+                                                <div className="pt-1.5 border-t border-black/5 text-[11px] text-[var(--muted)] flex flex-wrap items-center gap-1.5">
+                                                    <span className="font-medium text-indigo-800 bg-indigo-50/90 px-2 py-0.5 rounded-md border border-indigo-100">
+                                                        Ví dụ: {item.example.hanzi} ({item.example.vietnamese})
+                                                    </span>
+                                                    {item.example.grammarNote && (
+                                                        <span className="text-[10px] text-amber-900 bg-amber-50/90 px-2 py-0.5 rounded-md border border-amber-200">
+                                                            💡 {item.example.grammarNote}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
                                 </div>
@@ -1453,6 +1609,28 @@ export default function GameClient() {
                                     className="btn btn-primary px-8 py-3.5 font-bold text-base shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer touch-manipulation select-none"
                                 >
                                     🔄 Luyện Lại Buổi 1 (16 Từ QC)
+                                </button>
+                            ) : selectedCategory === 'buoi-1-phong-o' ? (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        triggerHaptic();
+                                        startGame();
+                                    }}
+                                    className="btn btn-primary px-8 py-3.5 font-bold text-base shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer touch-manipulation select-none"
+                                >
+                                    🔄 Luyện Lại Buổi 1 (Phòng Ở & Xưởng)
+                                </button>
+                            ) : selectedCategory === 'buoi-2-ktx' ? (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        triggerHaptic();
+                                        startGame();
+                                    }}
+                                    className="btn btn-primary px-8 py-3.5 font-bold text-base shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer touch-manipulation select-none"
+                                >
+                                    🔄 Luyện Lại Buổi 2 (Ký Túc Xá)
                                 </button>
                             ) : selectedCategory === 'may-mac' && selectedLesson !== 'all' ? (
                                 <>

@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 export function useVirtualKeyboard() {
     const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
     const [keyboardHeight, setKeyboardHeight] = useState(0);
+    const [viewportHeight, setViewportHeight] = useState<number>(0);
     const [isFullscreen, setIsFullscreen] = useState(false);
 
     useEffect(() => {
@@ -15,17 +16,23 @@ export function useVirtualKeyboard() {
                 const vv = window.visualViewport;
                 const windowHeight = window.innerHeight;
                 const diff = windowHeight - vv.height;
+                setViewportHeight(vv.height);
 
-                // Nếu chênh lệch chiều cao > 150px thì chắc chắn bàn phím ảo đang mở
-                if (diff > 150) {
+                // Nếu chênh lệch chiều cao > 120px thì chắc chắn bàn phím ảo đang mở
+                if (diff > 120) {
                     setIsKeyboardOpen(true);
                     setKeyboardHeight(diff);
                 } else {
                     setIsKeyboardOpen(false);
                     setKeyboardHeight(0);
                 }
+            } else {
+                setViewportHeight(window.innerHeight);
             }
         };
+
+        // Khởi tạo ngay giá trị ban đầu
+        checkKeyboard();
 
         const handleFocusIn = (e: FocusEvent) => {
             const target = e.target as HTMLElement;
@@ -98,6 +105,7 @@ export function useVirtualKeyboard() {
     return {
         isKeyboardOpen,
         keyboardHeight,
+        viewportHeight,
         isFullscreen,
         toggleFullscreen,
     };

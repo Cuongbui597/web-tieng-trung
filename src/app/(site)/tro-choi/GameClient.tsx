@@ -206,6 +206,7 @@ function cleanInput(str: string): string {
     return str
         .toLowerCase()
         .replace(/[.,/#!$%^&*;:{}=\-_`~()?"'!]/g, '')
+        .replace(/\s+/g, ' ')
         .trim();
 }
 
@@ -383,9 +384,9 @@ function stopChineseSpeech() {
 }
 
 // Component GameInput: Tách biệt hoàn toàn việc nhập phím với bộ đếm giờ của cha
-// Đảm bảo gõ tiếng Việt Telex / VNI / Unikey 100% mượt mà, không giật lag, không nhân đôi chữ
+// Đảm bảo gõ tiếng Việt Telex / VNI / Unikey 100% mượt mà, giữ vững bàn phím không sập
 interface GameInputProps {
-    disabled: boolean;
+    isLocked?: boolean;
     feedbackMessage: string | null;
     currentWordId: string;
     isCompact?: boolean;
@@ -394,7 +395,7 @@ interface GameInputProps {
 }
 
 function GameInput({
-    disabled,
+    isLocked = false,
     feedbackMessage,
     currentWordId,
     isCompact = false,
@@ -405,20 +406,27 @@ function GameInput({
     const inputRef = useRef<HTMLInputElement>(null);
     const isComposingRef = useRef(false);
 
-    // Tự động focus input và duy trì focus khi đổi từ mới
+    // Khi chuyển sang từ mới: Xóa ô gõ, xóa lỗi và giữ nguyên focus bàn phím
     useEffect(() => {
-        if (!disabled && inputRef.current) {
-            const timer = setTimeout(() => {
-                inputRef.current?.focus();
-            }, 30);
-            return () => clearTimeout(timer);
+        setVal('');
+        onClearFeedback();
+        if (inputRef.current) {
+            inputRef.current.focus();
         }
-    }, [disabled, currentWordId]);
+    }, [currentWordId]);
+
+    // Tự động focus input khi không bị khóa animation
+    useEffect(() => {
+        if (!isLocked && inputRef.current) {
+            inputRef.current.focus();
+        }
+    }, [isLocked]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (isLocked) return;
         const value = e.target.value;
         setVal(value);
-        onClearFeedback();
+        if (feedbackMessage) onClearFeedback();
 
         // Chỉ tự động kiểm tra khi người dùng không trong quá trình gõ dấu Telex (Composition)
         if (!isComposingRef.current) {
@@ -432,6 +440,7 @@ function GameInput({
 
     const handleCompositionEnd = (e: React.CompositionEvent<HTMLInputElement>) => {
         isComposingRef.current = false;
+        if (isLocked) return;
         const finalVal = e.currentTarget.value;
         setVal(finalVal);
         onCheckAnswer(finalVal, false);
@@ -439,6 +448,7 @@ function GameInput({
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        if (isLocked) return;
         onCheckAnswer(val, true);
         // Duy trì bàn phím mở trên điện thoại, không để bị giật đóng mở
         inputRef.current?.focus();
@@ -455,7 +465,7 @@ function GameInput({
                 <input
                     ref={inputRef}
                     type="text"
-                    disabled={disabled}
+                    readOnly={isLocked}
                     value={val}
                     onChange={handleChange}
                     onCompositionStart={handleCompositionStart}
@@ -475,7 +485,7 @@ function GameInput({
                 />
                 <button
                     type="submit"
-                    disabled={disabled}
+                    disabled={isLocked}
                     className="btn btn-primary px-4 sm:px-6 rounded-xl sm:rounded-2xl font-bold shrink-0 text-sm sm:text-base shadow-md hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-1 cursor-pointer disabled:opacity-50 touch-manipulation select-none"
                 >
                     <span>Gửi</span>
@@ -487,7 +497,7 @@ function GameInput({
 }
 
 export default function GameClient() {
-    const { isKeyboardOpen, isFullscreen, toggleFullscreen } = useVirtualKeyboard();
+    const { isKeyboardOpen, viewportHeight, isFullscreen, toggleFullscreen } = useVirtualKeyboard();
     const [selectedCategory, setSelectedCategory] = useState<string>('buoi-1');
     const [selectedLesson, setSelectedLesson] = useState<string>('b1');
     const [gameState, setGameState] = useState<'idle' | 'playing' | 'gameover'>('idle');
@@ -758,55 +768,13 @@ export default function GameClient() {
                 moveToNextWord(true);
             });
         } else if (isExplicitSubmit) {
-            // Khi bấm Gửi hoặc nhấn Enter nhưng đáp án sai:
-            // 1. Hiện ra kết quả đáp án đúng ngay lập tức
-            // 2. Ghi nhận lỗi đó là SAI vào lịch sử
-            // 3. Tự động chuyển sang câu tiếp theo sau 1.6 giây
-            triggerHaptic(50);
+            // Khi bấm Gửi hoặc nhấn Enter nhưng đáp án chưa đúng:
+            // Rung lắc cảnh báo và hiện thông báo lỗi, cho phép người dùng sửa lại hoặc bấm Gợi ý / Bỏ qua
+            triggerHaptic(40);
             sfx.playWrong();
             setWrongShake(true);
             setTimeout(() => setWrongShake(false), 500);
-            setStreak(0);
-
-            setIsRevealingWrong(true);
-            setRevealedAnswer({
-                typed: text.trim(),
-                correctMeaning: currentWord.meanings[0],
-                isSkip: false,
-            });
-
-            // Ghi nhận lỗi SAI ngay lập tức
-            setHistory(prev => [
-                ...prev,
-                {
-                    hanzi: currentWord.hanzi,
-                    pinyin: currentWord.pinyin,
-                    meaning: currentWord.meanings[0],
-                    correct: false,
-                    example: currentWord.exampleSentence ? {
-                        hanzi: currentWord.exampleSentence.hanzi,
-                        vietnamese: currentWord.exampleSentence.vietnamese,
-                        grammarNote: currentWord.exampleSentence.grammarNote,
-                    } : undefined,
-                },
-            ]);
-
-            setTimeout(() => {
-                setIsRevealingWrong(false);
-                setRevealedAnswer(null);
-                setFeedbackMessage(null);
-                setShowHint(false);
-
-                const nextIdx = currentIndex + 1;
-                if (nextIdx >= roundWords.length) {
-                    endGame('completed');
-                } else {
-                    setCurrentIndex(nextIdx);
-                    if (autoVoice && roundWords[nextIdx]) {
-                        setTimeout(() => speakChinese(roundWords[nextIdx].hanzi), 200);
-                    }
-                }
-            }, 1600);
+            setFeedbackMessage('❌ Chưa chính xác, hãy thử lại hoặc bấm Gợi ý / Bỏ qua!');
         }
     };
 
@@ -905,22 +873,23 @@ export default function GameClient() {
             </div>
 
             <div className="container-app max-w-3xl mx-auto relative z-10">
-                {/* Header title */}
-                <div className="text-center mb-4 sm:mb-8">
-                    <div className="inline-flex items-center gap-2 badge-gradient mb-2 sm:mb-3 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
-                        <span>🎮</span> Thử Thách 16 Từ Trong 1 Phút
-                    </div>
-                    <h1 className="text-3xl sm:text-5xl font-extrabold text-[var(--text)] tracking-tight mb-2">
-                        Từ Vựng <span className="text-gradient-accent">Tan Biến</span>
-                    </h1>
-                    <p className="text-xs sm:text-sm text-[var(--muted)] max-w-lg mx-auto">
-                        Đúng <strong>16 từ vựng không lặp lại</strong> trong vòng <strong>60 giây</strong>. Gõ nhanh tiếng Việt chuẩn để ghi điểm combo tối đa!
-                    </p>
-                </div>
-
                 {/* ==================== MÀN HÌNH BẮT ĐẦU ==================== */}
                 {gameState === 'idle' && (
-                    <div className="card rounded-[1.5rem] sm:rounded-[2.5rem] p-4 sm:p-12 bg-white/40 backdrop-blur-xl border border-white/40 shadow-2xl text-center">
+                    <>
+                        {/* Header title */}
+                        <div className="text-center mb-4 sm:mb-8">
+                            <div className="inline-flex items-center gap-2 badge-gradient mb-2 sm:mb-3 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                                <span>🎮</span> Thử Thách 16 Từ Trong 1 Phút
+                            </div>
+                            <h1 className="text-3xl sm:text-5xl font-extrabold text-[var(--text)] tracking-tight mb-2">
+                                Từ Vựng <span className="text-gradient-accent">Tan Biến</span>
+                            </h1>
+                            <p className="text-xs sm:text-sm text-[var(--muted)] max-w-lg mx-auto">
+                                Đúng <strong>16 từ vựng không lặp lại</strong> trong vòng <strong>60 giây</strong>. Gõ nhanh tiếng Việt chuẩn để ghi điểm combo tối đa!
+                            </p>
+                        </div>
+
+                        <div className="card rounded-[1.5rem] sm:rounded-[2.5rem] p-4 sm:p-12 bg-white/40 backdrop-blur-xl border border-white/40 shadow-2xl text-center">
                         <div className="text-5xl sm:text-6xl mb-3 sm:mb-4 animate-bounce">
                             🏮
                         </div>
@@ -1324,14 +1293,22 @@ export default function GameClient() {
                             </div>
                         )}
                     </div>
+                    </>
                 )}
 
                 {/* ==================== MÀN HÌNH ĐANG CHƠI (TẬN DỤNG FULL MÀN HÌNH & BÀN PHÍM) ==================== */}
                 {gameState === 'playing' && currentWord && (
-                    <div className={`fixed inset-0 z-50 bg-[var(--bg)] flex flex-col justify-between overflow-y-auto sm:overflow-hidden pt-safe pb-safe transition-all ${
-                        isKeyboardOpen ? 'p-1.5 sm:p-3' : 'p-2.5 sm:p-6'
-                    }`}>
-                        <div className="max-w-2xl w-full mx-auto flex-1 flex flex-col justify-between h-full">
+                    <div
+                        className={`fixed inset-0 z-[100] bg-[var(--bg)] flex flex-col justify-between overflow-y-auto sm:overflow-hidden pt-safe pb-safe transition-all ${
+                            isKeyboardOpen ? 'p-1.5 sm:p-3' : 'p-2.5 sm:p-6'
+                        }`}
+                        style={
+                            isKeyboardOpen && viewportHeight > 0
+                                ? { height: `${viewportHeight}px`, maxHeight: `${viewportHeight}px` }
+                                : undefined
+                        }
+                    >
+                        <div className="max-w-2xl w-full mx-auto flex-1 flex flex-col justify-between min-h-0">
                             {/* Thanh tiến độ 16 từ và đồng hồ 60 giây */}
                             <div className={`card bg-white/60 backdrop-blur-xl border border-white/60 shadow-md transition-all ${
                                 isKeyboardOpen ? 'p-2 rounded-xl mb-1 space-y-1' : 'p-3 sm:p-5 rounded-2xl mb-2 sm:mb-4 space-y-2 sm:space-y-3'
@@ -1531,8 +1508,7 @@ export default function GameClient() {
                                 isKeyboardOpen ? 'p-2 my-0.5 rounded-xl' : 'p-3 sm:p-5 my-2 rounded-2xl'
                             } ${wrongShake ? 'animate-[shake_0.5s_ease-in-out]' : ''}`}>
                                 <GameInput
-                                    key={currentWord.id}
-                                    disabled={isDissolving || isRevealingWrong}
+                                    isLocked={isDissolving || isRevealingWrong}
                                     feedbackMessage={feedbackMessage}
                                     currentWordId={currentWord.id}
                                     isCompact={isKeyboardOpen}

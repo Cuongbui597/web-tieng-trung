@@ -739,7 +739,7 @@ export default function SentenceGame() {
 
                 {/* ==================== MÀN HÌNH CHƠI (PLAYING - TẬN DỤNG FULL MÀN HÌNH) ==================== */}
                 {gameState === 'playing' && currentSentence && (
-                    <div className="fixed inset-0 z-50 bg-slate-50/98 backdrop-blur-md flex flex-col justify-between overflow-y-auto sm:overflow-hidden p-2 sm:p-5 pt-safe pb-safe transition-all">
+                    <div className="fixed inset-0 z-[100] bg-slate-50/98 backdrop-blur-md flex flex-col justify-between overflow-y-auto sm:overflow-hidden p-2 sm:p-5 pt-safe pb-safe transition-all">
                         <div className="max-w-3xl w-full mx-auto flex-1 flex flex-col justify-between h-full">
                             {/* Thanh Topbar: Tiến trình, Combo, Âm thanh, Toàn màn hình - Tinh gọn */}
                             <div className="flex items-center justify-between p-2 sm:p-3.5 bg-white/80 backdrop-blur-md rounded-xl sm:rounded-2xl border border-white/60 shadow-2xs mb-2 sm:mb-4 shrink-0">

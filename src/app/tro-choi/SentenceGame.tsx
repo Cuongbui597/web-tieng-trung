@@ -602,144 +602,16 @@ export default function SentenceGame() {
         'giao-tiep': { label: 'Giao Tiếp Thực Tế', color: 'bg-purple-100 text-purple-800 border-purple-300' },
     };
 
-    return (
-        <div className="min-h-screen py-3 sm:py-6 px-2.5 sm:px-4 relative overflow-hidden">
-            <div className="container-app max-w-3xl mx-auto relative z-10">
-
-                {/* ==================== MÀN HÌNH CHỌN BÀI (IDLE) ==================== */}
-                {gameState === 'idle' && (
-                    <div className="card rounded-[1.5rem] sm:rounded-[2.5rem] p-4 sm:p-10 bg-white/60 backdrop-blur-xl border border-white/50 shadow-xl text-center space-y-4 sm:space-y-6">
-                        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-rose-100 text-rose-700 shadow-2xs">
-                            <span>🧩</span> Trò Chơi Mới: Bậc Thầy Ghép Câu
-                        </div>
-
-                        <div className="text-5xl sm:text-6xl animate-bounce">
-                            🏗️
-                        </div>
-
-                        <div>
-                            <h1 className="text-2xl sm:text-5xl font-black text-slate-900 tracking-tight">
-                                Bậc Thầy <span className="text-gradient-accent">Ghép Câu</span>
-                            </h1>
-                            <p className="text-xs sm:text-sm text-slate-600 max-w-lg mx-auto mt-1.5 font-medium px-2">
-                                Sắp xếp các khối từ vựng thành câu giao tiếp hoàn chỉnh. Làm chủ câu chữ 把, lượng từ và bổ ngữ thực tế của <strong>Buổi 1, 2, 3 & 4</strong>!
-                            </p>
-                        </div>
-
-                        {/* Danh sách chủ đề */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3.5 pt-1 text-left">
-                            <button
-                                type="button"
-                                onClick={() => { triggerHaptic(15); startGame('buoi-1'); }}
-                                className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border-2 border-indigo-200 bg-white/90 hover:border-indigo-500 hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between touch-manipulation active:scale-98 select-none"
-                            >
-                                <div>
-                                    <span className="text-2xl sm:text-3xl">🪑</span>
-                                    <div className="font-black text-slate-900 text-sm sm:text-base mt-1.5 group-hover:text-indigo-600 transition">
-                                        Buổi 1: Phòng Ở & Bàn Làm Việc
-                                    </div>
-                                    <p className="text-xs text-slate-500 mt-1 line-clamp-2">
-                                        16 đồ vật phòng ở, lau dọn bàn ghế, chìa khóa, câu chữ 把, vị trí xưởng may...
-                                    </p>
-                                </div>
-                                <div className="mt-3 sm:mt-4 flex items-center justify-between text-xs font-bold text-indigo-700">
-                                    <span>48 câu mẫu</span>
-                                    <span>Bắt đầu →</span>
-                                </div>
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() => { triggerHaptic(15); startGame('buoi-2'); }}
-                                className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border-2 border-emerald-200 bg-white/90 hover:border-emerald-500 hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between touch-manipulation active:scale-98 select-none"
-                            >
-                                <div>
-                                    <span className="text-2xl sm:text-3xl">🛏️</span>
-                                    <div className="font-black text-slate-900 text-sm sm:text-base mt-1.5 group-hover:text-emerald-600 transition">
-                                        Buổi 2: Ký Túc Xá & Vệ Sinh
-                                    </div>
-                                    <p className="text-xs text-slate-500 mt-1 line-clamp-2">
-                                        Giường chiếu, máy giặt, máy sấy, kem đánh răng, rút sạc, kéo bấm chỉ...
-                                    </p>
-                                </div>
-                                <div className="mt-3 sm:mt-4 flex items-center justify-between text-xs font-bold text-emerald-700">
-                                    <span>48 câu mẫu</span>
-                                    <span>Bắt đầu →</span>
-                                </div>
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() => { triggerHaptic(15); startGame('buoi-3'); }}
-                                className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border-2 border-amber-200 bg-white/90 hover:border-amber-500 hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between touch-manipulation active:scale-98 select-none"
-                            >
-                                <div>
-                                    <span className="text-2xl sm:text-3xl">🍳</span>
-                                    <div className="font-black text-slate-900 text-sm sm:text-base mt-1.5 group-hover:text-amber-600 transition">
-                                        Buổi 3: Bếp Núc & Thời Gian
-                                    </div>
-                                    <p className="text-xs text-slate-500 mt-1 line-clamp-2">
-                                        Bát đũa thìa đĩa, lò vi sóng, nồi cơm điện, thứ trong tuần, buổi trong ngày, chỉ may...
-                                    </p>
-                                </div>
-                                <div className="mt-3 sm:mt-4 flex items-center justify-between text-xs font-bold text-amber-700">
-                                    <span>48 câu mẫu</span>
-                                    <span>Bắt đầu →</span>
-                                </div>
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() => { triggerHaptic(15); startGame('buoi-4'); }}
-                                className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border-2 border-rose-200 bg-white/90 hover:border-rose-500 hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between touch-manipulation active:scale-98 select-none"
-                            >
-                                <div>
-                                    <span className="text-2xl sm:text-3xl">👕</span>
-                                    <div className="font-black text-slate-900 text-sm sm:text-base mt-1.5 group-hover:text-rose-600 transition">
-                                        Buổi 4: Trang Phục & Ngày Tháng
-                                    </div>
-                                    <p className="text-xs text-slate-500 mt-1 line-clamp-2">
-                                        Quần áo, váy, sơ mi, giày tất, mũ kính, đồng hồ, thử đồ vừa vặn, ngày sinh, cỡ size...
-                                    </p>
-                                </div>
-                                <div className="mt-3 sm:mt-4 flex items-center justify-between text-xs font-bold text-rose-700">
-                                    <span>48 câu mẫu</span>
-                                    <span>Bắt đầu →</span>
-                                </div>
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() => { triggerHaptic(15); startGame('all'); }}
-                                className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border-2 border-purple-300 bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 hover:border-purple-500 hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between touch-manipulation active:scale-98 select-none sm:col-span-2 lg:col-span-1"
-                            >
-                                <div>
-                                    <span className="text-2xl sm:text-3xl">🌟</span>
-                                    <div className="font-black text-slate-900 text-sm sm:text-base mt-1.5 group-hover:text-purple-600 transition">
-                                        Thử Thách Tổng Hợp
-                                    </div>
-                                    <p className="text-xs text-slate-500 mt-1 line-clamp-2">
-                                        Trộn ngẫu nhiên 192 câu của cả 4 buổi học (Buổi 1, 2, 3, 4) để thử thách phản xạ cao nhất!
-                                    </p>
-                                </div>
-                                <div className="mt-3 sm:mt-4 flex items-center justify-between text-xs font-bold text-purple-700">
-                                    <span>192 câu thực chiến</span>
-                                    <span>Bắt đầu →</span>
-                                </div>
-                            </button>
-                        </div>
-
-                        {bestScore > 0 && (
-                            <div className="pt-1 text-xs font-bold text-slate-500">
-                                🏆 Điểm kỷ lục của bạn: <span className="text-rose-600 font-black">{bestScore} điểm</span>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* ==================== MÀN HÌNH CHƠI (PLAYING - TẬN DỤNG FULL MÀN HÌNH) ==================== */}
-                {gameState === 'playing' && currentSentence && (
-                    <div className="fixed inset-0 z-[100] bg-slate-50/98 backdrop-blur-md flex flex-col justify-between overflow-y-auto sm:overflow-hidden p-2 sm:p-5 pt-safe pb-safe transition-all">
+    // ==================== MÀN HÌNH CHƠI: TÁCH RIÊNG RA KHỎI CÂY DOM CHÍNH (Z-[200] ĐỘC LẬP) ====================
+    if (gameState === 'playing' && currentSentence) {
+        return (
+            <div
+                className="fixed inset-0 z-[200] bg-slate-50 flex flex-col justify-between overflow-y-auto sm:overflow-hidden p-2 sm:p-5 transition-all"
+                style={{
+                    paddingTop: 'max(env(safe-area-inset-top, 0px), 14px)',
+                    paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 14px)',
+                }}
+            >
                         <div className="max-w-3xl w-full mx-auto flex-1 flex flex-col justify-between h-full">
                             {/* Thanh Topbar: Tiến trình, Combo, Âm thanh, Toàn màn hình - Tinh gọn */}
                             <div className="flex items-center justify-between p-2 sm:p-3.5 bg-white/80 backdrop-blur-md rounded-xl sm:rounded-2xl border border-white/60 shadow-2xs mb-2 sm:mb-4 shrink-0">
@@ -1090,6 +962,144 @@ export default function SentenceGame() {
                             </div>
                         </div>
                         </div>
+                    </div>
+        );
+    }
+
+
+
+    return (
+        <div className="min-h-screen py-3 sm:py-6 px-2.5 sm:px-4 relative overflow-hidden">
+            <div className="container-app max-w-3xl mx-auto relative z-10">
+
+                {/* ==================== MÀN HÌNH CHỌN BÀI (IDLE) ==================== */}
+                {gameState === 'idle' && (
+                    <div className="card rounded-[1.5rem] sm:rounded-[2.5rem] p-4 sm:p-10 bg-white/60 backdrop-blur-xl border border-white/50 shadow-xl text-center space-y-4 sm:space-y-6">
+                        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-rose-100 text-rose-700 shadow-2xs">
+                            <span>🧩</span> Trò Chơi Mới: Bậc Thầy Ghép Câu
+                        </div>
+
+                        <div className="text-5xl sm:text-6xl animate-bounce">
+                            🏗️
+                        </div>
+
+                        <div>
+                            <h1 className="text-2xl sm:text-5xl font-black text-slate-900 tracking-tight">
+                                Bậc Thầy <span className="text-gradient-accent">Ghép Câu</span>
+                            </h1>
+                            <p className="text-xs sm:text-sm text-slate-600 max-w-lg mx-auto mt-1.5 font-medium px-2">
+                                Sắp xếp các khối từ vựng thành câu giao tiếp hoàn chỉnh. Làm chủ câu chữ 把, lượng từ và bổ ngữ thực tế của <strong>Buổi 1, 2, 3 & 4</strong>!
+                            </p>
+                        </div>
+
+                        {/* Danh sách chủ đề */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3.5 pt-1 text-left">
+                            <button
+                                type="button"
+                                onClick={() => { triggerHaptic(15); startGame('buoi-1'); }}
+                                className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border-2 border-indigo-200 bg-white/90 hover:border-indigo-500 hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between touch-manipulation active:scale-98 select-none"
+                            >
+                                <div>
+                                    <span className="text-2xl sm:text-3xl">🪑</span>
+                                    <div className="font-black text-slate-900 text-sm sm:text-base mt-1.5 group-hover:text-indigo-600 transition">
+                                        Buổi 1: Phòng Ở & Bàn Làm Việc
+                                    </div>
+                                    <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+                                        16 đồ vật phòng ở, lau dọn bàn ghế, chìa khóa, câu chữ 把, vị trí xưởng may...
+                                    </p>
+                                </div>
+                                <div className="mt-3 sm:mt-4 flex items-center justify-between text-xs font-bold text-indigo-700">
+                                    <span>48 câu mẫu</span>
+                                    <span>Bắt đầu →</span>
+                                </div>
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => { triggerHaptic(15); startGame('buoi-2'); }}
+                                className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border-2 border-emerald-200 bg-white/90 hover:border-emerald-500 hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between touch-manipulation active:scale-98 select-none"
+                            >
+                                <div>
+                                    <span className="text-2xl sm:text-3xl">🛏️</span>
+                                    <div className="font-black text-slate-900 text-sm sm:text-base mt-1.5 group-hover:text-emerald-600 transition">
+                                        Buổi 2: Ký Túc Xá & Vệ Sinh
+                                    </div>
+                                    <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+                                        Giường chiếu, máy giặt, máy sấy, kem đánh răng, rút sạc, kéo bấm chỉ...
+                                    </p>
+                                </div>
+                                <div className="mt-3 sm:mt-4 flex items-center justify-between text-xs font-bold text-emerald-700">
+                                    <span>48 câu mẫu</span>
+                                    <span>Bắt đầu →</span>
+                                </div>
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => { triggerHaptic(15); startGame('buoi-3'); }}
+                                className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border-2 border-amber-200 bg-white/90 hover:border-amber-500 hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between touch-manipulation active:scale-98 select-none"
+                            >
+                                <div>
+                                    <span className="text-2xl sm:text-3xl">🍳</span>
+                                    <div className="font-black text-slate-900 text-sm sm:text-base mt-1.5 group-hover:text-amber-600 transition">
+                                        Buổi 3: Bếp Núc & Thời Gian
+                                    </div>
+                                    <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+                                        Bát đũa thìa đĩa, lò vi sóng, nồi cơm điện, thứ trong tuần, buổi trong ngày, chỉ may...
+                                    </p>
+                                </div>
+                                <div className="mt-3 sm:mt-4 flex items-center justify-between text-xs font-bold text-amber-700">
+                                    <span>48 câu mẫu</span>
+                                    <span>Bắt đầu →</span>
+                                </div>
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => { triggerHaptic(15); startGame('buoi-4'); }}
+                                className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border-2 border-rose-200 bg-white/90 hover:border-rose-500 hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between touch-manipulation active:scale-98 select-none"
+                            >
+                                <div>
+                                    <span className="text-2xl sm:text-3xl">👕</span>
+                                    <div className="font-black text-slate-900 text-sm sm:text-base mt-1.5 group-hover:text-rose-600 transition">
+                                        Buổi 4: Trang Phục & Ngày Tháng
+                                    </div>
+                                    <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+                                        Quần áo, váy, sơ mi, giày tất, mũ kính, đồng hồ, thử đồ vừa vặn, ngày sinh, cỡ size...
+                                    </p>
+                                </div>
+                                <div className="mt-3 sm:mt-4 flex items-center justify-between text-xs font-bold text-rose-700">
+                                    <span>48 câu mẫu</span>
+                                    <span>Bắt đầu →</span>
+                                </div>
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => { triggerHaptic(15); startGame('all'); }}
+                                className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border-2 border-purple-300 bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 hover:border-purple-500 hover:shadow-lg transition-all cursor-pointer group flex flex-col justify-between touch-manipulation active:scale-98 select-none sm:col-span-2 lg:col-span-1"
+                            >
+                                <div>
+                                    <span className="text-2xl sm:text-3xl">🌟</span>
+                                    <div className="font-black text-slate-900 text-sm sm:text-base mt-1.5 group-hover:text-purple-600 transition">
+                                        Thử Thách Tổng Hợp
+                                    </div>
+                                    <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+                                        Trộn ngẫu nhiên 192 câu của cả 4 buổi học (Buổi 1, 2, 3, 4) để thử thách phản xạ cao nhất!
+                                    </p>
+                                </div>
+                                <div className="mt-3 sm:mt-4 flex items-center justify-between text-xs font-bold text-purple-700">
+                                    <span>192 câu thực chiến</span>
+                                    <span>Bắt đầu →</span>
+                                </div>
+                            </button>
+                        </div>
+
+                        {bestScore > 0 && (
+                            <div className="pt-1 text-xs font-bold text-slate-500">
+                                🏆 Điểm kỷ lục của bạn: <span className="text-rose-600 font-black">{bestScore} điểm</span>
+                            </div>
+                        )}
                     </div>
                 )}
 

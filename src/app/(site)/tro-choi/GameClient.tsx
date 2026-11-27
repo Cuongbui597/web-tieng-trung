@@ -6,14 +6,14 @@ import { GARMENT_VOCAB_DATABASE, GARMENT_LESSONS, GarmentLessonInfo } from './ga
 import { BUOI_1_VOCAB, BUOI_1_INFO } from './buoi1Vocab';
 import { ALL_HSK_EXTRA_VOCAB } from './hskVocab';
 import { FACTORY_EXTRA_VOCAB } from './factoryVocab';
-import { ALL_LIVING_VOCAB, LIVING_ROOM_VOCAB, DORM_VOCAB, BUOI_1_ROOM_INFO, BUOI_2_DORM_INFO, LivingWordItem } from './livingVocab';
+import { ALL_LIVING_VOCAB, LIVING_ROOM_VOCAB, DORM_VOCAB, KITCHEN_VOCAB, CLOTHING_VOCAB, BUOI_1_ROOM_INFO, BUOI_2_DORM_INFO, BUOI_3_KITCHEN_INFO, BUOI_4_CLOTHING_INFO, LivingWordItem } from './livingVocab';
 
 interface WordItem {
     id: string;
     hanzi: string;
     pinyin: string;
     meanings: string[]; // Các nghĩa tiếng Việt chấp nhận được
-    category: 'hsk-1' | 'hsk-2' | 'hsk-3' | 'cong-xuong' | 'may-mac' | 'buoi-1' | 'buoi-1-phong-o' | 'buoi-2-ktx' | string;
+    category: 'hsk-1' | 'hsk-2' | 'hsk-3' | 'cong-xuong' | 'may-mac' | 'buoi-1' | 'buoi-1-phong-o' | 'buoi-2-ktx' | 'buoi-3-bep' | 'buoi-4-trang-phuc' | string;
     categoryLabel: string;
     lesson?: string;
     lessonLabel?: string;
@@ -540,6 +540,12 @@ export default function GameClient() {
         if (selectedCategory === 'buoi-2-ktx') {
             return ALL_VOCAB_DATABASE.filter(w => w.category === 'buoi-2-ktx');
         }
+        if (selectedCategory === 'buoi-3-bep') {
+            return ALL_VOCAB_DATABASE.filter(w => w.category === 'buoi-3-bep');
+        }
+        if (selectedCategory === 'buoi-4-trang-phuc') {
+            return ALL_VOCAB_DATABASE.filter(w => w.category === 'buoi-4-trang-phuc');
+        }
         if (selectedCategory === 'may-mac') {
             if (selectedLesson === 'all') {
                 return ALL_VOCAB_DATABASE.filter(w => w.category === 'may-mac');
@@ -571,6 +577,14 @@ export default function GameClient() {
             // Lấy 16 từ Buổi 2 Ký túc xá & Đồ dùng sinh hoạt
             const dormPool = ALL_VOCAB_DATABASE.filter(w => w.category === 'buoi-2-ktx');
             selected16 = dormPool.slice(0, TOTAL_ROUND_WORDS);
+        } else if (selectedCategory === 'buoi-3-bep') {
+            // Lấy 16 từ Buổi 3 Bếp núc & Thời gian
+            const kitchenPool = ALL_VOCAB_DATABASE.filter(w => w.category === 'buoi-3-bep');
+            selected16 = kitchenPool.slice(0, TOTAL_ROUND_WORDS);
+        } else if (selectedCategory === 'buoi-4-trang-phuc') {
+            // Lấy 16 từ Buổi 4 Trang phục hàng ngày & Ngày tháng
+            const clothingPool = ALL_VOCAB_DATABASE.filter(w => w.category === 'buoi-4-trang-phuc');
+            selected16 = clothingPool.slice(0, TOTAL_ROUND_WORDS);
         } else if (selectedCategory === 'may-mac' && activeLesson !== 'all') {
             // Lấy 16 từ của bài đã chọn THEO ĐÚNG THỨ TỰ TỪ TRÊN XUỐNG DƯỚI (Không xáo trộn)
             const lessonPool = ALL_VOCAB_DATABASE.filter(w => w.category === 'may-mac' && w.lesson === activeLesson);
@@ -907,6 +921,8 @@ export default function GameClient() {
                                 { id: 'buoi-1', label: 'Buổi 1: QC May Mặc', icon: '📋', count: '16 từ cốt lõi', highlight: true },
                                 { id: 'buoi-1-phong-o', label: 'Buổi 1: Phòng Ở & Xưởng', icon: '🪑', count: '16 từ thực chiến', highlight: true },
                                 { id: 'buoi-2-ktx', label: 'Buổi 2: Ký Túc Xá', icon: '🛏️', count: '16 từ KTX & Vệ sinh', highlight: true },
+                                { id: 'buoi-3-bep', label: 'Buổi 3: Bếp Núc & Tuần', icon: '🍳', count: '16 từ Bếp & Thời gian', highlight: true },
+                                { id: 'buoi-4-trang-phuc', label: 'Buổi 4: Trang Phục', icon: '👕', count: '16 từ Quần áo & Lịch', highlight: true },
                                 { id: 'may-mac', label: '12 Bài Dệt May', icon: '🧵', count: '180+ từ (12 Bài)' },
                                 { id: 'all', label: 'Tất cả chủ đề', icon: '🌟', count: '760+ từ' },
                                 { id: 'cong-xuong', label: 'Công xưởng', icon: '🏭', count: '135 từ' },
@@ -1112,6 +1128,88 @@ export default function GameClient() {
                             </div>
                         )}
 
+                        {/* Hiển thị chi tiết nội dung BUỔI 3: ĐỒ DÙNG BẾP NÚC & THỜI GIAN TRONG TUẦN */}
+                        {selectedCategory === 'buoi-3-bep' && (
+                            <div className="mb-8 text-left bg-gradient-to-br from-amber-50/90 via-white/90 to-orange-50/80 p-5 sm:p-7 rounded-3xl border-2 border-amber-200 shadow-md animate-fade-in">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-4 border-b border-amber-100">
+                                    <div>
+                                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-amber-100 text-amber-900 uppercase tracking-wider mb-1.5">
+                                            <span>🍳</span> BÀI HỌC GHÉP TỪ: BUỔI 3
+                                        </div>
+                                        <h3 className="text-base sm:text-xl font-black text-[var(--text)] tracking-tight">
+                                            BUỔI 3: ĐỒ DÙNG BẾP NÚC, ĂN UỐNG & THỜI GIAN TRONG TUẦN
+                                        </h3>
+                                        <p className="text-xs sm:text-sm text-amber-900/80 font-medium mt-0.5">
+                                            16 từ cốt lõi về đồ dùng nhà bếp, các buổi trong ngày, thứ trong tuần và chỉ may chuyền
+                                        </p>
+                                    </div>
+                                    <div className="px-3.5 py-1.5 rounded-xl bg-amber-600 text-white font-extrabold text-xs shadow-xs shrink-0 self-start sm:self-auto">
+                                        Chuẩn 16 Từ / 60 Giây
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                                    {KITCHEN_VOCAB.map((w, idx) => (
+                                        <div key={w.id} className="p-2.5 rounded-xl bg-white/90 border border-amber-100 shadow-xs flex flex-col justify-between">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
+                                                    #{idx + 1}
+                                                </span>
+                                                <span className="text-[10px] text-gray-500 font-medium">[{w.pinyin}]</span>
+                                            </div>
+                                            <div className="text-base sm:text-lg font-bold text-gray-900 my-1 font-[family:var(--font-serif)]">
+                                                {w.hanzi}
+                                            </div>
+                                            <div className="text-xs text-gray-600 line-clamp-1">
+                                                {w.meanings[0]}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Hiển thị chi tiết nội dung BUỔI 4: TRANG PHỤC HÀNG NGÀY & THỜI GIAN NGÀY THÁNG */}
+                        {selectedCategory === 'buoi-4-trang-phuc' && (
+                            <div className="mb-8 text-left bg-gradient-to-br from-rose-50/90 via-white/90 to-pink-50/80 p-5 sm:p-7 rounded-3xl border-2 border-rose-200 shadow-md animate-fade-in">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-4 border-b border-rose-100">
+                                    <div>
+                                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-rose-100 text-rose-900 uppercase tracking-wider mb-1.5">
+                                            <span>👕</span> BÀI HỌC GHÉP TỪ: BUỔI 4
+                                        </div>
+                                        <h3 className="text-base sm:text-xl font-black text-[var(--text)] tracking-tight">
+                                            BUỔI 4: TRANG PHỤC HÀNG NGÀY, NGÀY THÁNG & CỠ SIZE
+                                        </h3>
+                                        <p className="text-xs sm:text-sm text-rose-900/80 font-medium mt-0.5">
+                                            16 từ vựng thiết yếu về quần áo, giày dép, kính mắt, cách nói ngày tháng và size may mặc
+                                        </p>
+                                    </div>
+                                    <div className="px-3.5 py-1.5 rounded-xl bg-rose-600 text-white font-extrabold text-xs shadow-xs shrink-0 self-start sm:self-auto">
+                                        Chuẩn 16 Từ / 60 Giây
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                                    {CLOTHING_VOCAB.map((w, idx) => (
+                                        <div key={w.id} className="p-2.5 rounded-xl bg-white/90 border border-rose-100 shadow-xs flex flex-col justify-between">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-[10px] font-bold text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded">
+                                                    #{idx + 1}
+                                                </span>
+                                                <span className="text-[10px] text-gray-500 font-medium">[{w.pinyin}]</span>
+                                            </div>
+                                            <div className="text-base sm:text-lg font-bold text-gray-900 my-1 font-[family:var(--font-serif)]">
+                                                {w.hanzi}
+                                            </div>
+                                            <div className="text-xs text-gray-600 line-clamp-1">
+                                                {w.meanings[0]}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
                         {/* Bộ chia 12 Bài học Mỗi ngày theo tài liệu dệt may (Khi chọn ngành may mặc) */}
                         {selectedCategory === 'may-mac' && (
                             <div className="mb-8 text-left bg-gradient-to-br from-amber-50/80 via-white/80 to-rose-50/60 p-5 sm:p-6 rounded-3xl border border-amber-200 shadow-sm animate-fade-in">
@@ -1191,6 +1289,10 @@ export default function GameClient() {
                                     <span>Bắt Đầu Buổi 1: Phòng Ở & Xưởng (16 Từ) 🔥</span>
                                 ) : selectedCategory === 'buoi-2-ktx' ? (
                                     <span>Bắt Đầu Buổi 2: Ký Túc Xá & Đồ Dùng (16 Từ) 🔥</span>
+                                ) : selectedCategory === 'buoi-3-bep' ? (
+                                    <span>Bắt Đầu Buổi 3: Bếp Núc & Thời Gian (16 Từ) 🔥</span>
+                                ) : selectedCategory === 'buoi-4-trang-phuc' ? (
+                                    <span>Bắt Đầu Buổi 4: Trang Phục & Lịch (16 Từ) 🔥</span>
                                 ) : selectedCategory === 'may-mac' && selectedLesson !== 'all' ? (
                                     <span>Bắt Đầu {GARMENT_LESSONS.find(l => l.id === selectedLesson)?.title || 'Bài Học'} (16 Từ) 🔥</span>
                                 ) : (
@@ -1631,6 +1733,28 @@ export default function GameClient() {
                                     className="btn btn-primary px-8 py-3.5 font-bold text-base shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer touch-manipulation select-none"
                                 >
                                     🔄 Luyện Lại Buổi 2 (Ký Túc Xá)
+                                </button>
+                            ) : selectedCategory === 'buoi-3-bep' ? (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        triggerHaptic();
+                                        startGame();
+                                    }}
+                                    className="btn btn-primary px-8 py-3.5 font-bold text-base shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer touch-manipulation select-none"
+                                >
+                                    🔄 Luyện Lại Buổi 3 (Bếp Núc & Thời Gian)
+                                </button>
+                            ) : selectedCategory === 'buoi-4-trang-phuc' ? (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        triggerHaptic();
+                                        startGame();
+                                    }}
+                                    className="btn btn-primary px-8 py-3.5 font-bold text-base shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer touch-manipulation select-none"
+                                >
+                                    🔄 Luyện Lại Buổi 4 (Trang Phục & Lịch)
                                 </button>
                             ) : selectedCategory === 'may-mac' && selectedLesson !== 'all' ? (
                                 <>

@@ -1,6 +1,6 @@
 export interface SentenceItem {
     id: string;
-    lesson: 'buoi-1' | 'buoi-2';
+    lesson: 'buoi-1' | 'buoi-2' | 'buoi-3' | 'buoi-4';
     lessonLabel: string;
     targetWord: string;
     vietnamese: string;
@@ -1600,5 +1600,1541 @@ export const SENTENCE_DATABASE: SentenceItem[] = [
         ],
         "grammarTag": "bo-ngu",
         "grammarNote": "Bổ ngữ kết quả 破: 剪破 (cắt rách, cắt thủng)."
+    },
+    {
+        "id": "s_b3_1",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "碗",
+        "vietnamese": "Lấy cho tôi hai cái bát.",
+        "fullHanzi": "给我拿两个碗。",
+        "fullPinyin": "Gěi wǒ ná liǎng gè wǎn.",
+        "chunks": [
+            "给我",
+            "拿两个",
+            "碗。"
+        ],
+        "grammarTag": "luong-tu",
+        "grammarNote": "Lượng từ của bát là 个 (两个碗 - hai cái bát)."
+    },
+    {
+        "id": "s_b3_2",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "碗",
+        "vietnamese": "Buổi trưa tôi ăn một bát cơm.",
+        "fullHanzi": "我中午吃一碗饭。",
+        "fullPinyin": "Wǒ zhōngwǔ chī yì wǎn fàn.",
+        "chunks": [
+            "我中午",
+            "吃一碗",
+            "饭。"
+        ],
+        "grammarTag": "luong-tu",
+        "grammarNote": "碗 tự làm lượng từ chỉ đồ ăn đựng bên trong: 一碗饭 (một bát cơm), 一碗汤 (một bát canh)."
+    },
+    {
+        "id": "s_b3_3",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "碗",
+        "vietnamese": "Hôm nay để tôi rửa bát cho.",
+        "fullHanzi": "今天我来洗碗。",
+        "fullPinyin": "Jīntiān wǒ lái xǐ wǎn.",
+        "chunks": [
+            "今天",
+            "我来",
+            "洗碗。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Cụm động từ thông dụng: 洗碗 (rửa bát); 我来... (để tôi làm...)."
+    },
+    {
+        "id": "s_b3_4",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "筷子",
+        "vietnamese": "Xin cho tôi một đôi đũa.",
+        "fullHanzi": "请给我一双筷子。",
+        "fullPinyin": "Qǐng gěi wǒ yì shuāng kuàizi.",
+        "chunks": [
+            "请给我",
+            "一双",
+            "筷子。"
+        ],
+        "grammarTag": "luong-tu",
+        "grammarNote": "Đồ vật đi theo cặp đôi dùng lượng từ 双: 一双筷子 (một đôi đũa)."
+    },
+    {
+        "id": "s_b3_5",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "筷子",
+        "vietnamese": "Bạn có biết dùng đũa không?",
+        "fullHanzi": "你会用筷子吗？",
+        "fullPinyin": "Nǐ huì yòng kuàizi ma?",
+        "chunks": [
+            "你会",
+            "用筷子",
+            "吗？"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Động từ năng nguyện 会: Biểu thị kỹ năng học được mới biết làm (会用筷子 - biết dùng đũa)."
+    },
+    {
+        "id": "s_b3_6",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "筷子",
+        "vietnamese": "Trên bàn thiếu mất một đôi đũa.",
+        "fullHanzi": "桌子上少了一双筷子。",
+        "fullPinyin": "Zhuōzi shang shǎo le yì shuāng kuàizi.",
+        "chunks": [
+            "桌子上",
+            "少了一双",
+            "筷子。"
+        ],
+        "grammarTag": "vi-tri",
+        "grammarNote": "Phương vị từ 上 (桌子上 - trên bàn); 少了一双 (thiếu mất một đôi)."
+    },
+    {
+        "id": "s_b3_7",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "勺子",
+        "vietnamese": "Uống canh phải dùng thìa.",
+        "fullHanzi": "喝汤要用勺子。",
+        "fullPinyin": "Hē tāng yào yòng sháozi.",
+        "chunks": [
+            "喝汤",
+            "要用",
+            "勺子。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Cấu trúc chỉ công cụ: 用 + Công cụ + Làm gì (用勺子喝汤 - dùng thìa uống canh)."
+    },
+    {
+        "id": "s_b3_8",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "勺子",
+        "vietnamese": "Xin lấy giúp tôi một cái thìa nhỏ.",
+        "fullHanzi": "请拿一个小勺子给我。",
+        "fullPinyin": "Qǐng ná yí gè xiǎo sháozi gěi wǒ.",
+        "chunks": [
+            "请拿",
+            "一个小勺子",
+            "给我。"
+        ],
+        "grammarTag": "luong-tu",
+        "grammarNote": "Lượng từ của thìa dùng 个 hoặc 把 (一个小勺子 / 一把勺子)."
+    },
+    {
+        "id": "s_b3_9",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "勺子",
+        "vietnamese": "Tôi dùng thìa khuấy cà phê.",
+        "fullHanzi": "我用勺子搅咖啡。",
+        "fullPinyin": "Wǒ yòng sháozi jiǎo kāfēi.",
+        "chunks": [
+            "我用勺子",
+            "搅",
+            "咖啡。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "用勺子搅咖啡 (dùng thìa khuấy cà phê); 搅 (jiǎo - khuấy, đảo)."
+    },
+    {
+        "id": "s_b3_10",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "盘子",
+        "vietnamese": "Thức ăn để trong đĩa to.",
+        "fullHanzi": "菜放在大盘子里。",
+        "fullPinyin": "Cài fàng zài dà pánzi lǐ.",
+        "chunks": [
+            "菜放在",
+            "大盘子",
+            "里。"
+        ],
+        "grammarTag": "vi-tri",
+        "grammarNote": "Phương vị từ 里 (盘子里 - bên trong đĩa); 放在...里 (đặt để vào trong)."
+    },
+    {
+        "id": "s_b3_11",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "盘子",
+        "vietnamese": "Bưng đĩa cẩn thận bỏng tay!",
+        "fullHanzi": "端盘子小心烫手！",
+        "fullPinyin": "Duān pánzi xiǎoxīn tàngshǒu!",
+        "chunks": [
+            "端盘子",
+            "小心",
+            "烫手！"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Động từ 端 (duān - bê, bưng bằng hai tay); 烫手 (nóng bỏng tay)."
+    },
+    {
+        "id": "s_b3_12",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "盘子",
+        "vietnamese": "Trên bàn có ba cái đĩa.",
+        "fullHanzi": "桌上有三个盘子。",
+        "fullPinyin": "Zhuō shang yǒu sān gè pánzi.",
+        "chunks": [
+            "桌上有",
+            "三个",
+            "盘子。"
+        ],
+        "grammarTag": "luong-tu",
+        "grammarNote": "Lượng từ của đĩa dùng 个 (三个盘子); Có thể làm lượng từ chứa đựng: 一盘菜."
+    },
+    {
+        "id": "s_b3_13",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "锅",
+        "vietnamese": "Tôi mới mua một cái nồi.",
+        "fullHanzi": "我新买了一口锅。",
+        "fullPinyin": "Wǒ xīn mǎi le yì kǒu guō.",
+        "chunks": [
+            "我新买了",
+            "一口",
+            "锅。"
+        ],
+        "grammarTag": "luong-tu",
+        "grammarNote": "Lượng từ chuẩn xác của nồi, chảo là 口 (一口锅 - một cái nồi/chảo) hoặc 个."
+    },
+    {
+        "id": "s_b3_14",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "锅",
+        "vietnamese": "Dùng xong nhớ rửa nồi.",
+        "fullHanzi": "用完记得洗锅。",
+        "fullPinyin": "Yòng wán jìde xǐ guō.",
+        "chunks": [
+            "用完",
+            "记得",
+            "洗锅。"
+        ],
+        "grammarTag": "bo-ngu",
+        "grammarNote": "Bổ ngữ kết quả 完: Động từ + 完 biểu thị hành động đã hoàn tất (用完 - dùng xong)."
+    },
+    {
+        "id": "s_b3_15",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "锅",
+        "vietnamese": "Canh vẫn còn ở trong nồi đấy.",
+        "fullHanzi": "汤还在锅里呢。",
+        "fullPinyin": "Tāng hái zài guō lǐ ne.",
+        "chunks": [
+            "汤还",
+            "在锅里",
+            "呢。"
+        ],
+        "grammarTag": "vi-tri",
+        "grammarNote": "Phương vị từ: 锅里 (trong nồi); Trợ từ ngữ khí 呢 biểu thị sự việc vẫn đang tiếp diễn."
+    },
+    {
+        "id": "s_b3_16",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "冰箱",
+        "vietnamese": "Cất thức ăn vào tủ lạnh đi.",
+        "fullHanzi": "菜放进冰箱里吧。",
+        "fullPinyin": "Cài fàng jìn bīngxiāng lǐ ba.",
+        "chunks": [
+            "菜放进",
+            "冰箱里",
+            "吧。"
+        ],
+        "grammarTag": "vi-tri",
+        "grammarNote": "Phương vị từ 里 đặt sau danh từ không gian: 放进冰箱里 (bỏ vào trong tủ lạnh)."
+    },
+    {
+        "id": "s_b3_17",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "冰箱",
+        "vietnamese": "Trong tủ lạnh có nước đá không?",
+        "fullHanzi": "冰箱里有冰水吗？",
+        "fullPinyin": "Bīngxiāng lǐ yǒu bīngshuǐ ma?",
+        "chunks": [
+            "冰箱里",
+            "有冰水",
+            "吗？"
+        ],
+        "grammarTag": "vi-tri",
+        "grammarNote": "冰箱里 (trong tủ lạnh); 冰水 (nước đá lạnh)."
+    },
+    {
+        "id": "s_b3_18",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "冰箱",
+        "vietnamese": "Văn phòng có một chiếc tủ lạnh to.",
+        "fullHanzi": "办公室有一台大冰箱。",
+        "fullPinyin": "Bàngōngshì yǒu yì tái dà bīngxiāng.",
+        "chunks": [
+            "办公室",
+            "有一台",
+            "大冰箱。"
+        ],
+        "grammarTag": "luong-tu",
+        "grammarNote": "Lượng từ của thiết bị điện gia dụng cỡ lớn dùng 台 (tái) - 一台冰箱 (một chiếc tủ lạnh)."
+    },
+    {
+        "id": "s_b3_19",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "微波炉",
+        "vietnamese": "Cơm nguội rồi, dùng lò vi sóng hâm chút đi.",
+        "fullHanzi": "饭凉了，用微波炉热一下。",
+        "fullPinyin": "Fàn liáng le, yòng wēibōlú rè yíxià.",
+        "chunks": [
+            "饭凉了，",
+            "用微波炉",
+            "热一下。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Động từ + 一下 biểu thị hành động diễn ra nhẹ nhàng, nhanh chóng (热一下 - hâm chút)."
+    },
+    {
+        "id": "s_b3_20",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "微波炉",
+        "vietnamese": "Bát sắt không được cho vào lò vi sóng.",
+        "fullHanzi": "铁碗不能放进微波炉。",
+        "fullPinyin": "Tiěwǎn bù néng fàng jìn wēibōlú.",
+        "chunks": [
+            "铁碗",
+            "不能放进",
+            "微波炉。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "不能 + Động từ (không được làm gì); 放进 (cho vào trong)."
+    },
+    {
+        "id": "s_b3_21",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "微波炉",
+        "vietnamese": "Phòng pantry có hai cái lò vi sóng.",
+        "fullHanzi": "茶水间有两台微波炉。",
+        "fullPinyin": "Cháshuǐjiān yǒu liǎng tái wēibōlú.",
+        "chunks": [
+            "茶水间",
+            "有两台",
+            "微波炉。"
+        ],
+        "grammarTag": "luong-tu",
+        "grammarNote": "Lượng từ của máy móc, thiết bị dùng 台 (两台微波炉 - hai chiếc lò vi sóng)."
+    },
+    {
+        "id": "s_b3_22",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "电饭煲",
+        "vietnamese": "Tôi dùng nồi cơm điện nấu cơm.",
+        "fullHanzi": "我用电饭煲煮饭。",
+        "fullPinyin": "Wǒ yòng diànfànbāo zhǔfàn.",
+        "chunks": [
+            "我用",
+            "电饭煲",
+            "煮饭。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Cấu trúc công cụ: 用 + 电饭煲 + 煮饭 (dùng nồi cơm điện nấu cơm)."
+    },
+    {
+        "id": "s_b3_23",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "电饭煲",
+        "vietnamese": "Nồi cơm điện nhỏ này dùng rất thích.",
+        "fullHanzi": "这个小电饭煲很好用。",
+        "fullPinyin": "Zhè gè xiǎo diànfànbāo hěn hǎoyòng.",
+        "chunks": [
+            "这个",
+            "小电饭煲",
+            "很好用。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Tính từ 好用 (hǎoyòng - dễ dùng, dùng thích, tiện lợi)."
+    },
+    {
+        "id": "s_b3_24",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "电饭煲",
+        "vietnamese": "Cơm chín rồi, rút phích cắm nồi cơm điện ra đi.",
+        "fullHanzi": "饭好了，拔掉电饭煲插头吧。",
+        "fullPinyin": "Fàn hǎo le, bádiào diànfànbāo chātóu ba.",
+        "chunks": [
+            "饭好了，",
+            "拔掉",
+            "电饭煲插头",
+            "吧。"
+        ],
+        "grammarTag": "bo-ngu",
+        "grammarNote": "Bổ ngữ kết quả: 拔掉 (bádiào - rút ra, nhổ ra); 饭好了 (cơm chín rồi)."
+    },
+    {
+        "id": "s_b3_25",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "星期",
+        "vietnamese": "Hôm nay là thứ mấy?",
+        "fullHanzi": "今天是星期几？",
+        "fullPinyin": "Jīntiān shì xīngqī jǐ?",
+        "chunks": [
+            "今天",
+            "是",
+            "星期几？"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Mẫu câu hỏi thứ trong tuần: 星期几？ (Thứ mấy?)."
+    },
+    {
+        "id": "s_b3_26",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "星期",
+        "vietnamese": "Chúng tôi nghỉ vào Chủ nhật.",
+        "fullHanzi": "我们星期天休息。",
+        "fullPinyin": "Wǒmen xīngqītiān xiūxi.",
+        "chunks": [
+            "我们",
+            "星期天",
+            "休息。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Chủ nhật gọi là 星期天 hoặc 星期日 (không dùng 星期七)."
+    },
+    {
+        "id": "s_b3_27",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "星期",
+        "vietnamese": "Thứ Hai tuần sau phải họp.",
+        "fullHanzi": "下个星期一要开会。",
+        "fullPinyin": "Xià gè xīngqīyī yào kāihuì.",
+        "chunks": [
+            "下个星期一",
+            "要",
+            "开会。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Chỉ tuần: 上个星期 (tuần trước), 这个星期 (tuần này), 下个星期 (tuần sau)."
+    },
+    {
+        "id": "s_b3_28",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "周末",
+        "vietnamese": "Cuối tuần bạn có dự định gì không?",
+        "fullHanzi": "周末你有什么安排？",
+        "fullPinyin": "Zhōumò nǐ yǒu shénme ānpái?",
+        "chunks": [
+            "周末",
+            "你有什么",
+            "安排？"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Vị trí trạng ngữ thời gian đứng đầu câu hoặc sau chủ ngữ (周末你... hoặc 你周末...)."
+    },
+    {
+        "id": "s_b3_29",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "周末",
+        "vietnamese": "Tôi thích ngủ nướng vào cuối tuần.",
+        "fullHanzi": "我喜欢在周末睡懒觉。",
+        "fullPinyin": "Wǒ xǐhuan zài zhōumò shuì lǎnjiào.",
+        "chunks": [
+            "我喜欢",
+            "在周末",
+            "睡懒觉。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Cụm từ giao tiếp thông dụng: 睡懒觉 (shuì lǎnjiào - ngủ nướng)."
+    },
+    {
+        "id": "s_b3_30",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "周末",
+        "vietnamese": "Chúc mọi người cuối tuần vui vẻ!",
+        "fullHanzi": "祝大家周末愉快！",
+        "fullPinyin": "Zhù dàjiā zhōumò yúkuài!",
+        "chunks": [
+            "祝大家",
+            "周末",
+            "愉快！"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Câu chúc cuối tuần phổ biến trong công ty: 祝大家周末愉快！"
+    },
+    {
+        "id": "s_b3_31",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "早上",
+        "vietnamese": "Tôi mỗi sáng 7 giờ thức dậy.",
+        "fullHanzi": "我每天早上七点起床。",
+        "fullPinyin": "Wǒ měitiān zǎoshang qī diǎn qǐchuáng.",
+        "chunks": [
+            "我每天早上",
+            "七点",
+            "起床。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Trật tự thời gian tiếng Trung: Từ lớn đến nhỏ (每天 -> 早上 -> 七点)."
+    },
+    {
+        "id": "s_b3_32",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "早上",
+        "vietnamese": "Chào buổi sáng, hôm nay bận không?",
+        "fullHanzi": "早上好，今天忙吗？",
+        "fullPinyin": "Zǎoshang hǎo, jīntiān máng ma?",
+        "chunks": [
+            "早上好，",
+            "今天",
+            "忙吗？"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Chào buổi sáng: 早上好! (Zǎoshang hǎo!)."
+    },
+    {
+        "id": "s_b3_33",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "早上",
+        "vietnamese": "Buổi sáng nhớ ăn sáng nhé.",
+        "fullHanzi": "早上记得吃早饭。",
+        "fullPinyin": "Zǎoshang jìde chī zǎofàn.",
+        "chunks": [
+            "早上",
+            "记得",
+            "吃早饭。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Động từ 记得 (jìde - nhớ làm gì); 吃早饭 (ăn bữa sáng)."
+    },
+    {
+        "id": "s_b3_34",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "中午",
+        "vietnamese": "12 giờ trưa đi ăn cơm.",
+        "fullHanzi": "中午十二点去吃饭。",
+        "fullPinyin": "Zhōngwǔ shí'èr diǎn qù chīfàn.",
+        "chunks": [
+            "中午十二点",
+            "去",
+            "吃饭。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Các buổi trong ngày: 早上 (sáng) -> 中午 (trưa) -> 下午 (chiều) -> 晚上 (tối)."
+    },
+    {
+        "id": "s_b3_35",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "中午",
+        "vietnamese": "Buổi trưa tôi muốn nghỉ ngơi một lát.",
+        "fullHanzi": "中午我想休息一会儿。",
+        "fullPinyin": "Zhōngwǔ wǒ xiǎng xiūxi yíhuìr.",
+        "chunks": [
+            "中午",
+            "我想",
+            "休息一会儿。"
+        ],
+        "grammarTag": "bo-ngu",
+        "grammarNote": "Bổ ngữ thời lượng: 休息一会儿 (nghỉ ngơi một lát)."
+    },
+    {
+        "id": "s_b3_36",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "中午",
+        "vietnamese": "Trưa nay chúng ta ăn gì nhỉ?",
+        "fullHanzi": "今天中午我们吃什么？",
+        "fullPinyin": "Jīntiān zhōngwǔ wǒmen chī shénme?",
+        "chunks": [
+            "今天中午",
+            "我们",
+            "吃什么？"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Ghép ngày + buổi: 今天中午 (trưa nay), 昨天中午 (trưa hôm qua)."
+    },
+    {
+        "id": "s_b3_37",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "晚上",
+        "vietnamese": "Buổi tối tôi thích nghe nhạc.",
+        "fullHanzi": "我晚上喜欢听音乐。",
+        "fullPinyin": "Wǒ wǎnshang xǐhuan tīng yīnyuè.",
+        "chunks": [
+            "我晚上",
+            "喜欢",
+            "听音乐。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "听音乐 (tīng yīnyuè - nghe âm nhạc); 晚上 (buổi tối)."
+    },
+    {
+        "id": "s_b3_38",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "晚上",
+        "vietnamese": "Tối nay bạn có tăng ca không?",
+        "fullHanzi": "今天晚上你加班吗？",
+        "fullPinyin": "Jīntiān wǎnshang nǐ jiābān ma?",
+        "chunks": [
+            "今天晚上",
+            "你",
+            "加班吗？"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Từ vựng công xưởng: 加班 (jiābān - tăng ca, làm thêm giờ)."
+    },
+    {
+        "id": "s_b3_39",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "晚上",
+        "vietnamese": "Tối mai đi liên hoan cùng nhau nhé!",
+        "fullHanzi": "明天晚上一起聚餐吧！",
+        "fullPinyin": "Míngtiān wǎnshang yìqǐ jùcān ba!",
+        "chunks": [
+            "明天晚上",
+            "一起",
+            "聚餐吧！"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Trợ từ ngữ khí 吧 rủ rê nhẹ nhàng: 一起聚餐吧！ (cùng đi liên hoan nhé!)."
+    },
+    {
+        "id": "s_b3_40",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "刚才",
+        "vietnamese": "Vừa nãy giám đốc tới tìm bạn đấy.",
+        "fullHanzi": "刚才经理来找你了。",
+        "fullPinyin": "Gāngcái jīnglǐ lái zhǎo nǐ le.",
+        "chunks": [
+            "刚才",
+            "经理",
+            "来找你了。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Danh từ chỉ thời gian 刚才 (vừa nãy, lúc nãy), đứng trước hoặc sau chủ ngữ."
+    },
+    {
+        "id": "s_b3_41",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "刚才",
+        "vietnamese": "Lúc nãy bạn nói gì thế?",
+        "fullHanzi": "你刚才说什么？",
+        "fullPinyin": "Nǐ gāngcái shuō shénme?",
+        "chunks": [
+            "你刚才",
+            "说",
+            "什么？"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "你刚才说什么？ (Lúc nãy bạn nói điều gì?)."
+    },
+    {
+        "id": "s_b3_42",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "刚才",
+        "vietnamese": "Vừa nãy bên ngoài mưa rồi.",
+        "fullHanzi": "刚才外面下雨了。",
+        "fullPinyin": "Gāngcái wàimian xiàyǔ le.",
+        "chunks": [
+            "刚才",
+            "外面",
+            "下雨了。"
+        ],
+        "grammarTag": "vi-tri",
+        "grammarNote": "Trợ từ 了 biểu thị sự thay đổi trạng thái hoặc việc vừa xảy ra (下雨了 - trời mưa rồi)."
+    },
+    {
+        "id": "s_b3_43",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "一会儿",
+        "vietnamese": "Xin đợi tôi một lát!",
+        "fullHanzi": "请等我一会儿！",
+        "fullPinyin": "Qǐng děng wǒ yíhuìr!",
+        "chunks": [
+            "请等我",
+            "一会儿！"
+        ],
+        "grammarTag": "bo-ngu",
+        "grammarNote": "Đứng sau động từ làm bổ ngữ thời lượng: 等一会儿 (đợi một lát)."
+    },
+    {
+        "id": "s_b3_44",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "一会儿",
+        "vietnamese": "Một lát nữa tôi quay lại ngay.",
+        "fullHanzi": "我一会儿就回来。",
+        "fullPinyin": "Wǒ yíhuìr jiù huílái.",
+        "chunks": [
+            "我一会儿",
+            "就",
+            "回来。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Đứng trước động từ chỉ tương lai gần: 一会儿就回来 (một lát nữa sẽ về ngay)."
+    },
+    {
+        "id": "s_b3_45",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "一会儿",
+        "vietnamese": "Nghỉ một lát rồi làm việc tiếp đi.",
+        "fullHanzi": "休息一会儿再工作吧。",
+        "fullPinyin": "Xiūxi yíhuìr zài gōngzuò ba.",
+        "chunks": [
+            "休息一会儿",
+            "再",
+            "工作吧。"
+        ],
+        "grammarTag": "bo-ngu",
+        "grammarNote": "Cấu trúc: ĐT 1 + 一会儿 + 再 + ĐT 2 (Làm việc gì một lát rồi làm tiếp)."
+    },
+    {
+        "id": "s_b3_46",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "缝纫线",
+        "vietnamese": "Chỉ may màu trắng dùng hết rồi.",
+        "fullHanzi": "白色缝纫线用完了。",
+        "fullPinyin": "Báisè féngrènxiàn yòng wán le.",
+        "chunks": [
+            "白色缝纫线",
+            "用完",
+            "了。"
+        ],
+        "grammarTag": "bo-ngu",
+        "grammarNote": "Bổ ngữ kết quả 完: 用完了 (dùng hết rồi); 白色缝纫线 (chỉ may trắng)."
+    },
+    {
+        "id": "s_b3_47",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "缝纫线",
+        "vietnamese": "Xin lấy giúp tôi hai cuộn chỉ may.",
+        "fullHanzi": "请给我拿两卷缝纫线。",
+        "fullPinyin": "Qǐng gěi wǒ ná liǎng juǎn féngrènxiàn.",
+        "chunks": [
+            "请给我",
+            "拿两卷",
+            "缝纫线。"
+        ],
+        "grammarTag": "luong-tu",
+        "grammarNote": "Lượng từ của cuộn chỉ dùng 卷 (juǎn) - 两卷缝纫线 (hai cuộn chỉ may)."
+    },
+    {
+        "id": "s_b3_48",
+        "lesson": "buoi-3",
+        "lessonLabel": "Buổi 3: Đồ dùng bếp núc & Thời gian trong tuần",
+        "targetWord": "缝纫线",
+        "vietnamese": "Thay chỉ may xong rồi hãy may thử.",
+        "fullHanzi": "换好缝纫线再试车。",
+        "fullPinyin": "Huàn hǎo féngrènxiàn zài shìchē.",
+        "chunks": [
+            "换好缝纫线",
+            "再",
+            "试车。"
+        ],
+        "grammarTag": "bo-ngu",
+        "grammarNote": "Bổ ngữ kết quả 好: 换好 (thay hoàn chỉnh xong xuôi); 试车 (chạy may thử máy)."
+    },
+    {
+        "id": "s_b4_1",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "衣服",
+        "vietnamese": "Chiếc áo này rất đẹp.",
+        "fullHanzi": "这件衣服很好看。",
+        "fullPinyin": "Zhè jiàn yīfu hěn hǎokàn.",
+        "chunks": [
+            "这件衣服",
+            "很",
+            "好看。"
+        ],
+        "grammarTag": "luong-tu",
+        "grammarNote": "Lượng từ của quần áo dùng 件 (jiàn) - 一件衣服 (một chiếc áo / bộ quần áo)."
+    },
+    {
+        "id": "s_b4_2",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "衣服",
+        "vietnamese": "Hôm nay lạnh, mặc thêm chút quần áo vào.",
+        "fullHanzi": "今天冷，多穿点衣服。",
+        "fullPinyin": "Jīntiān lěng, duō chuān diǎn yīfu.",
+        "chunks": [
+            "今天冷，",
+            "多穿点",
+            "衣服。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Phó từ 多 + Động từ: 多穿点 (mặc nhiều thêm một chút)."
+    },
+    {
+        "id": "s_b4_3",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "衣服",
+        "vietnamese": "Cuối tuần tôi muốn đi mua đồ mới.",
+        "fullHanzi": "周末我想去买新衣服。",
+        "fullPinyin": "Zhōumò wǒ xiǎng qù mǎi xīn yīfu.",
+        "chunks": [
+            "周末",
+            "我想去",
+            "买新衣服。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "买新衣服 (mua quần áo mới); 周末 (cuối tuần)."
+    },
+    {
+        "id": "s_b4_4",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "裤子",
+        "vietnamese": "Chiếc quần đen này mặc rất thoải mái.",
+        "fullHanzi": "这条黑裤子很舒服。",
+        "fullPinyin": "Zhè tiáo hēi kùzi hěn shūfu.",
+        "chunks": [
+            "这条黑裤子",
+            "很",
+            "舒服。"
+        ],
+        "grammarTag": "luong-tu",
+        "grammarNote": "Đồ vật dáng thon dài dùng lượng từ 条: 一条裤子 (một chiếc quần)."
+    },
+    {
+        "id": "s_b4_5",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "裤子",
+        "vietnamese": "Chiếc quần này hơi dài.",
+        "fullHanzi": "这条裤子有点长。",
+        "fullPinyin": "Zhè tiáo kùzi yǒudiǎn cháng.",
+        "chunks": [
+            "这条裤子",
+            "有点",
+            "长。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Cấu trúc 有点 + Tính từ: Biểu thị mức độ hơi mang ý không ưng ý (有点长 - hơi dài)."
+    },
+    {
+        "id": "s_b4_6",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "裤子",
+        "vietnamese": "Đi làm mặc quần dài tương đối phù hợp.",
+        "fullHanzi": "上班穿长裤比较合适。",
+        "fullPinyin": "Shàngbān chuān chángkù bǐjiào héshì.",
+        "chunks": [
+            "上班穿长裤",
+            "比较",
+            "合适。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "穿长裤 (chuān chángkù - mặc quần dài); 比较合适 (tương đối thích hợp)."
+    },
+    {
+        "id": "s_b4_7",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "裙子",
+        "vietnamese": "Bạn mặc chiếc váy này thật đẹp!",
+        "fullHanzi": "你穿这条裙子真漂亮！",
+        "fullPinyin": "Nǐ chuān zhè tiáo qúnzi zhēn piàoliang!",
+        "chunks": [
+            "你穿这条裙子",
+            "真",
+            "漂亮！"
+        ],
+        "grammarTag": "luong-tu",
+        "grammarNote": "Lượng từ của váy dùng 条 (一条裙子); Phó từ cảm thán: 真漂亮 (thật đẹp)."
+    },
+    {
+        "id": "s_b4_8",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "裙子",
+        "vietnamese": "Chiếc váy trắng này bao nhiêu tiền?",
+        "fullHanzi": "这条白裙子多少钱？",
+        "fullPinyin": "Zhè tiáo bái qúnzi duōshao qián?",
+        "chunks": [
+            "这条白裙子",
+            "多少",
+            "钱？"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Mẫu câu hỏi giá: 多少钱？ (Bao nhiêu tiền?); 白裙子 (váy trắng)."
+    },
+    {
+        "id": "s_b4_9",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "裙子",
+        "vietnamese": "Mùa hè tôi thích mặc váy.",
+        "fullHanzi": "夏天我喜欢穿裙子。",
+        "fullPinyin": "Xiàtiān wǒ xǐhuan chuān qúnzi.",
+        "chunks": [
+            "夏天",
+            "我喜欢",
+            "穿裙子。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "夏天 (xiàtiān - mùa hè); 穿裙子 (mặc váy/đầm)."
+    },
+    {
+        "id": "s_b4_10",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "衬衫",
+        "vietnamese": "Chúng tôi đi làm mặc áo sơ mi trắng.",
+        "fullHanzi": "我们上班穿白色衬衫。",
+        "fullPinyin": "Wǒmen shàngbān chuān báisè chènshān.",
+        "chunks": [
+            "我们上班",
+            "穿",
+            "白色衬衫。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "白色衬衫 (áo sơ mi màu trắng); 上班穿... (đi làm mặc...)."
+    },
+    {
+        "id": "s_b4_11",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "衬衫",
+        "vietnamese": "Tôi muốn mua một chiếc áo sơ mi mới.",
+        "fullHanzi": "我想买一件新衬衫。",
+        "fullPinyin": "Wǒ xiǎng mǎi yí jiàn xīn chènshān.",
+        "chunks": [
+            "我想买",
+            "一件",
+            "新衬衫。"
+        ],
+        "grammarTag": "luong-tu",
+        "grammarNote": "Lượng từ của áo sơ mi dùng 件 (一件新衬衫 - một chiếc áo sơ mi mới)."
+    },
+    {
+        "id": "s_b4_12",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "衬衫",
+        "vietnamese": "Chiếc sơ mi này giặt xong phải ủi qua một chút.",
+        "fullHanzi": "这件衬衫洗完要熨一下。",
+        "fullPinyin": "Zhè jiàn chènshān xǐ wán yào yùn yíxià.",
+        "chunks": [
+            "这件衬衫",
+            "洗完",
+            "要熨一下。"
+        ],
+        "grammarTag": "bo-ngu",
+        "grammarNote": "Bổ ngữ kết quả: 洗完 (giặt xong); 熨一下 (ủi/là qua một chút)."
+    },
+    {
+        "id": "s_b4_13",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "外套",
+        "vietnamese": "Buổi sáng hơi mát, mang theo cái áo khoác đi.",
+        "fullHanzi": "早上有点凉，带件外套吧。",
+        "fullPinyin": "Zǎoshang yǒudiǎn liáng, dài jiàn wàitào ba.",
+        "chunks": [
+            "早上有点凉，",
+            "带件外套",
+            "吧。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Lược bỏ 一 khi số lượng là 1: 带件外套 = 带一件外套."
+    },
+    {
+        "id": "s_b4_14",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "外套",
+        "vietnamese": "Vào văn phòng tôi quen cởi áo khoác ra.",
+        "fullHanzi": "进办公室我习惯脱外套。",
+        "fullPinyin": "Jìn bàngōngshì wǒ xíguàn tuō wàitào.",
+        "chunks": [
+            "进办公室",
+            "我习惯",
+            "脱外套。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Động từ 脱 (tuō - cởi ra) đối lập với 穿 (chuān - mặc vào); 脱外套 (cởi áo khoác)."
+    },
+    {
+        "id": "s_b4_15",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "外套",
+        "vietnamese": "Chiếc áo khoác này chất lượng cực tốt.",
+        "fullHanzi": "这件外套质量特别好。",
+        "fullPinyin": "Zhè jiàn wàitào zhìliàng tèbié hǎo.",
+        "chunks": [
+            "这件外套",
+            "质量",
+            "特别好。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Phó từ 特别 (tèbié - đặc biệt, cực kỳ); 质量特别好 (chất lượng cực tốt)."
+    },
+    {
+        "id": "s_b4_16",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "鞋子",
+        "vietnamese": "Đôi giày trắng này đi rất êm.",
+        "fullHanzi": "这双白鞋子很舒服。",
+        "fullPinyin": "Zhè shuāng bái xiézi hěn shūfu.",
+        "chunks": [
+            "这双白鞋子",
+            "很",
+            "舒服。"
+        ],
+        "grammarTag": "luong-tu",
+        "grammarNote": "Lượng từ đi theo đôi dùng 双 (一双鞋子 - một đôi giày)."
+    },
+    {
+        "id": "s_b4_17",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "鞋子",
+        "vietnamese": "Ngày mưa đừng đi giày vải.",
+        "fullHanzi": "下雨天别穿布鞋子。",
+        "fullPinyin": "Xiàyǔ tiān bié chuān bù xiézi.",
+        "chunks": [
+            "下雨天",
+            "别穿",
+            "布鞋子。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Câu cầu khiến ngăn cấm 别: 别 + Động từ (别穿布鞋子 - đừng đi giày vải)."
+    },
+    {
+        "id": "s_b4_18",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "鞋子",
+        "vietnamese": "Vào cửa xin để giày lên kệ giày.",
+        "fullHanzi": "进门请把鞋子放鞋架上。",
+        "fullPinyin": "Jìnmén qǐng bǎ xiézi fàng xiéjià shang.",
+        "chunks": [
+            "进门请把",
+            "鞋子",
+            "放鞋架上。"
+        ],
+        "grammarTag": "cau-chu-ba",
+        "grammarNote": "Cấu trúc câu chữ 把: 把 + Tân ngữ + Động từ + Vị trí (把鞋子放鞋架上)."
+    },
+    {
+        "id": "s_b4_19",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "袜子",
+        "vietnamese": "Đi giày thể thao phải đi tất.",
+        "fullHanzi": "穿运动鞋要穿袜子。",
+        "fullPinyin": "Chuān yùndòngxié yào chuān wàzi.",
+        "chunks": [
+            "穿运动鞋",
+            "要穿",
+            "袜子。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Động từ 穿 đi với giày tất: 穿运动鞋 (đi giày thể thao), 穿袜子 (đi tất)."
+    },
+    {
+        "id": "s_b4_20",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "袜子",
+        "vietnamese": "Mười tệ ba đôi tất cotton.",
+        "fullHanzi": "十块钱三双纯棉袜子。",
+        "fullPinyin": "Shí kuài qián sān shuāng chúnmián wàzi.",
+        "chunks": [
+            "十块钱",
+            "三双",
+            "纯棉袜子。"
+        ],
+        "grammarTag": "luong-tu",
+        "grammarNote": "Lượng từ 双 (三双袜子 - ba đôi tất); 纯棉 (chúnmián - cotton 100%)."
+    },
+    {
+        "id": "s_b4_21",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "袜子",
+        "vietnamese": "Hôm qua tôi mua hai đôi tất mới.",
+        "fullHanzi": "我昨天买了两双新袜子。",
+        "fullPinyin": "Wǒ zuótiān mǎi le liǎng shuāng xīn wàzi.",
+        "chunks": [
+            "我昨天买了",
+            "两双",
+            "新袜子。"
+        ],
+        "grammarTag": "luong-tu",
+        "grammarNote": "Lượng từ 双 (两双新袜子); Số 2 trước lượng từ đọc là 两 (liǎng)."
+    },
+    {
+        "id": "s_b4_22",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "帽子",
+        "vietnamese": "Ra ngoài đi xe phải đội mũ cẩn thận.",
+        "fullHanzi": "出门骑车要戴好帽子。",
+        "fullPinyin": "Chūmén qíchē yào dài hǎo màozi.",
+        "chunks": [
+            "出门骑车",
+            "要戴好",
+            "帽子。"
+        ],
+        "grammarTag": "bo-ngu",
+        "grammarNote": "Mũ, nón dùng động từ 戴 (dài); Bổ ngữ kết quả: 戴好 (đội ngay ngắn, cẩn thận)."
+    },
+    {
+        "id": "s_b4_23",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "帽子",
+        "vietnamese": "Vào xưởng phải đội mũ bảo hộ/mũ làm việc.",
+        "fullHanzi": "进车间要戴工作帽子。",
+        "fullPinyin": "Jìn chējiān yào dài gōngzuò màozi.",
+        "chunks": [
+            "进车间",
+            "要戴",
+            "工作帽子。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "车间 (chējiān - phân xưởng may); 工作帽子 (mũ làm việc/bảo hộ)."
+    },
+    {
+        "id": "s_b4_24",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "帽子",
+        "vietnamese": "Chiếc mũ này rất hợp với bạn.",
+        "fullHanzi": "这顶帽子很适合你。",
+        "fullPinyin": "Zhè dǐng màozi hěn shìhé nǐ.",
+        "chunks": [
+            "这顶帽子",
+            "很适合",
+            "你。"
+        ],
+        "grammarTag": "luong-tu",
+        "grammarNote": "Lượng từ của mũ là 顶 (dǐng) - 一顶帽子; 适合 (shìhé - hợp với)."
+    },
+    {
+        "id": "s_b4_25",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "眼镜",
+        "vietnamese": "Tôi bị cận, đi làm phải đeo kính.",
+        "fullHanzi": "我近视，上班要戴眼镜。",
+        "fullPinyin": "Wǒ jìnshì, shàngbān yào dài yǎnjìng.",
+        "chunks": [
+            "我近视，",
+            "上班",
+            "要戴眼镜。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "近视 (jìnshì - cận thị); Kính mắt dùng động từ 戴 (戴眼镜 - đeo kính)."
+    },
+    {
+        "id": "s_b4_26",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "眼镜",
+        "vietnamese": "Nhìn máy tính lâu phải tháo kính ra nghỉ ngơi.",
+        "fullHanzi": "看电脑久了要摘下眼镜休息。",
+        "fullPinyin": "Kàn diànnǎo jiǔ le yào zhāixià yǎnjìng xiūxi.",
+        "chunks": [
+            "看电脑久了",
+            "要摘下眼镜",
+            "休息。"
+        ],
+        "grammarTag": "bo-ngu",
+        "grammarNote": "Tháo kính dùng động từ 摘 (zhāi); Bổ ngữ xu hướng: 摘下 (tháo ra)."
+    },
+    {
+        "id": "s_b4_27",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "眼镜",
+        "vietnamese": "Tôi mới cắt một cặp kính mới.",
+        "fullHanzi": "我新配了一副眼镜。",
+        "fullPinyin": "Wǒ xīn pèi le yí fù yǎnjìng.",
+        "chunks": [
+            "我新配了",
+            "一副",
+            "眼镜。"
+        ],
+        "grammarTag": "luong-tu",
+        "grammarNote": "Lượng từ của kính mắt dùng 副 (fù) - 一副眼镜 (một cặp kính); 配 (cắt kính)."
+    },
+    {
+        "id": "s_b4_28",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "手表",
+        "vietnamese": "Tôi quen nhìn đồng hồ đeo tay để xem giờ.",
+        "fullHanzi": "我习惯看手表看时间。",
+        "fullPinyin": "Wǒ xíguàn kàn shǒubiǎo kàn shíjiān.",
+        "chunks": [
+            "我习惯",
+            "看手表",
+            "看时间。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "习惯 (xíguàn - quen với thói quen); 看手表看时间 (nhìn đồng hồ xem giờ)."
+    },
+    {
+        "id": "s_b4_29",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "手表",
+        "vietnamese": "Vào phân xưởng không được đeo đồng hồ.",
+        "fullHanzi": "进车间不能戴手表。",
+        "fullPinyin": "Jìn chējiān bù néng dài shǒubiǎo.",
+        "chunks": [
+            "进车间",
+            "不能",
+            "戴手表。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Quy định an toàn chuyền may: 不能戴手表 (không được đeo đồng hồ)."
+    },
+    {
+        "id": "s_b4_30",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "手表",
+        "vietnamese": "Chiếc đồng hồ này là bạn tặng.",
+        "fullHanzi": "这块手表是朋友送的。",
+        "fullPinyin": "Zhè kuài shǒubiǎo shì péngyou sòng de.",
+        "chunks": [
+            "这块手表",
+            "是",
+            "朋友送的。"
+        ],
+        "grammarTag": "luong-tu",
+        "grammarNote": "Lượng từ của đồng hồ đeo tay là 块 (kuài) - 一块手表; Cấu trúc nhấn mạnh 是...的."
+    },
+    {
+        "id": "s_b4_31",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "试穿",
+        "vietnamese": "Chiếc áo này tôi mặc thử được không?",
+        "fullHanzi": "这件衣服我可以试穿吗？",
+        "fullPinyin": "Zhè jiàn yīfu wǒ kěyǐ shìchuān ma?",
+        "chunks": [
+            "这件衣服",
+            "我可以",
+            "试穿吗？"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Mẫu câu xin phép lịch sự: 我可以 + Động từ + 吗？ (Tôi có thể mặc thử không?)."
+    },
+    {
+        "id": "s_b4_32",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "试穿",
+        "vietnamese": "Phòng thử đồ ở đằng kia, mời bạn đi mặc thử.",
+        "fullHanzi": "试衣间在那边，请去试穿。",
+        "fullPinyin": "Shìyījiān zài nàbiān, qǐng qù shìchuān.",
+        "chunks": [
+            "试衣间在那边，",
+            "请去",
+            "试穿。"
+        ],
+        "grammarTag": "vi-tri",
+        "grammarNote": "试衣间 (shìyījiān - phòng thử đồ); 在那边 (ở đằng kia)."
+    },
+    {
+        "id": "s_b4_33",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "试穿",
+        "vietnamese": "Đôi giày này đẹp đấy, tôi xỏ thử xem sao.",
+        "fullHanzi": "这双鞋不错，我试穿看看。",
+        "fullPinyin": "Zhè shuāng xié búcuò, wǒ shìchuān kànkan.",
+        "chunks": [
+            "这双鞋不错，",
+            "我试穿",
+            "看看。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Cấu trúc thử nghiệm: Động từ + 看看 (试穿看看 - xỏ/mặc thử xem sao)."
+    },
+    {
+        "id": "s_b4_34",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "合适",
+        "vietnamese": "Chiếc áo khoác này kích cỡ vừa in.",
+        "fullHanzi": "这件外套大小刚刚合适。",
+        "fullPinyin": "Zhè jiàn wàitào dàxiǎo gānggāng héshì.",
+        "chunks": [
+            "这件外套",
+            "大小",
+            "刚刚合适。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Phó từ 刚刚 (gānggāng - vừa vặn, vừa khéo); 刚刚合适 (vừa vặn như in)."
+    },
+    {
+        "id": "s_b4_35",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "合适",
+        "vietnamese": "Không vừa có thể quay lại đổi.",
+        "fullHanzi": "不合适可以回来换。",
+        "fullPinyin": "Bù héshì kěyǐ huílái huàn.",
+        "chunks": [
+            "不合适",
+            "可以",
+            "回来换。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "不合适 (không vừa, không thích hợp); 回来换 (quay lại đổi hàng)."
+    },
+    {
+        "id": "s_b4_36",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "合适",
+        "vietnamese": "Đôi giày này bạn đi có vừa không?",
+        "fullHanzi": "这双鞋你穿合不合适？",
+        "fullPinyin": "Zhè shuāng xié nǐ chuān hé bù héshì?",
+        "chunks": [
+            "这双鞋",
+            "你穿",
+            "合不合适？"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Câu hỏi chính phản với tính từ 2 âm tiết: 合不合适？ (Có vừa vặn không?)."
+    },
+    {
+        "id": "s_b4_37",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "号",
+        "vietnamese": "Hôm nay là ngày mấy tháng 11?",
+        "fullHanzi": "今天是十一月几号？",
+        "fullPinyin": "Jīntiān shì shíyī yuè jǐ hào?",
+        "chunks": [
+            "今天",
+            "是十一月",
+            "几号？"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Cách nói ngày tháng trong văn nói: Số + 月 + Số + 号; Hỏi ngày: 几号？"
+    },
+    {
+        "id": "s_b4_38",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "号",
+        "vietnamese": "Công ty ngày mùng 10 hàng tháng phát lương.",
+        "fullHanzi": "公司每个月十号发工资。",
+        "fullPinyin": "Gōngsī měi gè yuè shí hào fā gōngzī.",
+        "chunks": [
+            "公司每个月",
+            "十号",
+            "发工资。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "发工资 (fā gōngzī - phát tiền lương); 十号 (ngày mùng 10)."
+    },
+    {
+        "id": "s_b4_39",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "号",
+        "vietnamese": "Chiếc này hơi nhỏ, lấy cỡ lớn hơn một số.",
+        "fullHanzi": "这件有点小，拿大一号的。",
+        "fullPinyin": "Zhè jiàn yǒudiǎn xiǎo, ná dà yí hào de.",
+        "chunks": [
+            "这件有点小，",
+            "拿大一号",
+            "的。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "So sánh kích cỡ: 大一号 (lớn hơn 1 số/size) / 小一号 (nhỏ hơn 1 số/size)."
+    },
+    {
+        "id": "s_b4_40",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "月",
+        "vietnamese": "Một năm có 12 tháng.",
+        "fullHanzi": "一年有十二个月。",
+        "fullPinyin": "Yì nián yǒu shí'èr gè yuè.",
+        "chunks": [
+            "一年",
+            "有十二个",
+            "月。"
+        ],
+        "grammarTag": "luong-tu",
+        "grammarNote": "Khoảng thời gian bao nhiêu tháng bắt buộc có lượng từ 个: 十二个月 (12 tháng)."
+    },
+    {
+        "id": "s_b4_41",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "月",
+        "vietnamese": "Tôi vào công ty làm việc được 6 tháng rồi.",
+        "fullHanzi": "我来公司工作六个月了。",
+        "fullPinyin": "Wǒ lái gōngsī gōngzuò liù gè yuè le.",
+        "chunks": [
+            "我来公司",
+            "工作六个月",
+            "了。"
+        ],
+        "grammarTag": "bo-ngu",
+        "grammarNote": "Bổ ngữ thời lượng: 工作六个月了 (làm việc được 6 tháng rồi)."
+    },
+    {
+        "id": "s_b4_42",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "月",
+        "vietnamese": "Tháng sau chúng tôi phải đi công tác.",
+        "fullHanzi": "下个月我们要出差。",
+        "fullPinyin": "Xià gè yuè wǒmen yào chūchāi.",
+        "chunks": [
+            "下个月",
+            "我们",
+            "要出差。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Chỉ tháng: 上个月 (tháng trước), 这个月 (tháng này), 下个月 (tháng sau); 出差 (đi công tác)."
+    },
+    {
+        "id": "s_b4_43",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "生日",
+        "vietnamese": "Ngày mai là sinh nhật bạn của tôi.",
+        "fullHanzi": "明天是我朋友的生日。",
+        "fullPinyin": "Míngtiān shì wǒ péngyou de shēngrì.",
+        "chunks": [
+            "明天",
+            "是我朋友的",
+            "生日。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Mẫu câu ngày kỷ niệm: 明天是...的生日 (Ngày mai là sinh nhật của...)."
+    },
+    {
+        "id": "s_b4_44",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "生日",
+        "vietnamese": "Chúc bạn sinh nhật vui vẻ!",
+        "fullHanzi": "祝你生日快乐！",
+        "fullPinyin": "Zhù nǐ shēngrì kuàilè!",
+        "chunks": [
+            "祝你",
+            "生日",
+            "快乐！"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Câu chúc sinh nhật kinh điển: 祝你生日快乐！ (Zhù nǐ shēngrì kuàilè!)."
+    },
+    {
+        "id": "s_b4_45",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "生日",
+        "vietnamese": "Sinh nhật của bạn là ngày mấy tháng mấy?",
+        "fullHanzi": "你的生日是几月几号？",
+        "fullPinyin": "Nǐ de shēngrì shì jǐ yuè jǐ hào?",
+        "chunks": [
+            "你的生日",
+            "是",
+            "几月几号？"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Mẫu câu hỏi ngày sinh nhật: 几月几号？ (Ngày mấy tháng mấy?)."
+    },
+    {
+        "id": "s_b4_46",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "尺码",
+        "vietnamese": "May nhãn cổ phải nhìn rõ cỡ size.",
+        "fullHanzi": "车领标要看清尺码。",
+        "fullPinyin": "Chē lǐngbiāo yào kànqīng chǐmǎ.",
+        "chunks": [
+            "车领标",
+            "要看清",
+            "尺码。"
+        ],
+        "grammarTag": "bo-ngu",
+        "grammarNote": "Thuật ngữ may mặc: 车领标 (may nhãn cổ áo); Bổ ngữ kết quả: 看清 (nhìn rõ ràng)."
+    },
+    {
+        "id": "s_b4_47",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "尺码",
+        "vietnamese": "Đừng để lẫn các cỡ size khác nhau vào chung.",
+        "fullHanzi": "别把不同尺码混在一起。",
+        "fullPinyin": "Bié bǎ bùtóng chǐmǎ hùn zài yìqǐ.",
+        "chunks": [
+            "别把不同尺码",
+            "混在",
+            "一起。"
+        ],
+        "grammarTag": "cau-chu-ba",
+        "grammarNote": "Cấu trúc câu chữ 把 ngăn cấm: 别把...混在一起 (đừng để lẫn vào nhau)."
+    },
+    {
+        "id": "s_b4_48",
+        "lesson": "buoi-4",
+        "lessonLabel": "Buổi 4: Trang phục hàng ngày & Thời gian ngày tháng",
+        "targetWord": "尺码",
+        "vietnamese": "Lúc đóng gói phải đóng thùng theo cỡ size.",
+        "fullHanzi": "包装时要按尺码装箱。",
+        "fullPinyin": "Bāozhuāng shí yào àn chǐmǎ zhuāngxiāng.",
+        "chunks": [
+            "包装时",
+            "要按尺码",
+            "装箱。"
+        ],
+        "grammarTag": "giao-tiep",
+        "grammarNote": "Cấu trúc ...时 (khi, lúc...); 按尺码装箱 (đóng thùng theo kích cỡ size)."
     }
 ];

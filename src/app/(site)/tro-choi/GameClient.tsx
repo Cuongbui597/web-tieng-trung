@@ -7,6 +7,7 @@ import { BUOI_1_VOCAB, BUOI_1_INFO } from './buoi1Vocab';
 import { ALL_HSK_EXTRA_VOCAB } from './hskVocab';
 import { FACTORY_EXTRA_VOCAB } from './factoryVocab';
 import { ALL_LIVING_VOCAB, LIVING_ROOM_VOCAB, DORM_VOCAB, KITCHEN_VOCAB, CLOTHING_VOCAB, BUOI_1_ROOM_INFO, BUOI_2_DORM_INFO, BUOI_3_KITCHEN_INFO, BUOI_4_CLOTHING_INFO, LivingWordItem } from './livingVocab';
+import { useVirtualKeyboard } from '@/hooks/useVirtualKeyboard';
 
 interface WordItem {
     id: string;
@@ -373,12 +374,21 @@ function speakChinese(text: string) {
     }
 }
 
+function stopChineseSpeech() {
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+        try {
+            window.speechSynthesis.cancel();
+        } catch {}
+    }
+}
+
 // Component GameInput: Tách biệt hoàn toàn việc nhập phím với bộ đếm giờ của cha
 // Đảm bảo gõ tiếng Việt Telex / VNI / Unikey 100% mượt mà, không giật lag, không nhân đôi chữ
 interface GameInputProps {
     disabled: boolean;
     feedbackMessage: string | null;
     currentWordId: string;
+    isCompact?: boolean;
     onCheckAnswer: (text: string, isExplicitSubmit: boolean) => void;
     onClearFeedback: () => void;
 }
@@ -387,6 +397,7 @@ function GameInput({
     disabled,
     feedbackMessage,
     currentWordId,
+    isCompact = false,
     onCheckAnswer,
     onClearFeedback,
 }: GameInputProps) {
@@ -394,15 +405,15 @@ function GameInput({
     const inputRef = useRef<HTMLInputElement>(null);
     const isComposingRef = useRef(false);
 
-    // Tự động focus input khi không bị disabled
+    // Tự động focus input và duy trì focus khi đổi từ mới
     useEffect(() => {
         if (!disabled && inputRef.current) {
             const timer = setTimeout(() => {
                 inputRef.current?.focus();
-            }, 60);
+            }, 30);
             return () => clearTimeout(timer);
         }
-    }, [disabled]);
+    }, [disabled, currentWordId]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -429,14 +440,18 @@ function GameInput({
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onCheckAnswer(val, true);
+        // Duy trì bàn phím mở trên điện thoại, không để bị giật đóng mở
+        inputRef.current?.focus();
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-2 sm:space-y-3">
-            <label className="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[var(--muted)] text-center">
-                Gõ nghĩa tiếng Việt vào đây (nhấn Enter hoặc bấm Gửi):
-            </label>
-            <div className="flex gap-2">
+        <form onSubmit={handleSubmit} className={isCompact ? "space-y-1" : "space-y-2 sm:space-y-3"}>
+            {!isCompact && (
+                <label className="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[var(--muted)] text-center">
+                    Gõ nghĩa tiếng Việt vào đây (nhấn Enter hoặc bấm Gửi):
+                </label>
+            )}
+            <div className="flex gap-1.5 sm:gap-2">
                 <input
                     ref={inputRef}
                     type="text"
@@ -445,8 +460,8 @@ function GameInput({
                     onChange={handleChange}
                     onCompositionStart={handleCompositionStart}
                     onCompositionEnd={handleCompositionEnd}
-                    placeholder="Ví dụ: xin chào, cảm ơn, trà..."
-                    className={`w-full px-4 py-3 sm:px-5 sm:py-4 text-center rounded-xl sm:rounded-2xl border-2 bg-white/85 text-base sm:text-xl font-bold text-[var(--text)] placeholder:text-[var(--muted)]/50 focus:outline-none focus:ring-4 focus:ring-[var(--accent)]/20 transition-all shadow-inner touch-manipulation ${
+                    placeholder={isCompact ? "Gõ nghĩa tiếng Việt rồi bấm Gửi..." : "Ví dụ: xin chào, cảm ơn, trà..."}
+                    className={`w-full px-3 py-2.5 sm:px-5 sm:py-3.5 text-center rounded-xl sm:rounded-2xl border-2 bg-white/90 text-base sm:text-xl font-bold text-[var(--text)] placeholder:text-[var(--muted)]/50 focus:outline-none focus:ring-4 focus:ring-[var(--accent)]/20 transition-all shadow-inner touch-manipulation ${
                         feedbackMessage?.startsWith('❌')
                             ? 'border-rose-400 bg-rose-50/60'
                             : feedbackMessage?.startsWith('⚠️')
@@ -472,6 +487,7 @@ function GameInput({
 }
 
 export default function GameClient() {
+    const { isKeyboardOpen, isFullscreen, toggleFullscreen } = useVirtualKeyboard();
     const [selectedCategory, setSelectedCategory] = useState<string>('buoi-1');
     const [selectedLesson, setSelectedLesson] = useState<string>('b1');
     const [gameState, setGameState] = useState<'idle' | 'playing' | 'gameover'>('idle');
@@ -1310,288 +1326,277 @@ export default function GameClient() {
                     </div>
                 )}
 
-                {/* ==================== MÀN HÌNH ĐANG CHƠI ==================== */}
+                {/* ==================== MÀN HÌNH ĐANG CHƠI (TẬN DỤNG FULL MÀN HÌNH & BÀN PHÍM) ==================== */}
                 {gameState === 'playing' && currentWord && (
-                    <div className="space-y-6">
-                        {/* Thanh tiến độ 16 từ và đồng hồ 60 giây */}
-                        <div className="card p-4 sm:p-5 rounded-2xl bg-white/40 backdrop-blur-xl border border-white/40 shadow-md space-y-3">
-                            <div className="flex items-center justify-between gap-4">
-                                {/* Tiến độ từ */}
-                                <div className="flex items-center gap-2">
-                                    <span className="w-2.5 h-2.5 rounded-full bg-[var(--accent)] animate-pulse"></span>
-                                    <span className="text-sm font-extrabold text-[var(--text)]">
-                                        Câu {currentIndex + 1} / {TOTAL_ROUND_WORDS}
-                                    </span>
+                    <div className={`fixed inset-0 z-50 bg-[var(--bg)] flex flex-col justify-between overflow-y-auto sm:overflow-hidden pt-safe pb-safe transition-all ${
+                        isKeyboardOpen ? 'p-1.5 sm:p-3' : 'p-2.5 sm:p-6'
+                    }`}>
+                        <div className="max-w-2xl w-full mx-auto flex-1 flex flex-col justify-between h-full">
+                            {/* Thanh tiến độ 16 từ và đồng hồ 60 giây */}
+                            <div className={`card bg-white/60 backdrop-blur-xl border border-white/60 shadow-md transition-all ${
+                                isKeyboardOpen ? 'p-2 rounded-xl mb-1 space-y-1' : 'p-3 sm:p-5 rounded-2xl mb-2 sm:mb-4 space-y-2 sm:space-y-3'
+                            }`}>
+                                <div className="flex items-center justify-between gap-2 sm:gap-4">
+                                    {/* Nút thoát & Tiến độ câu */}
+                                    <div className="flex items-center gap-1.5 sm:gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                triggerHaptic(10);
+                                                stopChineseSpeech();
+                                                setGameState('idle');
+                                            }}
+                                            className="px-2 py-1 rounded-lg text-xs font-bold text-[var(--muted)] hover:text-rose-600 bg-black/5 hover:bg-black/10 transition cursor-pointer touch-manipulation"
+                                            title="Thoát ván chơi về màn hình chọn"
+                                        >
+                                            ✕ Thoát
+                                        </button>
+                                        <span className="text-xs sm:text-sm font-extrabold text-[var(--text)] whitespace-nowrap">
+                                            #{currentIndex + 1} / {TOTAL_ROUND_WORDS}
+                                        </span>
+                                    </div>
+
+                                    {/* Điểm và Combo */}
+                                    <div className="text-center flex items-center gap-2">
+                                        <span className="text-base sm:text-2xl font-black text-[var(--accent)]">
+                                            {score} đ
+                                        </span>
+                                        {streak >= 2 && (
+                                            <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded-full animate-pulse whitespace-nowrap">
+                                                🔥x{streak >= 5 ? 3 : 2}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {/* Đồng hồ đếm ngược & Nút toàn màn hình */}
+                                    <div className="flex items-center gap-1.5">
+                                        <div className={`px-2.5 py-1 sm:px-3 sm:py-1 rounded-xl border text-xs sm:text-sm font-black flex items-center gap-1 shadow-xs transition-all ${
+                                            totalTimeLeft <= 15
+                                                ? 'bg-rose-50 text-rose-600 border-rose-300 animate-bounce'
+                                                : totalTimeLeft <= 30
+                                                ? 'bg-amber-50 text-amber-700 border-amber-300'
+                                                : 'bg-emerald-50 text-emerald-700 border-emerald-300'
+                                        }`}>
+                                            <span>⏱️</span>
+                                            <span>{totalTimeLeft}s</span>
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            onClick={toggleSound}
+                                            title={soundOn ? 'Tắt âm thanh hiệu ứng' : 'Bật âm thanh hiệu ứng'}
+                                            className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/70 border border-[var(--border)] flex items-center justify-center text-xs hover:bg-white transition cursor-pointer"
+                                        >
+                                            {soundOn ? '🔔' : '🔕'}
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            onClick={toggleFullscreen}
+                                            title={isFullscreen ? 'Thu nhỏ cửa sổ' : 'Bật toàn màn hình'}
+                                            className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/70 border border-[var(--border)] flex items-center justify-center text-xs hover:bg-white transition cursor-pointer hidden sm:flex"
+                                        >
+                                            {isFullscreen ? '⤓' : '⛶'}
+                                        </button>
+                                    </div>
                                 </div>
 
-                                {/* Điểm và Combo */}
-                                <div className="text-center">
-                                    <div className="text-xs uppercase font-semibold text-[var(--muted)]">Điểm số</div>
-                                    <div className="text-xl sm:text-2xl font-extrabold text-[var(--accent)]">
-                                        {score}
+                                {/* 16 vạch chỉ số cho 16 từ (Ẩn khi bàn phím mở để tiết kiệm tối đa diện tích) */}
+                                {!isKeyboardOpen && (
+                                    <div className="flex items-center gap-1 pt-0.5">
+                                        {roundWords.map((_, idx) => {
+                                            const hist = history[idx];
+                                            return (
+                                                <div
+                                                    key={idx}
+                                                    className={`flex-1 h-1.5 rounded-full transition-all duration-300 ${
+                                                        idx === currentIndex
+                                                            ? 'bg-[var(--accent)] ring-2 ring-[var(--accent)]/40 scale-y-125'
+                                                            : hist?.correct
+                                                            ? 'bg-emerald-500'
+                                                            : hist && !hist.correct
+                                                            ? 'bg-rose-400'
+                                                            : 'bg-gray-200'
+                                                    }`}
+                                                    title={`Câu ${idx + 1}`}
+                                                />
+                                            );
+                                        })}
                                     </div>
-                                    {streak >= 2 && (
-                                        <div className="text-[10px] font-bold text-amber-600 animate-pulse">
-                                            🔥 {streak} COMBO ({streak >= 5 ? 'x3' : 'x2'})
+                                )}
+                            </div>
+
+                            {/* Thẻ hiển thị chữ Hán trung tâm (Co giãn thông minh khi bàn phím mở) */}
+                            <div
+                                className={`card relative rounded-2xl sm:rounded-3xl flex flex-col items-center justify-center bg-white/55 backdrop-blur-2xl border border-white/60 shadow-xl transition-all duration-300 ${
+                                    isKeyboardOpen
+                                        ? 'min-h-[85px] sm:min-h-[110px] p-2 my-0.5'
+                                        : 'min-h-[180px] sm:min-h-[260px] p-4 sm:p-7 my-2 flex-1'
+                                } ${wrongShake ? 'animate-[shake_0.5s_ease-in-out]' : ''}`}
+                            >
+                                {/* Category badge */}
+                                {!isKeyboardOpen && (
+                                    <div className="absolute top-2.5 left-3 sm:top-4 sm:left-5 flex items-center gap-1.5">
+                                        <span className="badge-gradient text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-bold">
+                                            {currentWord.categoryLabel}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {/* Hạt nổ tan biến khi đúng */}
+                                {particles.map(p => (
+                                    <span
+                                        key={p.id}
+                                        className="absolute rounded-full pointer-events-none transition-all duration-500 ease-out z-20"
+                                        style={{
+                                            width: `${p.size}px`,
+                                            height: `${p.size}px`,
+                                            backgroundColor: p.color,
+                                            transform: `translate(${p.x}px, ${p.y}px) scale(0)`,
+                                            opacity: isDissolving ? 0.9 : 0,
+                                            boxShadow: `0 0 10px ${p.color}`,
+                                        }}
+                                    />
+                                ))}
+
+                                {/* Chữ Hán & Pinyin */}
+                                <div
+                                    className={`transition-all duration-300 select-none text-center ${
+                                        isDissolving
+                                            ? 'scale-150 blur-lg opacity-0 rotate-6 filter'
+                                            : 'scale-100 blur-0 opacity-100'
+                                    }`}
+                                >
+                                    <div className={`font-[family:var(--font-serif)] font-extrabold text-[var(--accent)] tracking-wider drop-shadow-sm transition-all ${
+                                        isKeyboardOpen ? 'text-3xl sm:text-5xl leading-tight' : 'text-5xl sm:text-7xl mb-1 sm:mb-2'
+                                    }`}>
+                                        {currentWord.hanzi}
+                                    </div>
+
+                                    {showPinyin && (
+                                        <div className={`font-medium text-[var(--muted)] tracking-wide transition-all ${
+                                            isKeyboardOpen ? 'text-xs sm:text-base mb-0.5' : 'text-sm sm:text-xl mb-1.5 sm:mb-2.5'
+                                        }`}>
+                                            [{currentWord.pinyin}]
                                         </div>
+                                    )}
+
+                                    {!isKeyboardOpen && (
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                triggerHaptic(10);
+                                                speakChinese(currentWord.hanzi);
+                                            }}
+                                            className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/80 hover:bg-white text-[11px] font-bold text-[var(--accent)] border border-[var(--border)] shadow-xs hover:scale-105 active:scale-95 transition cursor-pointer touch-manipulation select-none"
+                                            title="Nghe phát âm chuẩn tiếng Trung"
+                                        >
+                                            <span>🔊</span> Nghe phát âm
+                                        </button>
                                     )}
                                 </div>
 
-                                {/* Đồng hồ đếm ngược 60s tổng */}
-                                <div className={`px-4 py-2 rounded-2xl border text-sm font-black flex items-center gap-1.5 shadow-sm transition-all ${
-                                    totalTimeLeft <= 15
-                                        ? 'bg-rose-50 text-rose-600 border-rose-300 animate-bounce'
-                                        : totalTimeLeft <= 30
-                                        ? 'bg-amber-50 text-amber-700 border-amber-300'
-                                        : 'bg-emerald-50 text-emerald-700 border-emerald-300'
-                                }`}>
-                                    <span>⏱️</span>
-                                    <span>{totalTimeLeft}s</span>
-                                </div>
+                                {isDissolving && (
+                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
+                                        <span className="text-xl sm:text-3xl font-extrabold text-emerald-600 bg-white/95 px-5 py-1.5 rounded-xl shadow-xl animate-bounce">
+                                            ✨ CHÍNH XÁC!
+                                        </span>
+                                    </div>
+                                )}
 
-                                {/* Điều khiển âm thanh */}
+                                {/* Hiển thị kết quả đáp án đúng khi bấm sai */}
+                                {isRevealingWrong && revealedAnswer && (
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-rose-950/90 backdrop-blur-md rounded-2xl sm:rounded-3xl p-3 sm:p-5 text-white z-30 animate-fade-in text-center select-none shadow-2xl border-2 border-rose-500/50">
+                                        <div className="text-2xl sm:text-3xl mb-0.5">
+                                            ❌
+                                        </div>
+                                        <div className="text-sm sm:text-lg font-black text-rose-200 tracking-wide uppercase">
+                                            {revealedAnswer.isSkip ? 'ĐÃ BỎ QUA CÂU NÀY' : 'CHƯA CHÍNH XÁC!'}
+                                        </div>
+                                        <div className="mt-1 py-1 px-3 bg-white/15 rounded-xl border border-white/25">
+                                            <div className="text-[10px] uppercase text-amber-300 font-extrabold">
+                                                Đáp án đúng là:
+                                            </div>
+                                            <div className="text-base sm:text-xl font-extrabold text-white">
+                                                {revealedAnswer.correctMeaning}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Ô nhập nghĩa tiếng Việt độc lập */}
+                            <div className={`card bg-white/50 backdrop-blur-xl border border-white/50 shadow-lg transition-all ${
+                                isKeyboardOpen ? 'p-2 my-0.5 rounded-xl' : 'p-3 sm:p-5 my-2 rounded-2xl'
+                            } ${wrongShake ? 'animate-[shake_0.5s_ease-in-out]' : ''}`}>
+                                <GameInput
+                                    key={currentWord.id}
+                                    disabled={isDissolving || isRevealingWrong}
+                                    feedbackMessage={feedbackMessage}
+                                    currentWordId={currentWord.id}
+                                    isCompact={isKeyboardOpen}
+                                    onCheckAnswer={checkAnswer}
+                                    onClearFeedback={() => setFeedbackMessage(null)}
+                                />
+
+                                {/* Cảnh báo kết quả sai hoặc hướng dẫn */}
+                                {feedbackMessage && (
+                                    <div className="mt-1.5 text-center text-xs font-semibold text-rose-600 bg-rose-50/90 py-1.5 px-3 rounded-lg border border-rose-200 animate-fade-in flex items-center justify-center gap-1">
+                                        <span>{feedbackMessage}</span>
+                                    </div>
+                                )}
+
+                                {/* Khối gợi ý */}
+                                {showHint && currentWord && (
+                                    <div className="mt-1.5 text-center text-xs font-medium text-amber-900 bg-amber-50/90 py-1.5 px-3 rounded-lg border border-amber-200 animate-fade-in space-y-1">
+                                        <div>
+                                            💡 <strong>Gợi ý:</strong> Bắt đầu bằng <strong className="text-rose-600 uppercase">&quot;{currentWord.meanings[0].charAt(0)}&quot;</strong> ({currentWord.meanings[0].split(' ').length} từ)
+                                        </div>
+                                        {currentWord.note && (
+                                            <div className="text-[11px] text-amber-800">
+                                                <span>📌 <em>{currentWord.note}</em></span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Phím hỗ trợ và bỏ qua */}
+                            <div className={`flex justify-between items-center text-[11px] sm:text-xs text-[var(--muted)] px-1 select-none ${
+                                isKeyboardOpen ? 'py-0.5' : 'py-1.5'
+                            }`}>
                                 <div className="flex items-center gap-1.5">
                                     <button
                                         type="button"
-                                        onClick={toggleSound}
-                                        title={soundOn ? 'Tắt âm thanh hiệu ứng' : 'Bật âm thanh hiệu ứng'}
-                                        className="w-9 h-9 rounded-xl bg-white/70 border border-[var(--border)] flex items-center justify-center text-sm hover:bg-white transition cursor-pointer"
+                                        onClick={() => {
+                                            triggerHaptic();
+                                            setShowHint(prev => !prev);
+                                        }}
+                                        className="px-2 py-1 rounded-lg bg-white/70 hover:bg-white text-[var(--accent)] font-bold inline-flex items-center gap-1 cursor-pointer border border-white/80 active:scale-95 transition touch-manipulation"
                                     >
-                                        {soundOn ? '🔔' : '🔕'}
+                                        <span>💡</span> {showHint ? 'Ẩn' : 'Gợi ý'}
                                     </button>
                                     <button
                                         type="button"
-                                        onClick={() => setAutoVoice(prev => !prev)}
-                                        title="Tự động phát âm tiếng Trung khi xuất hiện từ mới"
-                                        className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border transition cursor-pointer ${
-                                            autoVoice
-                                                ? 'bg-rose-100 text-rose-800 border-rose-300'
-                                                : 'bg-white/70 text-[var(--muted)] border-[var(--border)]'
-                                        }`}
+                                        onClick={() => {
+                                            triggerHaptic();
+                                            setShowPinyin(prev => !prev);
+                                        }}
+                                        className="px-2 py-1 rounded-lg bg-white/70 hover:bg-white font-semibold text-[var(--text)] cursor-pointer border border-white/80 active:scale-95 transition touch-manipulation"
                                     >
-                                        🗣️ {autoVoice ? 'BẬT' : 'TẮT'}
+                                        Pinyin: {showPinyin ? 'BẬT' : 'TẮT'}
                                     </button>
                                 </div>
-                            </div>
-
-                            {/* 16 vạch chỉ số cho 16 từ */}
-                            <div className="flex items-center gap-1 sm:gap-1.5 pt-1">
-                                {roundWords.map((_, idx) => {
-                                    const hist = history[idx];
-                                    return (
-                                        <div
-                                            key={idx}
-                                            className={`flex-1 h-2 rounded-full transition-all duration-300 ${
-                                                idx === currentIndex
-                                                    ? 'bg-[var(--accent)] ring-2 ring-[var(--accent)]/40 scale-y-125'
-                                                    : hist?.correct
-                                                    ? 'bg-emerald-500'
-                                                    : hist && !hist.correct
-                                                    ? 'bg-rose-400'
-                                                    : 'bg-gray-200'
-                                            }`}
-                                            title={`Câu ${idx + 1}`}
-                                        />
-                                    );
-                                })}
-                            </div>
-
-                            {/* Thanh thời gian 60 giây tổng */}
-                            <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                <div
-                                    className={`h-full transition-all duration-1000 linear ${
-                                        totalTimeLeft > 30
-                                            ? 'bg-emerald-500'
-                                            : totalTimeLeft > 15
-                                            ? 'bg-amber-500'
-                                            : 'bg-rose-500'
-                                    }`}
-                                    style={{ width: `${(totalTimeLeft / ROUND_TIME_LIMIT) * 100}%` }}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Thẻ hiển thị chữ Hán trung tâm */}
-                        <div
-                            className={`card relative min-h-[210px] sm:min-h-[290px] rounded-[1.5rem] sm:rounded-[3rem] p-4 sm:p-8 flex flex-col items-center justify-center bg-white/45 backdrop-blur-2xl border border-white/50 shadow-2xl transition-all duration-300 ${
-                                wrongShake ? 'animate-[shake_0.5s_ease-in-out]' : ''
-                            }`}
-                        >
-                            {/* Category badge */}
-                            <div className="absolute top-3.5 left-4 sm:top-5 sm:left-6 flex items-center gap-1.5 sm:gap-2">
-                                <span className="badge-gradient text-[11px] sm:text-xs px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full font-bold">
-                                    {currentWord.categoryLabel} {currentWord.part ? `• Phần ${currentWord.part}` : currentWord.lessonLabel ? `• ${currentWord.lessonLabel}` : ''}
-                                </span>
-                                {currentWord.note && (
-                                    <span className="hidden sm:inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-800 border border-indigo-200">
-                                        {currentWord.note}
-                                    </span>
-                                )}
-                            </div>
-
-                            {/* Question number badge */}
-                            <div className="absolute top-3.5 right-4 sm:top-5 sm:right-6 text-[11px] sm:text-xs font-bold text-[var(--muted)] bg-white/80 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full border border-white/60">
-                                #{currentIndex + 1} / 16
-                            </div>
-
-                            {/* Hạt nổ tan biến khi đúng */}
-                            {particles.map(p => (
-                                <span
-                                    key={p.id}
-                                    className="absolute rounded-full pointer-events-none transition-all duration-500 ease-out z-20"
-                                    style={{
-                                        width: `${p.size}px`,
-                                        height: `${p.size}px`,
-                                        backgroundColor: p.color,
-                                        transform: `translate(${p.x}px, ${p.y}px) scale(0)`,
-                                        opacity: isDissolving ? 0.9 : 0,
-                                        boxShadow: `0 0 10px ${p.color}`,
-                                    }}
-                                />
-                            ))}
-
-                            {/* Chữ Hán & Pinyin */}
-                            <div
-                                className={`transition-all duration-500 select-none text-center ${
-                                    isDissolving
-                                        ? 'scale-150 blur-lg opacity-0 rotate-6 filter'
-                                        : 'scale-100 blur-0 opacity-100'
-                                }`}
-                            >
-                                <div className="text-5xl sm:text-8xl font-[family:var(--font-serif)] font-extrabold text-[var(--accent)] tracking-wider drop-shadow-sm mb-1 sm:mb-2">
-                                    {currentWord.hanzi}
-                                </div>
-
-                                {showPinyin && (
-                                    <div className="text-base sm:text-2xl font-medium text-[var(--muted)] tracking-wide mb-2 sm:mb-3">
-                                        [{currentWord.pinyin}]
-                                    </div>
-                                )}
-
                                 <button
                                     type="button"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        triggerHaptic(10);
-                                        speakChinese(currentWord.hanzi);
-                                    }}
-                                    className="inline-flex items-center gap-1.5 px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full bg-white/80 hover:bg-white text-xs font-bold text-[var(--accent)] border border-[var(--border)] shadow-sm hover:scale-105 active:scale-95 transition cursor-pointer touch-manipulation select-none"
-                                    title="Nghe phát âm chuẩn tiếng Trung"
+                                    disabled={isDissolving || isRevealingWrong}
+                                    onClick={handleSkip}
+                                    className="px-2.5 py-1 rounded-lg text-rose-600 hover:text-rose-700 font-semibold cursor-pointer disabled:opacity-40 active:scale-95 transition touch-manipulation"
                                 >
-                                    <span>🔊</span> Nghe phát âm
+                                    Bỏ qua →
                                 </button>
                             </div>
-
-                            {isDissolving && (
-                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
-                                    <span className="text-2xl sm:text-4xl font-extrabold text-emerald-600 bg-white/90 px-6 py-2 rounded-2xl shadow-xl animate-bounce">
-                                        ✨ CHÍNH XÁC!
-                                    </span>
-                                </div>
-                            )}
-
-                            {/* Hiển thị kết quả đáp án đúng khi bấm sai */}
-                            {isRevealingWrong && revealedAnswer && (
-                                <div className="absolute inset-0 flex flex-col items-center justify-center bg-rose-950/85 backdrop-blur-md rounded-[1.5rem] sm:rounded-[3rem] p-4 sm:p-6 text-white z-30 animate-fade-in text-center select-none shadow-2xl border-2 border-rose-500/50">
-                                    <div className="text-3xl sm:text-4xl mb-1 animate-bounce">
-                                        ❌
-                                    </div>
-                                    <div className="text-lg sm:text-2xl font-black text-rose-200 tracking-wide uppercase">
-                                        {revealedAnswer.isSkip ? 'ĐÃ BỎ QUA CÂU NÀY' : 'CHƯA CHÍNH XÁC!'}
-                                    </div>
-                                    {revealedAnswer.typed && (
-                                        <div className="text-xs text-rose-300 mt-1">
-                                            Từ bạn vừa gõ: <span className="line-through font-bold text-white px-2 py-0.5 rounded bg-black/30">&quot;{revealedAnswer.typed}&quot;</span>
-                                        </div>
-                                    )}
-                                    <div className="mt-2.5 sm:mt-3.5 py-2 px-4 sm:px-6 bg-white/15 rounded-xl sm:rounded-2xl border border-white/25 shadow-inner">
-                                        <div className="text-[10px] sm:text-[11px] uppercase tracking-wider text-amber-300 font-extrabold">
-                                            Đáp án đúng là:
-                                        </div>
-                                        <div className="text-lg sm:text-2xl font-extrabold text-white mt-0.5">
-                                            {revealedAnswer.correctMeaning}
-                                        </div>
-                                    </div>
-                                    <div className="text-[10px] sm:text-[11px] text-white/70 mt-2 sm:mt-3 animate-pulse">
-                                        Đang chuyển sang câu tiếp theo...
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Ô nhập nghĩa tiếng Việt độc lập (Không bị gián đoạn bộ đệm Telex/Unikey) */}
-                        <div className={`card p-3 sm:p-6 rounded-[1.25rem] sm:rounded-[2rem] bg-white/40 backdrop-blur-xl border border-white/40 shadow-xl transition-all ${
-                            wrongShake ? 'animate-[shake_0.5s_ease-in-out]' : ''
-                        }`}>
-                            <GameInput
-                                key={currentWord.id}
-                                disabled={isDissolving || isRevealingWrong}
-                                feedbackMessage={feedbackMessage}
-                                currentWordId={currentWord.id}
-                                onCheckAnswer={checkAnswer}
-                                onClearFeedback={() => setFeedbackMessage(null)}
-                            />
-
-                            {/* Cảnh báo kết quả sai hoặc hướng dẫn */}
-                            {feedbackMessage && (
-                                <div className="mt-3 text-center text-xs sm:text-sm font-semibold text-rose-600 bg-rose-50/90 py-2.5 px-4 rounded-xl border border-rose-200 animate-fade-in flex items-center justify-center gap-1.5">
-                                    <span>{feedbackMessage}</span>
-                                </div>
-                            )}
-
-                            {/* Khối gợi ý */}
-                            {showHint && currentWord && (
-                                <div className="mt-3 text-center text-xs sm:text-sm font-medium text-amber-900 bg-amber-50/90 py-2.5 px-4 rounded-xl border border-amber-200 animate-fade-in space-y-1.5">
-                                    <div>
-                                        💡 <strong>Gợi ý:</strong> Từ này bắt đầu bằng chữ <strong className="text-rose-600 uppercase font-bold">&quot;{currentWord.meanings[0].charAt(0)}&quot;</strong> ({currentWord.meanings[0].split(' ').length} từ: {currentWord.meanings[0].slice(0, 3)}...)
-                                    </div>
-                                    {currentWord.note && (
-                                        <div className="text-[11px] sm:text-xs text-amber-800 font-normal">
-                                            <span>📌 <em>{currentWord.note}</em></span>
-                                        </div>
-                                    )}
-                                    {currentWord.exampleSentence && (
-                                        <div className="text-[11px] sm:text-xs text-amber-800 pt-1 border-t border-amber-200/70 font-normal">
-                                            <span>📝 <em>Ngữ cảnh thực tế: {currentWord.exampleSentence.vietnamese}</em></span>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Phím hỗ trợ và bỏ qua - Tối ưu mobile touch */}
-                        <div className="flex flex-col sm:flex-row justify-between items-center text-xs text-[var(--muted)] px-1 gap-2 select-none">
-                            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                                <span className="hidden sm:inline">Gõ có dấu hoặc không dấu đều đúng!</span>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        triggerHaptic();
-                                        setShowHint(prev => !prev);
-                                    }}
-                                    className="px-2.5 py-1.5 rounded-lg bg-white/60 hover:bg-white text-[var(--accent)] font-bold inline-flex items-center gap-1 cursor-pointer border border-white/80 active:scale-95 transition touch-manipulation"
-                                >
-                                    <span>💡</span> {showHint ? 'Ẩn gợi ý' : 'Xem gợi ý'}
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        triggerHaptic();
-                                        setShowPinyin(prev => !prev);
-                                    }}
-                                    className="px-2.5 py-1.5 rounded-lg bg-white/60 hover:bg-white font-semibold text-[var(--text)] cursor-pointer border border-white/80 active:scale-95 transition touch-manipulation"
-                                >
-                                    Pinyin: {showPinyin ? 'BẬT' : 'TẮT'}
-                                </button>
-                            </div>
-                            <button
-                                type="button"
-                                disabled={isDissolving || isRevealingWrong}
-                                onClick={handleSkip}
-                                className="px-3 py-1.5 rounded-lg text-rose-600 sm:text-[var(--muted)] hover:text-rose-600 font-semibold underline sm:no-underline cursor-pointer disabled:opacity-40 active:scale-95 transition touch-manipulation"
-                            >
-                                Bỏ qua câu này →
-                            </button>
                         </div>
                     </div>
                 )}

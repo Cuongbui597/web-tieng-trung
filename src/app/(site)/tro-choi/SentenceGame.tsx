@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { SENTENCE_DATABASE, SentenceItem } from './sentenceData';
 import { selectBestChineseVoice, formatChineseSentenceForSpeech } from './ssmlHelper';
+import { useVirtualKeyboard } from '@/hooks/useVirtualKeyboard';
 
 interface ChunkItem {
     id: string;
@@ -136,6 +137,7 @@ function getChineseVoice(): SpeechSynthesisVoice | null {
 const QUESTIONS_PER_ROUND = 10;
 
 export default function SentenceGame() {
+    const { isFullscreen, toggleFullscreen } = useVirtualKeyboard();
     const [selectedLesson, setSelectedLesson] = useState<'all' | 'buoi-1' | 'buoi-2' | 'buoi-3' | 'buoi-4'>('all');
     const [gameState, setGameState] = useState<'idle' | 'playing' | 'gameover'>('idle');
     const [roundSentences, setRoundSentences] = useState<SentenceItem[]>([]);
@@ -735,62 +737,75 @@ export default function SentenceGame() {
                     </div>
                 )}
 
-                {/* ==================== MÀN HÌNH CHƠI (PLAYING) ==================== */}
+                {/* ==================== MÀN HÌNH CHƠI (PLAYING - TẬN DỤNG FULL MÀN HÌNH) ==================== */}
                 {gameState === 'playing' && currentSentence && (
-                    <div className="space-y-2.5 sm:space-y-4">
-                        {/* Thanh Topbar: Tiến trình, Combo, Âm thanh - Tinh gọn */}
-                        <div className="flex items-center justify-between p-2.5 sm:p-3.5 bg-white/80 backdrop-blur-md rounded-xl sm:rounded-2xl border border-white/60 shadow-2xs">
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    triggerHaptic(10);
-                                    stopSpeech();
-                                    setGameState('idle');
-                                }}
-                                className="text-xs font-bold text-slate-500 hover:text-slate-800 transition inline-flex items-center gap-1 cursor-pointer touch-manipulation"
-                            >
-                                ✕ Thoát
-                            </button>
+                    <div className="fixed inset-0 z-50 bg-slate-50/98 backdrop-blur-md flex flex-col justify-between overflow-y-auto sm:overflow-hidden p-2 sm:p-5 pt-safe pb-safe transition-all">
+                        <div className="max-w-3xl w-full mx-auto flex-1 flex flex-col justify-between h-full">
+                            {/* Thanh Topbar: Tiến trình, Combo, Âm thanh, Toàn màn hình - Tinh gọn */}
+                            <div className="flex items-center justify-between p-2 sm:p-3.5 bg-white/80 backdrop-blur-md rounded-xl sm:rounded-2xl border border-white/60 shadow-2xs mb-2 sm:mb-4 shrink-0">
+                                <div className="flex items-center gap-1.5 sm:gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            triggerHaptic(10);
+                                            stopSpeech();
+                                            setGameState('idle');
+                                        }}
+                                        className="px-2 py-1 rounded-lg text-xs font-bold text-slate-500 hover:text-rose-600 bg-black/5 hover:bg-black/10 transition cursor-pointer touch-manipulation inline-flex items-center gap-1"
+                                        title="Thoát ván chơi về màn hình chọn"
+                                    >
+                                        ✕ Thoát
+                                    </button>
 
-                            <div className="flex items-center gap-1.5 sm:gap-2">
-                                <span className="text-xs font-extrabold text-slate-700">
-                                    {currentIndex + 1}/{roundSentences.length}
-                                </span>
-                                <div className="w-20 sm:w-36 h-2 bg-slate-200 rounded-full overflow-hidden">
-                                    <div
-                                        className="h-full bg-gradient-to-r from-rose-500 to-amber-500 transition-all duration-300"
-                                        style={{ width: `${((currentIndex + 1) / roundSentences.length) * 100}%` }}
-                                    />
+                                    <button
+                                        type="button"
+                                        onClick={toggleFullscreen}
+                                        title={isFullscreen ? 'Thu nhỏ cửa sổ' : 'Bật toàn màn hình'}
+                                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/70 border border-slate-200 flex items-center justify-center text-xs text-slate-600 hover:bg-white transition cursor-pointer hidden sm:flex"
+                                    >
+                                        {isFullscreen ? '⤓' : '⛶'}
+                                    </button>
+                                </div>
+
+                                <div className="flex items-center gap-1.5 sm:gap-2">
+                                    <span className="text-xs font-extrabold text-slate-700 whitespace-nowrap">
+                                        {currentIndex + 1}/{roundSentences.length}
+                                    </span>
+                                    <div className="w-16 sm:w-36 h-2 bg-slate-200 rounded-full overflow-hidden">
+                                        <div
+                                            className="h-full bg-gradient-to-r from-rose-500 to-amber-500 transition-all duration-300"
+                                            style={{ width: `${((currentIndex + 1) / roundSentences.length) * 100}%` }}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-1.5 sm:gap-2">
+                                    {streak >= 2 && (
+                                        <span className="text-[10px] sm:text-xs font-black px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 animate-pulse whitespace-nowrap">
+                                            🔥x{streak}
+                                        </span>
+                                    )}
+                                    <span className="text-xs sm:text-sm font-black text-rose-600 whitespace-nowrap">
+                                        {score} đ
+                                    </span>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            triggerHaptic(10);
+                                            toggleSound();
+                                        }}
+                                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-white/70 border border-slate-200 flex items-center justify-center text-xs text-slate-600 hover:bg-white transition cursor-pointer touch-manipulation"
+                                        title="Bật/Tắt âm thanh"
+                                    >
+                                        {soundOn ? '🔊' : '🔇'}
+                                    </button>
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-1.5 sm:gap-2">
-                                {streak >= 2 && (
-                                    <span className="text-[10px] sm:text-xs font-black px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 animate-pulse">
-                                        🔥x{streak}
-                                    </span>
-                                )}
-                                <span className="text-xs font-black text-rose-600">
-                                    {score} đ
-                                </span>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        triggerHaptic(10);
-                                        toggleSound();
-                                    }}
-                                    className="p-1 rounded-lg text-slate-500 hover:text-slate-800 text-xs cursor-pointer touch-manipulation"
-                                    title="Bật/Tắt âm thanh"
-                                >
-                                    {soundOn ? '🔊' : '🔇'}
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Thẻ câu hỏi trung tâm */}
-                        <div className={`card p-3.5 sm:p-8 rounded-[1.25rem] sm:rounded-[2rem] bg-white/90 backdrop-blur-xl border border-white/70 shadow-lg relative transition-all overflow-hidden ${
-                            shake ? 'animate-shake border-rose-300' : ''
-                        } ${isCorrect === true ? 'border-emerald-400 bg-emerald-50/40' : ''}`}>
+                            {/* Thẻ câu hỏi trung tâm */}
+                            <div className={`card p-3 sm:p-6 rounded-[1.25rem] sm:rounded-[2rem] bg-white/95 backdrop-blur-xl border border-white/70 shadow-lg relative transition-all overflow-hidden my-auto flex flex-col justify-between ${
+                                shake ? 'animate-shake border-rose-300' : ''
+                            } ${isCorrect === true ? 'border-emerald-400 bg-emerald-50/40' : ''}`}>
 
                             {/* Lớp phủ Đang tải khi đổi câu khác */}
                             {isLoadingNext && (
@@ -1073,6 +1088,7 @@ export default function SentenceGame() {
                                     <span>→</span>
                                 </button>
                             </div>
+                        </div>
                         </div>
                     </div>
                 )}

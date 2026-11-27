@@ -146,7 +146,7 @@ export default function SentenceGame() {
     const [selectedChunks, setSelectedChunks] = useState<ChunkItem[]>([]);
 
     // Tùy chọn học tập & Âm thanh
-    const [showPinyin, setShowPinyin] = useState(true);
+    const [showPinyin, setShowPinyin] = useState(false); // Mặc định ẨN Pinyin cả câu lúc làm bài (Audio Only, không mách nước đáp án)
     const [showHint, setShowHint] = useState(false);
     const [soundOn, setSoundOn] = useState(true);
     const [voiceSpeed, setVoiceSpeed] = useState<number>(0.70); // Tốc độ mặc định 0.70x: rất chậm rãi, chuẩn âm điệu
@@ -242,11 +242,13 @@ export default function SentenceGame() {
     }, [voiceSpeed]);
 
     // Phát âm câu tiếng Trung với hỗ trợ thẻ SSML Chunks Break hoặc Flow liền mạch
+    // Mặc định enableHighlight = false (Audio Only - không mách nước đáp án lúc đầu)
     const speakSentence = useCallback((
         target: SentenceItem | string,
         rate: number = voiceSpeed,
         onComplete?: () => void,
-        forceMode?: 'ssml-chunks' | 'flow'
+        forceMode?: 'ssml-chunks' | 'flow',
+        enableHighlight: boolean = false
     ) => {
         if (typeof window === 'undefined' || !window.speechSynthesis) {
             onComplete?.();
@@ -286,7 +288,12 @@ export default function SentenceGame() {
                 }
 
                 const chunkText = chunks[currentChunkIdx];
-                setActiveSpeakingChunkIndex(currentChunkIdx);
+                // Chỉ highlight khi được phép rõ ràng (ví dụ: sau khi đã trả lời đúng để tổng kết)
+                if (enableHighlight) {
+                    setActiveSpeakingChunkIndex(currentChunkIdx);
+                } else {
+                    setActiveSpeakingChunkIndex(null);
+                }
 
                 const utterance = new SpeechSynthesisUtterance(chunkText);
                 utterance.lang = 'zh-CN';
@@ -384,6 +391,7 @@ export default function SentenceGame() {
         setSelectedChunks([]);
         setIsCorrect(null);
         setShowHint(false);
+        setShowPinyin(false);
         setShake(false);
     }, []);
 
@@ -488,12 +496,12 @@ export default function SentenceGame() {
                 },
             ]);
 
-            // Thì 2: Tự động đọc lại câu hoàn chỉnh 1 LẦN NỮA trước khi chuyển sang câu tiếp theo
+            // Thì 2: Sau khi trả lời ĐÚNG -> Mới đọc lại câu và highlight kết quả trên khung ghép
             speakSentence(currentSentence, voiceSpeed, () => {
                 setTimeout(() => {
                     moveToNextSentence();
                 }, 500);
-            });
+            }, undefined, true);
         } else {
             // Sai!
             setIsCorrect(false);
@@ -883,7 +891,7 @@ export default function SentenceGame() {
                                 <h2 className="text-base sm:text-2xl md:text-3xl font-extrabold text-slate-900 leading-snug">
                                     &ldquo;{currentSentence.vietnamese}&rdquo;
                                 </h2>
-                                {showPinyin && (
+                                {(showPinyin || isCorrect === true) && (
                                     <p className="text-xs sm:text-sm font-mono text-rose-600 font-bold mt-1">
                                         {currentSentence.fullPinyin}
                                     </p>
@@ -898,7 +906,7 @@ export default function SentenceGame() {
                                     </span>
                                 ) : (
                                     selectedChunks.map(chunk => {
-                                        const isSpeakingThis = activeSpeakingChunkIndex === chunk.originalIndex;
+                                        const isSpeakingThis = isCorrect === true && activeSpeakingChunkIndex === chunk.originalIndex;
                                         return (
                                             <button
                                                 key={chunk.id}
@@ -921,17 +929,12 @@ export default function SentenceGame() {
                             {/* VÙNG KHO TỪ ĐANG XÁO TRỘN (WORD BANK) */}
                             <div className="mt-3 sm:mt-5 pt-2.5 sm:pt-4 border-t border-slate-100 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2.5 min-h-[68px] sm:min-h-[80px]">
                                 {availableChunks.map(chunk => {
-                                    const isSpeakingThis = activeSpeakingChunkIndex === chunk.originalIndex;
                                     return (
                                         <button
                                             key={chunk.id}
                                             type="button"
                                             onClick={() => handlePickChunk(chunk)}
-                                            className={`px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl font-extrabold text-sm sm:text-base md:text-lg shadow-2xs hover:shadow-sm active:scale-95 transition cursor-pointer select-none touch-manipulation min-h-[42px] flex items-center justify-center border-2 ${
-                                                isSpeakingThis
-                                                    ? 'bg-amber-100 border-amber-400 text-amber-950 ring-2 ring-amber-300 scale-105'
-                                                    : 'bg-white border-slate-200 hover:border-indigo-500 text-slate-800'
-                                            }`}
+                                            className="px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl font-extrabold text-sm sm:text-base md:text-lg shadow-2xs hover:shadow-sm active:scale-95 transition cursor-pointer select-none touch-manipulation min-h-[42px] flex items-center justify-center border-2 bg-white border-slate-200 hover:border-indigo-500 text-slate-800"
                                         >
                                             {chunk.text}
                                         </button>

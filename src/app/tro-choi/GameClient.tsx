@@ -1,12 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
-import { GARMENT_VOCAB_DATABASE, GARMENT_LESSONS, GarmentLessonInfo } from './garmentVocab';
-import { BUOI_1_VOCAB, BUOI_1_INFO } from './buoi1Vocab';
+import { GARMENT_VOCAB_DATABASE, GARMENT_LESSONS } from './garmentVocab';
+import { BUOI_1_VOCAB } from './buoi1Vocab';
 import { ALL_HSK_EXTRA_VOCAB } from './hskVocab';
 import { FACTORY_EXTRA_VOCAB } from './factoryVocab';
-import { ALL_LIVING_VOCAB, LIVING_ROOM_VOCAB, DORM_VOCAB, KITCHEN_VOCAB, CLOTHING_VOCAB, BUOI_1_ROOM_INFO, BUOI_2_DORM_INFO, BUOI_3_KITCHEN_INFO, BUOI_4_CLOTHING_INFO, LivingWordItem } from './livingVocab';
+import { ALL_LIVING_VOCAB } from './livingVocab';
 import { useVirtualKeyboard } from '@/hooks/useVirtualKeyboard';
 
 interface WordItem {
@@ -225,6 +224,26 @@ class SoundEffects {
         if (this.ctx && this.ctx.state === 'suspended') {
             this.ctx.resume().catch(() => {});
         }
+    }
+
+    playTap() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(600, now);
+            osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+            gain.gain.setValueAtTime(0.12, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+            osc.start(now);
+            osc.stop(now + 0.05);
+        } catch {}
     }
 
     playCorrect() {
@@ -500,6 +519,7 @@ export default function GameClient() {
     const { isKeyboardOpen, viewportHeight, isFullscreen, toggleFullscreen } = useVirtualKeyboard();
     const [selectedCategory, setSelectedCategory] = useState<string>('buoi-1');
     const [selectedLesson, setSelectedLesson] = useState<string>('b1');
+    const [showGarmentPicker, setShowGarmentPicker] = useState<boolean>(false);
     const [gameState, setGameState] = useState<'idle' | 'playing' | 'gameover'>('idle');
     const [endReason, setEndReason] = useState<'completed' | 'timeout'>('completed');
 
@@ -554,71 +574,51 @@ export default function GameClient() {
     // Từ hiện tại đang hiển thị
     const currentWord = roundWords[currentIndex] || null;
 
-    // Lọc danh sách từ theo chủ đề và bài học
-    const getFilteredWords = useCallback(() => {
-        if (selectedCategory === 'all') return ALL_VOCAB_DATABASE;
-        if (selectedCategory === 'buoi-1') {
-            return ALL_VOCAB_DATABASE.filter(w => w.category === 'buoi-1');
-        }
-        if (selectedCategory === 'buoi-1-phong-o') {
-            return ALL_VOCAB_DATABASE.filter(w => w.category === 'buoi-1-phong-o');
-        }
-        if (selectedCategory === 'buoi-2-ktx') {
-            return ALL_VOCAB_DATABASE.filter(w => w.category === 'buoi-2-ktx');
-        }
-        if (selectedCategory === 'buoi-3-bep') {
-            return ALL_VOCAB_DATABASE.filter(w => w.category === 'buoi-3-bep');
-        }
-        if (selectedCategory === 'buoi-4-trang-phuc') {
-            return ALL_VOCAB_DATABASE.filter(w => w.category === 'buoi-4-trang-phuc');
-        }
-        if (selectedCategory === 'may-mac') {
-            if (selectedLesson === 'all') {
-                return ALL_VOCAB_DATABASE.filter(w => w.category === 'may-mac');
-            }
-            return ALL_VOCAB_DATABASE.filter(w => w.category === 'may-mac' && w.lesson === selectedLesson);
-        }
-        return ALL_VOCAB_DATABASE.filter(w => w.category === selectedCategory);
-    }, [selectedCategory, selectedLesson]);
-
-    // Bắt đầu lượt chơi mới (16 từ)
-    const startGame = (overrideLesson?: string) => {
+    // Bắt đầu lượt chơi mới (16 từ) - 1 Chạm Chơi Ngay
+    const startGame = (targetCategory?: string, targetLesson?: string) => {
         sfx.init();
-        const activeLesson = overrideLesson !== undefined ? overrideLesson : selectedLesson;
-        if (overrideLesson !== undefined) {
-            setSelectedLesson(overrideLesson);
+        if (typeof window !== 'undefined' && window.speechSynthesis) {
+            try {
+                if (window.speechSynthesis.paused) {
+                    window.speechSynthesis.resume();
+                }
+            } catch {}
         }
+        const activeCategory = targetCategory || selectedCategory;
+        const activeLesson = targetLesson !== undefined ? targetLesson : selectedLesson;
+        if (targetCategory) setSelectedCategory(targetCategory);
+        if (targetLesson !== undefined) setSelectedLesson(targetLesson);
 
         let selected16: WordItem[] = [];
 
-        if (selectedCategory === 'buoi-1') {
+        if (activeCategory === 'buoi-1') {
             // Lấy 16 từ Buổi 1 THEO ĐÚNG THỨ TỰ TỪ TRÊN XUỐNG DƯỚI (Phần A -> Phần B -> Phần C)
             const buoi1Pool = ALL_VOCAB_DATABASE.filter(w => w.category === 'buoi-1');
             selected16 = buoi1Pool.slice(0, TOTAL_ROUND_WORDS);
-        } else if (selectedCategory === 'buoi-1-phong-o') {
+        } else if (activeCategory === 'buoi-1-phong-o') {
             // Lấy 16 từ Buổi 1 Phòng ở & Xưởng
             const roomPool = ALL_VOCAB_DATABASE.filter(w => w.category === 'buoi-1-phong-o');
             selected16 = roomPool.slice(0, TOTAL_ROUND_WORDS);
-        } else if (selectedCategory === 'buoi-2-ktx') {
+        } else if (activeCategory === 'buoi-2-ktx') {
             // Lấy 16 từ Buổi 2 Ký túc xá & Đồ dùng sinh hoạt
             const dormPool = ALL_VOCAB_DATABASE.filter(w => w.category === 'buoi-2-ktx');
             selected16 = dormPool.slice(0, TOTAL_ROUND_WORDS);
-        } else if (selectedCategory === 'buoi-3-bep') {
+        } else if (activeCategory === 'buoi-3-bep') {
             // Lấy 16 từ Buổi 3 Bếp núc & Thời gian
             const kitchenPool = ALL_VOCAB_DATABASE.filter(w => w.category === 'buoi-3-bep');
             selected16 = kitchenPool.slice(0, TOTAL_ROUND_WORDS);
-        } else if (selectedCategory === 'buoi-4-trang-phuc') {
+        } else if (activeCategory === 'buoi-4-trang-phuc') {
             // Lấy 16 từ Buổi 4 Trang phục hàng ngày & Ngày tháng
             const clothingPool = ALL_VOCAB_DATABASE.filter(w => w.category === 'buoi-4-trang-phuc');
             selected16 = clothingPool.slice(0, TOTAL_ROUND_WORDS);
-        } else if (selectedCategory === 'may-mac' && activeLesson !== 'all') {
+        } else if (activeCategory === 'may-mac' && activeLesson !== 'all') {
             // Lấy 16 từ của bài đã chọn THEO ĐÚNG THỨ TỰ TỪ TRÊN XUỐNG DƯỚI (Không xáo trộn)
             const lessonPool = ALL_VOCAB_DATABASE.filter(w => w.category === 'may-mac' && w.lesson === activeLesson);
             selected16 = lessonPool.slice(0, TOTAL_ROUND_WORDS);
         } else {
-            const pool = selectedCategory === 'all'
+            const pool = activeCategory === 'all'
                 ? ALL_VOCAB_DATABASE
-                : ALL_VOCAB_DATABASE.filter(w => w.category === selectedCategory);
+                : ALL_VOCAB_DATABASE.filter(w => w.category === activeCategory);
             const shuffled = [...pool].sort(() => Math.random() - 0.5);
             selected16 = shuffled.slice(0, TOTAL_ROUND_WORDS);
         }
@@ -893,15 +893,15 @@ export default function GameClient() {
                         <div className="text-5xl sm:text-6xl mb-3 sm:mb-4 animate-bounce">
                             🏮
                         </div>
-                        <h2 className="text-xl sm:text-3xl font-bold text-[var(--text)] mb-2 sm:mb-3">
-                            Chọn Chủ Đề Luyện Tập
+                        <h2 className="text-xl sm:text-3xl font-bold text-[var(--text)] mb-1 sm:mb-2">
+                            Chọn Bài Học & Thử Thách
                         </h2>
-                        <p className="text-xs sm:text-sm text-[var(--muted)] mb-5 sm:mb-8 max-w-md mx-auto">
-                            Mỗi lượt chơi gồm <strong>16 câu hỏi chọn lọc</strong> trong <strong>1 phút (60 giây)</strong>:
+                        <p className="text-xs sm:text-sm text-[var(--muted)] mb-4 sm:mb-6 max-w-md mx-auto">
+                            ⚡ <strong>1-Chạm chơi ngay:</strong> Bấm vào bất kỳ thẻ bài để bắt đầu lượt đấu <strong>16 từ / 60 giây</strong>!
                         </p>
 
-                        {/* Danh sách chủ đề */}
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 mb-4 sm:mb-6">
+                        {/* Danh sách thẻ bài Action Cards - Bấm là chơi ngay */}
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-3.5 mb-4 sm:mb-6">
                             {[
                                 { id: 'buoi-1', label: 'Buổi 1: QC May Mặc', icon: '📋', count: '16 từ cốt lõi', highlight: true },
                                 { id: 'buoi-1-phong-o', label: 'Buổi 1: Phòng Ở & Xưởng', icon: '🪑', count: '16 từ thực chiến', highlight: true },
@@ -909,382 +909,117 @@ export default function GameClient() {
                                 { id: 'buoi-3-bep', label: 'Buổi 3: Bếp Núc & Tuần', icon: '🍳', count: '16 từ Bếp & Thời gian', highlight: true },
                                 { id: 'buoi-4-trang-phuc', label: 'Buổi 4: Trang Phục', icon: '👕', count: '16 từ Quần áo & Lịch', highlight: true },
                                 { id: 'may-mac', label: '12 Bài Dệt May', icon: '🧵', count: '180+ từ (12 Bài)' },
-                                { id: 'all', label: 'Tất cả chủ đề', icon: '🌟', count: '760+ từ' },
-                                { id: 'cong-xuong', label: 'Công xưởng', icon: '🏭', count: '135 từ' },
-                                { id: 'hsk-1', label: 'HSK 1 (Sơ cấp)', icon: '🎯', count: '135 từ' },
-                                { id: 'hsk-2', label: 'HSK 2 (Cơ bản)', icon: '📗', count: '135 từ' },
-                                { id: 'hsk-3', label: 'HSK 3 (Trung cấp)', icon: '📘', count: '135 từ' },
-                            ].map(cat => (
-                                <button
-                                    key={cat.id}
-                                    type="button"
-                                    onClick={() => { triggerHaptic(10); setSelectedCategory(cat.id); }}
-                                    className={`p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border text-xs sm:text-sm font-semibold transition-all flex flex-col items-center gap-1 cursor-pointer relative touch-manipulation select-none active:scale-95 ${
-                                        selectedCategory === cat.id
-                                            ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-md scale-102 ring-2 ring-[var(--accent)]/30'
-                                            : 'bg-white/60 text-[var(--text)] border-[var(--border)] hover:bg-white'
-                                    } ${cat.highlight && selectedCategory !== cat.id ? 'border-rose-300 bg-rose-50/50' : ''}`}
-                                >
-                                    {cat.highlight && selectedCategory !== cat.id && (
-                                        <span className="absolute -top-2.5 -right-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-rose-500 text-white shadow-xs">
-                                            Mới ✨
+                                { id: 'all', label: 'Tất cả chủ đề', icon: '🌟', count: '760+ từ ngẫu nhiên' },
+                                { id: 'cong-xuong', label: 'Công xưởng', icon: '🏭', count: '135 từ nhà máy' },
+                                { id: 'hsk-1', label: 'HSK 1 (Sơ cấp)', icon: '🎯', count: '135 từ cơ bản' },
+                                { id: 'hsk-2', label: 'HSK 2 (Cơ bản)', icon: '📗', count: '135 từ thiết yếu' },
+                                { id: 'hsk-3', label: 'HSK 3 (Trung cấp)', icon: '📘', count: '135 từ nâng cao' },
+                            ].map(cat => {
+                                const isGarment = cat.id === 'may-mac';
+                                const isGarmentActive = isGarment && showGarmentPicker;
+
+                                return (
+                                    <button
+                                        key={cat.id}
+                                        type="button"
+                                        onClick={() => {
+                                            sfx.playTap();
+                                            triggerHaptic(15);
+                                            if (isGarment) {
+                                                setShowGarmentPicker(prev => !prev);
+                                            } else {
+                                                startGame(cat.id);
+                                            }
+                                        }}
+                                        className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border text-xs sm:text-sm font-semibold transition-all flex flex-col items-center justify-between gap-1.5 cursor-pointer relative touch-manipulation select-none active:scale-95 shadow-xs hover:shadow-md hover:-translate-y-0.5 ${
+                                            isGarmentActive
+                                                ? 'bg-indigo-600 text-white border-indigo-600 ring-2 ring-indigo-400'
+                                                : cat.highlight
+                                                ? 'bg-white/80 border-rose-200 hover:border-rose-400 hover:bg-rose-50/40 text-[var(--text)]'
+                                                : 'bg-white/70 border-[var(--border)] hover:border-[var(--accent)] hover:bg-white text-[var(--text)]'
+                                        }`}
+                                    >
+                                        {cat.highlight && (
+                                            <span className="absolute -top-2 -right-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-rose-500 text-white shadow-xs">
+                                                Mới ✨
+                                            </span>
+                                        )}
+                                        <span className="text-2xl sm:text-3xl">{cat.icon}</span>
+                                        <div className="font-bold text-center line-clamp-1 w-full">
+                                            {cat.label}
+                                        </div>
+                                        <span className={`text-[10px] ${isGarmentActive ? 'text-white/80' : 'text-[var(--muted)]'}`}>
+                                            {cat.count}
                                         </span>
-                                    )}
-                                    <span className="text-2xl">{cat.icon}</span>
-                                    <span className="line-clamp-1">{cat.label}</span>
-                                    <span className={`text-[10px] ${selectedCategory === cat.id ? 'text-white/80' : 'text-[var(--muted)]'}`}>
-                                        {cat.count}
-                                    </span>
-                                </button>
-                            ))}
+                                        <div className={`mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
+                                            isGarmentActive
+                                                ? 'bg-white/20 text-white'
+                                                : isGarment
+                                                ? 'bg-indigo-100 text-indigo-700'
+                                                : 'bg-[var(--accent)]/10 text-[var(--accent)]'
+                                        }`}>
+                                            {isGarment ? (showGarmentPicker ? '▲ Đóng bài' : '📖 Chọn bài ▾') : '▶ Chơi ngay'}
+                                        </div>
+                                    </button>
+                                );
+                            })}
                         </div>
 
-                        {/* Hiển thị chi tiết nội dung BUỔI 1: QC MAY MẶC */}
-                        {selectedCategory === 'buoi-1' && (
-                            <div className="mb-8 text-left bg-gradient-to-br from-indigo-50/90 via-white/90 to-rose-50/80 p-5 sm:p-7 rounded-3xl border-2 border-indigo-200 shadow-md animate-fade-in">
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-4 border-b border-indigo-100">
+                        {/* Drawer / Lưới 12 Bài Dệt May khi bấm mở */}
+                        {showGarmentPicker && (
+                            <div className="mb-6 p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-indigo-50/90 via-white/95 to-blue-50/90 border-2 border-indigo-200 shadow-lg animate-fade-in text-left">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-3 border-b border-indigo-100">
                                     <div>
-                                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-indigo-100 text-indigo-900 uppercase tracking-wider mb-1.5">
-                                            <span>📋</span> BÀI HỌC THEO YÊU CẦU: BUỔI 1
+                                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-indigo-100 text-indigo-800 tracking-wider">
+                                            <span>🧵</span> Chuyên Ngành Dệt May
                                         </div>
-                                        <h3 className="text-base sm:text-xl font-black text-[var(--text)] tracking-tight">
-                                            BUỔI 1: CHÀO HỎI LÀM QUEN & KIỂM MẪU VẢI, NHÃN GIẶT, THÔNG SỐ KỸ THUẬT
+                                        <h3 className="text-sm sm:text-base font-extrabold text-[var(--text)] mt-1">
+                                            Chọn 1 Trong 12 Bài May Mặc (Chạm vào là chơi ngay 16 từ)
                                         </h3>
-                                        <p className="text-xs sm:text-sm text-indigo-900/80 font-medium mt-0.5">
-                                            I. BẢNG TỪ VỰNG CỐT LÕI (16 TỪ CHUYÊN BIỆT QC) • Học tuần tự từ trên xuống dưới
-                                        </p>
-                                    </div>
-                                    <div className="px-3.5 py-1.5 rounded-xl bg-indigo-600 text-white font-extrabold text-xs shadow-xs shrink-0 self-start sm:self-auto">
-                                        Chuẩn 16 Từ / 60 Giây
-                                    </div>
-                                </div>
-
-                                {/* 3 Phần A, B, C */}
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-                                    {/* Phần A */}
-                                    <div className="p-3.5 rounded-2xl bg-white/90 border border-blue-200 shadow-xs flex flex-col justify-between">
-                                        <div>
-                                            <div className="flex items-center justify-between mb-1.5">
-                                                <span className="text-xs font-black uppercase text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md">
-                                                    Phần A (6 từ)
-                                                </span>
-                                                <span className="text-[10px] font-bold text-gray-500">Từ 1 – 6</span>
-                                            </div>
-                                            <div className="text-xs font-bold text-gray-900 mb-2">
-                                                Giao tiếp đời sống cơ bản (Chào hỏi & Làm quen)
-                                            </div>
-                                            <div className="space-y-1.5 text-xs text-gray-700">
-                                                <div>1. <strong>你好</strong> (nǐ hǎo): Xin chào</div>
-                                                <div>2. <strong>请问</strong> (qǐngwèn): Xin hỏi</div>
-                                                <div>3. <strong>名字</strong> (míngzi): Tên, họ tên</div>
-                                                <div>4. <strong>越南人</strong> (Yuènán rén): Người Việt Nam</div>
-                                                <div>5. <strong>质检员</strong> (zhìjiǎnyuán): QC / KCS</div>
-                                                <div>6. <strong>认识</strong> (rènshi): Quen biết</div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Phần B */}
-                                    <div className="p-3.5 rounded-2xl bg-white/90 border border-amber-200 shadow-xs flex flex-col justify-between">
-                                        <div>
-                                            <div className="flex items-center justify-between mb-1.5">
-                                                <span className="text-xs font-black uppercase text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md">
-                                                    Phần B (5 từ)
-                                                </span>
-                                                <span className="text-[10px] font-bold text-gray-500">Từ 7 – 11</span>
-                                            </div>
-                                            <div className="text-xs font-bold text-gray-900 mb-2">
-                                                Từ vựng nền tảng Dệt sợi (Tài liệu gốc)
-                                            </div>
-                                            <div className="space-y-1.5 text-xs text-gray-700">
-                                                <div>7. <strong>织物样本</strong>: Bản mẫu hàng dệt</div>
-                                                <div>8. <strong>衣料样品卡</strong>: Thẻ/Card găm mẫu vải</div>
-                                                <div>9. <strong>薄呢</strong>: Dạ mỏng, nỉ mỏng</div>
-                                                <div>10. <strong>衣物使用须知标签</strong>: Nhãn giặt là (Care label)</div>
-                                                <div>11. <strong>棉织物</strong>: Hàng dệt bông, vải cotton</div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Phần C */}
-                                    <div className="p-3.5 rounded-2xl bg-white/90 border border-emerald-200 shadow-xs flex flex-col justify-between">
-                                        <div>
-                                            <div className="flex items-center justify-between mb-1.5">
-                                                <span className="text-xs font-black uppercase text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
-                                                    Phần C (5 từ)
-                                                </span>
-                                                <span className="text-[10px] font-bold text-gray-500">Từ 12 – 16</span>
-                                            </div>
-                                            <div className="text-xs font-bold text-gray-900 mb-2">
-                                                Nghiệp vụ QC & Thông số công ty
-                                            </div>
-                                            <div className="space-y-1.5 text-xs text-gray-700">
-                                                <div>12. <strong>核对</strong> (héduì): Đối chiếu, kiểm tra</div>
-                                                <div>13. <strong>尺寸表</strong>: Bảng thông số (Spec sheet)</div>
-                                                <div>14. <strong>公差</strong> (gōngchā): Dung sai cho phép (+/-)</div>
-                                                <div>15. <strong>前身长</strong>: Dài thân trước (Front length)</div>
-                                                <div>16. <strong>胸宽</strong>: Rộng ngực (1/2 Chest width)</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Hiển thị chi tiết nội dung BUỔI 1: PHÒNG Ở & BÀN LÀM VIỆC */}
-                        {selectedCategory === 'buoi-1-phong-o' && (
-                            <div className="mb-8 text-left bg-gradient-to-br from-emerald-50/90 via-white/90 to-blue-50/80 p-5 sm:p-7 rounded-3xl border-2 border-emerald-200 shadow-md animate-fade-in">
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-4 border-b border-emerald-100">
-                                    <div>
-                                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-emerald-100 text-emerald-900 uppercase tracking-wider mb-1.5">
-                                            <span>🪑</span> BÀI HỌC GHÉP TỪ: BUỔI 1
-                                        </div>
-                                        <h3 className="text-base sm:text-xl font-black text-[var(--text)] tracking-tight">
-                                            BUỔI 1: ĐỒ VẬT PHÒNG Ở & BÀN LÀM VIỆC TẠI CÔNG XƯỞNG
-                                        </h3>
-                                        <p className="text-xs sm:text-sm text-emerald-900/80 font-medium mt-0.5">
-                                            16 từ thực chiến chọn lọc kèm câu ví dụ ngữ cảnh (câu chữ 把, lượng từ, cấu trúc vị trí)
-                                        </p>
-                                    </div>
-                                    <div className="px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white font-extrabold text-xs shadow-xs shrink-0 self-start sm:self-auto">
-                                        Chuẩn 16 Từ / 60 Giây
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                                    {LIVING_ROOM_VOCAB.map((w, idx) => (
-                                        <div key={w.id} className="p-2.5 rounded-xl bg-white/90 border border-emerald-100 shadow-xs flex flex-col justify-between">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
-                                                    #{idx + 1}
-                                                </span>
-                                                <span className="text-[10px] text-gray-500 font-medium">[{w.pinyin}]</span>
-                                            </div>
-                                            <div className="text-base sm:text-lg font-bold text-gray-900 my-1 font-[family:var(--font-serif)]">
-                                                {w.hanzi}
-                                            </div>
-                                            <div className="text-xs text-gray-600 line-clamp-1">
-                                                {w.meanings[0]}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Hiển thị chi tiết nội dung BUỔI 2: KÝ TÚC XÁ & VỆ SINH CÁ NHÂN */}
-                        {selectedCategory === 'buoi-2-ktx' && (
-                            <div className="mb-8 text-left bg-gradient-to-br from-indigo-50/90 via-white/90 to-purple-50/80 p-5 sm:p-7 rounded-3xl border-2 border-indigo-200 shadow-md animate-fade-in">
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-4 border-b border-indigo-100">
-                                    <div>
-                                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-indigo-100 text-indigo-900 uppercase tracking-wider mb-1.5">
-                                            <span>🛏️</span> BÀI HỌC GHÉP TỪ: BUỔI 2
-                                        </div>
-                                        <h3 className="text-base sm:text-xl font-black text-[var(--text)] tracking-tight">
-                                            BUỔI 2: KÝ TÚC XÁ, ĐỒ DÙNG SINH HOẠT & VỆ SINH CÁ NHÂN
-                                        </h3>
-                                        <p className="text-xs sm:text-sm text-indigo-900/80 font-medium mt-0.5">
-                                            16 từ vựng thiết yếu về phòng ngủ, giặt giũ, sinh hoạt kèm bổ ngữ kết quả và câu ví dụ
-                                        </p>
-                                    </div>
-                                    <div className="px-3.5 py-1.5 rounded-xl bg-indigo-600 text-white font-extrabold text-xs shadow-xs shrink-0 self-start sm:self-auto">
-                                        Chuẩn 16 Từ / 60 Giây
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                                    {DORM_VOCAB.map((w, idx) => (
-                                        <div key={w.id} className="p-2.5 rounded-xl bg-white/90 border border-indigo-100 shadow-xs flex flex-col justify-between">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded">
-                                                    #{idx + 1}
-                                                </span>
-                                                <span className="text-[10px] text-gray-500 font-medium">[{w.pinyin}]</span>
-                                            </div>
-                                            <div className="text-base sm:text-lg font-bold text-gray-900 my-1 font-[family:var(--font-serif)]">
-                                                {w.hanzi}
-                                            </div>
-                                            <div className="text-xs text-gray-600 line-clamp-1">
-                                                {w.meanings[0]}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Hiển thị chi tiết nội dung BUỔI 3: ĐỒ DÙNG BẾP NÚC & THỜI GIAN TRONG TUẦN */}
-                        {selectedCategory === 'buoi-3-bep' && (
-                            <div className="mb-8 text-left bg-gradient-to-br from-amber-50/90 via-white/90 to-orange-50/80 p-5 sm:p-7 rounded-3xl border-2 border-amber-200 shadow-md animate-fade-in">
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-4 border-b border-amber-100">
-                                    <div>
-                                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-amber-100 text-amber-900 uppercase tracking-wider mb-1.5">
-                                            <span>🍳</span> BÀI HỌC GHÉP TỪ: BUỔI 3
-                                        </div>
-                                        <h3 className="text-base sm:text-xl font-black text-[var(--text)] tracking-tight">
-                                            BUỔI 3: ĐỒ DÙNG BẾP NÚC, ĂN UỐNG & THỜI GIAN TRONG TUẦN
-                                        </h3>
-                                        <p className="text-xs sm:text-sm text-amber-900/80 font-medium mt-0.5">
-                                            16 từ cốt lõi về đồ dùng nhà bếp, các buổi trong ngày, thứ trong tuần và chỉ may chuyền
-                                        </p>
-                                    </div>
-                                    <div className="px-3.5 py-1.5 rounded-xl bg-amber-600 text-white font-extrabold text-xs shadow-xs shrink-0 self-start sm:self-auto">
-                                        Chuẩn 16 Từ / 60 Giây
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                                    {KITCHEN_VOCAB.map((w, idx) => (
-                                        <div key={w.id} className="p-2.5 rounded-xl bg-white/90 border border-amber-100 shadow-xs flex flex-col justify-between">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
-                                                    #{idx + 1}
-                                                </span>
-                                                <span className="text-[10px] text-gray-500 font-medium">[{w.pinyin}]</span>
-                                            </div>
-                                            <div className="text-base sm:text-lg font-bold text-gray-900 my-1 font-[family:var(--font-serif)]">
-                                                {w.hanzi}
-                                            </div>
-                                            <div className="text-xs text-gray-600 line-clamp-1">
-                                                {w.meanings[0]}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Hiển thị chi tiết nội dung BUỔI 4: TRANG PHỤC HÀNG NGÀY & THỜI GIAN NGÀY THÁNG */}
-                        {selectedCategory === 'buoi-4-trang-phuc' && (
-                            <div className="mb-8 text-left bg-gradient-to-br from-rose-50/90 via-white/90 to-pink-50/80 p-5 sm:p-7 rounded-3xl border-2 border-rose-200 shadow-md animate-fade-in">
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-4 border-b border-rose-100">
-                                    <div>
-                                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-rose-100 text-rose-900 uppercase tracking-wider mb-1.5">
-                                            <span>👕</span> BÀI HỌC GHÉP TỪ: BUỔI 4
-                                        </div>
-                                        <h3 className="text-base sm:text-xl font-black text-[var(--text)] tracking-tight">
-                                            BUỔI 4: TRANG PHỤC HÀNG NGÀY, NGÀY THÁNG & CỠ SIZE
-                                        </h3>
-                                        <p className="text-xs sm:text-sm text-rose-900/80 font-medium mt-0.5">
-                                            16 từ vựng thiết yếu về quần áo, giày dép, kính mắt, cách nói ngày tháng và size may mặc
-                                        </p>
-                                    </div>
-                                    <div className="px-3.5 py-1.5 rounded-xl bg-rose-600 text-white font-extrabold text-xs shadow-xs shrink-0 self-start sm:self-auto">
-                                        Chuẩn 16 Từ / 60 Giây
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                                    {CLOTHING_VOCAB.map((w, idx) => (
-                                        <div key={w.id} className="p-2.5 rounded-xl bg-white/90 border border-rose-100 shadow-xs flex flex-col justify-between">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-[10px] font-bold text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded">
-                                                    #{idx + 1}
-                                                </span>
-                                                <span className="text-[10px] text-gray-500 font-medium">[{w.pinyin}]</span>
-                                            </div>
-                                            <div className="text-base sm:text-lg font-bold text-gray-900 my-1 font-[family:var(--font-serif)]">
-                                                {w.hanzi}
-                                            </div>
-                                            <div className="text-xs text-gray-600 line-clamp-1">
-                                                {w.meanings[0]}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Bộ chia 12 Bài học Mỗi ngày theo tài liệu dệt may (Khi chọn ngành may mặc) */}
-                        {selectedCategory === 'may-mac' && (
-                            <div className="mb-8 text-left bg-gradient-to-br from-amber-50/80 via-white/80 to-rose-50/60 p-5 sm:p-6 rounded-3xl border border-amber-200 shadow-sm animate-fade-in">
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-amber-200/60">
-                                    <div>
-                                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-amber-100 text-amber-900 uppercase tracking-wider mb-1">
-                                            <span>📅</span> Lộ trình học 16 từ mỗi ngày (Từ trên xuống dưới)
-                                        </div>
-                                        <h3 className="text-base sm:text-lg font-extrabold text-[var(--text)]">
-                                            Chọn Ngày / Bài Học Ngành May Mặc & Dệt Sợi
-                                        </h3>
-                                        <p className="text-xs text-[var(--muted)]">
-                                            Đã chia sẵn 12 bài theo đúng thứ tự file Word tài liệu. Mỗi ngày học chuẩn 16 từ!
-                                        </p>
                                     </div>
                                     <button
                                         type="button"
-                                        onClick={() => setSelectedLesson('all')}
-                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer border ${
-                                            selectedLesson === 'all'
-                                                ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-sm'
-                                                : 'bg-white text-[var(--muted)] border-gray-200 hover:text-[var(--text)]'
-                                        }`}
+                                        onClick={() => {
+                                            sfx.playTap();
+                                            triggerHaptic(15);
+                                            startGame('may-mac', 'all');
+                                        }}
+                                        className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs active:scale-95 transition cursor-pointer touch-manipulation self-start sm:self-auto"
                                     >
-                                        🎲 Trộn ngẫu nhiên (16 từ)
+                                        🌟 Chơi ngẫu nhiên cả 12 bài
                                     </button>
                                 </div>
 
-                                {/* 12 bài dạng lưới */}
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
-                                    {GARMENT_LESSONS.map(lesson => {
-                                        const isSelected = selectedLesson === lesson.id;
-                                        return (
-                                            <button
-                                                key={lesson.id}
-                                                type="button"
-                                                onClick={() => setSelectedLesson(lesson.id)}
-                                                className={`p-3 rounded-2xl border text-left transition-all cursor-pointer relative flex flex-col justify-between gap-1 ${
-                                                    isSelected
-                                                        ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-md scale-102 ring-2 ring-[var(--accent)]/30'
-                                                        : 'bg-white/80 hover:bg-white text-[var(--text)] border-amber-100 hover:border-amber-300 shadow-xs'
-                                                }`}
-                                            >
-                                                <div className="flex items-center justify-between gap-1">
-                                                    <span className="text-xl">{lesson.icon}</span>
-                                                    <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md ${
-                                                        isSelected ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-900'
-                                                    }`}>
-                                                        Ngày {lesson.number}
-                                                    </span>
-                                                </div>
-                                                <div>
-                                                    <div className="text-xs sm:text-sm font-bold line-clamp-1">
-                                                        {lesson.title}
-                                                    </div>
-                                                    <div className={`text-[11px] mt-0.5 ${isSelected ? 'text-white/80' : 'text-[var(--muted)]'}`}>
-                                                        {lesson.wordRange}
-                                                    </div>
-                                                </div>
-                                            </button>
-                                        );
-                                    })}
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-2.5">
+                                    {GARMENT_LESSONS.map(lesson => (
+                                        <button
+                                            key={lesson.id}
+                                            type="button"
+                                            onClick={() => {
+                                                sfx.playTap();
+                                                triggerHaptic(15);
+                                                startGame('may-mac', lesson.id);
+                                            }}
+                                            className="p-2.5 sm:p-3 rounded-xl bg-white hover:bg-indigo-50/60 border border-indigo-100 hover:border-indigo-400 text-left transition-all shadow-xs hover:shadow-md active:scale-95 cursor-pointer touch-manipulation flex flex-col justify-between"
+                                        >
+                                            <div className="flex items-center gap-1.5">
+                                                <span className="text-base sm:text-lg">{lesson.icon}</span>
+                                                <span className="text-[11px] font-black text-indigo-700 uppercase">
+                                                    Bài {lesson.number}
+                                                </span>
+                                            </div>
+                                            <div className="text-xs font-bold text-gray-900 mt-1 line-clamp-1">
+                                                {lesson.title}
+                                            </div>
+                                            <div className="flex items-center justify-between text-[10px] text-gray-500 mt-2 pt-1 border-t border-gray-100">
+                                                <span>16 câu</span>
+                                                <span className="text-indigo-600 font-bold">▶ Vào chơi</span>
+                                            </div>
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
                         )}
-
-                        {/* Nút bắt đầu */}
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                            <button
-                                type="button"
-                                onClick={() => startGame()}
-                                className="btn btn-primary px-10 py-4 text-lg font-bold shadow-xl hover:scale-105 active:scale-95 transition-all w-full sm:w-auto cursor-pointer"
-                            >
-                                {selectedCategory === 'buoi-1' ? (
-                                    <span>Bắt Đầu Buổi 1 (16 Từ QC May Mặc) 🔥</span>
-                                ) : selectedCategory === 'buoi-1-phong-o' ? (
-                                    <span>Bắt Đầu Buổi 1: Phòng Ở & Xưởng (16 Từ) 🔥</span>
-                                ) : selectedCategory === 'buoi-2-ktx' ? (
-                                    <span>Bắt Đầu Buổi 2: Ký Túc Xá & Đồ Dùng (16 Từ) 🔥</span>
-                                ) : selectedCategory === 'buoi-3-bep' ? (
-                                    <span>Bắt Đầu Buổi 3: Bếp Núc & Thời Gian (16 Từ) 🔥</span>
-                                ) : selectedCategory === 'buoi-4-trang-phuc' ? (
-                                    <span>Bắt Đầu Buổi 4: Trang Phục & Lịch (16 Từ) 🔥</span>
-                                ) : selectedCategory === 'may-mac' && selectedLesson !== 'all' ? (
-                                    <span>Bắt Đầu {GARMENT_LESSONS.find(l => l.id === selectedLesson)?.title || 'Bài Học'} (16 Từ) 🔥</span>
-                                ) : (
-                                    <span>Bắt Đầu 16 Từ (1 Phút) 🔥</span>
-                                )}
-                            </button>
-                        </div>
 
                         {bestScore > 0 && (
                             <div className="mt-8 pt-6 border-t border-[var(--border)] text-xs text-[var(--muted)] flex items-center justify-center gap-2">
@@ -1743,7 +1478,7 @@ export default function GameClient() {
                                         type="button"
                                         onClick={() => {
                                             triggerHaptic();
-                                            startGame(selectedLesson);
+                                            startGame('may-mac', selectedLesson);
                                         }}
                                         className="btn btn-primary px-8 py-3.5 font-bold text-base shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer touch-manipulation select-none"
                                     >
@@ -1754,7 +1489,7 @@ export default function GameClient() {
                                             type="button"
                                             onClick={() => {
                                                 triggerHaptic();
-                                                startGame(`b${parseInt(selectedLesson.replace('b', '')) + 1}`);
+                                                startGame('may-mac', `b${parseInt(selectedLesson.replace('b', '')) + 1}`);
                                             }}
                                             className="btn px-8 py-3.5 font-bold text-base bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer touch-manipulation select-none"
                                         >

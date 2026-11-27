@@ -209,6 +209,66 @@ function cleanInput(str: string): string {
         .trim();
 }
 
+interface ChoiceOption {
+    id: string;
+    text: string;
+    isCorrect: boolean;
+}
+
+// Hàm sinh 4 đáp án trắc nghiệm: 1 đúng + 3 sai ngẫu nhiên trong bài học
+function generateWordChoices(targetWord: WordItem, pool: WordItem[]): ChoiceOption[] {
+    const correctText = targetWord.meanings[0];
+    const targetCleanMeanings = new Set(targetWord.meanings.map(m => cleanInput(m)));
+
+    // Lọc các từ làm đáp án gây nhiễu từ chính bài học/chủ đề hiện tại
+    const candidateDistractors = pool.filter(w => {
+        if (w.id === targetWord.id || w.hanzi === targetWord.hanzi) return false;
+        return !w.meanings.some(m => targetCleanMeanings.has(cleanInput(m)));
+    });
+
+    // Nếu pool ít hơn 3 từ gây nhiễu, lấy thêm từ kho toàn bộ ALL_VOCAB_DATABASE
+    let fallbackDistractors: WordItem[] = [];
+    if (candidateDistractors.length < 3) {
+        fallbackDistractors = ALL_VOCAB_DATABASE.filter(w => {
+            if (w.id === targetWord.id || w.hanzi === targetWord.hanzi) return false;
+            return !w.meanings.some(m => targetCleanMeanings.has(cleanInput(m)));
+        });
+    }
+
+    const availablePool = [...candidateDistractors, ...fallbackDistractors].sort(() => Math.random() - 0.5);
+
+    const chosenMeanings = new Set<string>([cleanInput(correctText)]);
+    const distractors: string[] = [];
+
+    for (const item of availablePool) {
+        const primaryMeaning = item.meanings[0];
+        const cleanP = cleanInput(primaryMeaning);
+        if (!chosenMeanings.has(cleanP)) {
+            chosenMeanings.add(cleanP);
+            distractors.push(primaryMeaning);
+            if (distractors.length >= 3) break;
+        }
+    }
+
+    // Dự phòng an toàn nếu kho từ quá ít
+    const defaultFallbacks = ['xin chào', 'cảm ơn', 'tạm biệt', 'an toàn', 'chất lượng', 'sản phẩm', 'kiểm tra'];
+    for (const fb of defaultFallbacks) {
+        if (distractors.length >= 3) break;
+        if (!chosenMeanings.has(cleanInput(fb))) {
+            chosenMeanings.add(cleanInput(fb));
+            distractors.push(fb);
+        }
+    }
+
+    const options: ChoiceOption[] = [
+        { id: `c_correct_${targetWord.id}`, text: correctText, isCorrect: true },
+        ...distractors.map((d, i) => ({ id: `c_dist_${i}_${targetWord.id}`, text: d, isCorrect: false })),
+    ];
+
+    // Xáo trộn vị trí A, B, C, D
+    return options.sort(() => Math.random() - 0.5);
+}
+
 // Bộ tạo âm thanh chuẩn Web Audio API (Offline, không cần MP3 ngoài)
 class SoundEffects {
     ctx: AudioContext | null = null;
@@ -544,6 +604,11 @@ export default function GameClient() {
     const [showPinyin, setShowPinyin] = useState(true);
     const [soundOn, setSoundOn] = useState(true);
     const [autoVoice, setAutoVoice] = useState(true);
+    const [playMode, setPlayMode] = useState<'multiple_choice' | 'typing'>('multiple_choice');
+    const [currentChoices, setCurrentChoices] = useState<ChoiceOption[]>([]);
+    const [selectedChoiceIdx, setSelectedChoiceIdx] = useState<number | null>(null);
+    const [choiceResult, setChoiceResult] = useState<'correct' | 'wrong' | null>(null);
+    const [isAnswering, setIsAnswering] = useState<boolean>(false);
     const [isDissolving, setIsDissolving] = useState(false);
     const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; color: string; size: number }>>([]);
     const [wrongShake, setWrongShake] = useState(false);
@@ -635,6 +700,12 @@ export default function GameClient() {
         setRevealedAnswer(null);
         setIsDissolving(false);
         setParticles([]);
+        setSelectedChoiceIdx(null);
+        setChoiceResult(null);
+        setIsAnswering(false);
+        if (selected16[0]) {
+            setCurrentChoices(generateWordChoices(selected16[0], selected16));
+        }
         setGameState('playing');
 
         if (autoVoice && selected16[0]) {
@@ -723,8 +794,14 @@ export default function GameClient() {
             endGame('completed');
         } else {
             setCurrentIndex(nextIdx);
-            if (autoVoice && roundWords[nextIdx]) {
-                setTimeout(() => speakChinese(roundWords[nextIdx].hanzi), 200);
+            setSelectedChoiceIdx(null);
+            setChoiceResult(null);
+            setIsAnswering(false);
+            if (roundWords[nextIdx]) {
+                setCurrentChoices(generateWordChoices(roundWords[nextIdx], roundWords));
+                if (autoVoice) {
+                    setTimeout(() => speakChinese(roundWords[nextIdx].hanzi), 200);
+                }
             }
         }
     }, [currentWord, currentIndex, roundWords, autoVoice, endGame]);
@@ -815,17 +892,90 @@ export default function GameClient() {
             setRevealedAnswer(null);
             setFeedbackMessage(null);
             setShowHint(false);
+            setSelectedChoiceIdx(null);
+            setChoiceResult(null);
+            setIsAnswering(false);
 
             const nextIdx = currentIndex + 1;
             if (nextIdx >= roundWords.length) {
                 endGame('completed');
             } else {
                 setCurrentIndex(nextIdx);
-                if (autoVoice && roundWords[nextIdx]) {
-                    setTimeout(() => speakChinese(roundWords[nextIdx].hanzi), 200);
+                if (roundWords[nextIdx]) {
+                    setCurrentChoices(generateWordChoices(roundWords[nextIdx], roundWords));
+                    if (autoVoice) {
+                        setTimeout(() => speakChinese(roundWords[nextIdx].hanzi), 200);
+                    }
                 }
             }
         }, 1500);
+    };
+
+    // Xử lý khi người chơi bấm chọn 1 trong 4 đáp án trắc nghiệm
+    const handleSelectChoice = (choice: ChoiceOption, index: number) => {
+        if (isAnswering || isDissolving || isRevealingWrong || gameState !== 'playing' || !currentWord) return;
+
+        setIsAnswering(true);
+        setSelectedChoiceIdx(index);
+        sfx.playTap();
+
+        if (choice.isCorrect) {
+            // Trả lời chính xác!
+            setChoiceResult('correct');
+            triggerHaptic([20, 30]);
+
+            const timeBonus = Math.max(1, Math.floor(totalTimeLeft / 6));
+            const multiplier = streak >= 5 ? 3 : streak >= 2 ? 2 : 1;
+            const pointsEarned = (10 + timeBonus) * multiplier;
+
+            setScore(prev => prev + pointsEarned);
+            setStreak(prev => prev + 1);
+
+            triggerDissolve(() => {
+                moveToNextWord(true);
+            });
+        } else {
+            // Chọn sai! Rung lắc đỏ và làm nổi bật đáp án đúng trong 750ms để học viên ghi nhớ
+            setChoiceResult('wrong');
+            triggerHaptic(50);
+            sfx.playWrong();
+            setStreak(0);
+            setWrongShake(true);
+            setTimeout(() => setWrongShake(false), 500);
+
+            setHistory(prev => [
+                ...prev,
+                {
+                    hanzi: currentWord.hanzi,
+                    pinyin: currentWord.pinyin,
+                    meaning: currentWord.meanings[0],
+                    correct: false,
+                    example: currentWord.exampleSentence ? {
+                        hanzi: currentWord.exampleSentence.hanzi,
+                        vietnamese: currentWord.exampleSentence.vietnamese,
+                        grammarNote: currentWord.exampleSentence.grammarNote,
+                    } : undefined,
+                },
+            ]);
+
+            setTimeout(() => {
+                const nextIdx = currentIndex + 1;
+                if (nextIdx >= roundWords.length) {
+                    endGame('completed');
+                } else {
+                    setCurrentIndex(nextIdx);
+                    setSelectedChoiceIdx(null);
+                    setChoiceResult(null);
+                    setIsAnswering(false);
+                    if (roundWords[nextIdx]) {
+                        setCurrentChoices(generateWordChoices(roundWords[nextIdx], roundWords));
+                        if (autoVoice) {
+                            setTimeout(() => speakChinese(roundWords[nextIdx].hanzi), 200);
+                        }
+                    }
+                }
+            }, 750);
+        }
     };
 
     // Bộ đếm thời gian 60 giây (1 phút) cho cả lượt chơi
@@ -896,9 +1046,40 @@ export default function GameClient() {
                         <h2 className="text-xl sm:text-3xl font-bold text-[var(--text)] mb-1 sm:mb-2">
                             Chọn Bài Học & Thử Thách
                         </h2>
-                        <p className="text-xs sm:text-sm text-[var(--muted)] mb-4 sm:mb-6 max-w-md mx-auto">
+                        <p className="text-xs sm:text-sm text-[var(--muted)] mb-3 sm:mb-4 max-w-md mx-auto">
                             ⚡ <strong>1-Chạm chơi ngay:</strong> Bấm vào bất kỳ thẻ bài để bắt đầu lượt đấu <strong>16 từ / 60 giây</strong>!
                         </p>
+
+                        {/* Bộ chuyển đổi chế độ: Trắc nghiệm 4 đáp án vs Gõ bàn phím */}
+                        <div className="inline-flex p-1 rounded-2xl bg-black/5 border border-black/10 mb-4 sm:mb-6 select-none">
+                            <button
+                                type="button"
+                                onClick={() => { sfx.playTap(); triggerHaptic(10); setPlayMode('multiple_choice'); }}
+                                className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-1.5 touch-manipulation ${
+                                    playMode === 'multiple_choice'
+                                        ? 'bg-white text-gray-900 shadow-sm'
+                                        : 'text-gray-500 hover:text-gray-900'
+                                }`}
+                            >
+                                <span>⚡</span>
+                                <span>Trắc nghiệm 4 đáp án</span>
+                                <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase bg-emerald-100 text-emerald-800">
+                                    Dễ chơi
+                                </span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => { sfx.playTap(); triggerHaptic(10); setPlayMode('typing'); }}
+                                className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-1.5 touch-manipulation ${
+                                    playMode === 'typing'
+                                        ? 'bg-white text-gray-900 shadow-sm'
+                                        : 'text-gray-500 hover:text-gray-900'
+                                }`}
+                            >
+                                <span>⌨️</span>
+                                <span>Gõ bàn phím</span>
+                            </button>
+                        </div>
 
                         {/* Danh sách thẻ bài Action Cards - Bấm là chơi ngay */}
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-3.5 mb-4 sm:mb-6">
@@ -1238,40 +1419,97 @@ export default function GameClient() {
                                 )}
                             </div>
 
-                            {/* Ô nhập nghĩa tiếng Việt độc lập */}
-                            <div className={`card bg-white/50 backdrop-blur-xl border border-white/50 shadow-lg transition-all ${
-                                isKeyboardOpen ? 'p-2 my-0.5 rounded-xl' : 'p-3 sm:p-5 my-2 rounded-2xl'
-                            } ${wrongShake ? 'animate-[shake_0.5s_ease-in-out]' : ''}`}>
-                                <GameInput
-                                    isLocked={isDissolving || isRevealingWrong}
-                                    feedbackMessage={feedbackMessage}
-                                    currentWordId={currentWord.id}
-                                    isCompact={isKeyboardOpen}
-                                    onCheckAnswer={checkAnswer}
-                                    onClearFeedback={() => setFeedbackMessage(null)}
-                                />
-
-                                {/* Cảnh báo kết quả sai hoặc hướng dẫn */}
-                                {feedbackMessage && (
-                                    <div className="mt-1.5 text-center text-xs font-semibold text-rose-600 bg-rose-50/90 py-1.5 px-3 rounded-lg border border-rose-200 animate-fade-in flex items-center justify-center gap-1">
-                                        <span>{feedbackMessage}</span>
+                            {/* Khu vực trả lời: Trắc nghiệm 4 đáp án hoặc Gõ bàn phím */}
+                            {playMode === 'multiple_choice' ? (
+                                <div className={`card bg-white/55 backdrop-blur-xl border border-white/60 shadow-lg p-2.5 sm:p-4 my-1.5 sm:my-2 rounded-2xl transition-all ${
+                                    wrongShake ? 'animate-[shake_0.5s_ease-in-out]' : ''
+                                }`}>
+                                    <div className="text-[11px] font-bold text-[var(--muted)] uppercase tracking-wider text-center mb-2">
+                                        Chọn 1 trong 4 nghĩa tiếng Việt chính xác:
                                     </div>
-                                )}
+                                    <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
+                                        {currentChoices.map((choice, idx) => {
+                                            const letters = ['A', 'B', 'C', 'D'];
+                                            const isSelected = selectedChoiceIdx === idx;
+                                            const showCorrectHighlight = choiceResult === 'wrong' && choice.isCorrect;
 
-                                {/* Khối gợi ý */}
-                                {showHint && currentWord && (
-                                    <div className="mt-1.5 text-center text-xs font-medium text-amber-900 bg-amber-50/90 py-1.5 px-3 rounded-lg border border-amber-200 animate-fade-in space-y-1">
-                                        <div>
-                                            💡 <strong>Gợi ý:</strong> Bắt đầu bằng <strong className="text-rose-600 uppercase">&quot;{currentWord.meanings[0].charAt(0)}&quot;</strong> ({currentWord.meanings[0].split(' ').length} từ)
+                                            let btnStyle = 'bg-white/85 border-gray-200 text-gray-800 hover:bg-white hover:border-[var(--accent)] hover:shadow-md';
+                                            if (isSelected && choiceResult === 'correct') {
+                                                btnStyle = 'bg-emerald-500 border-emerald-500 text-white shadow-lg ring-4 ring-emerald-300/60 scale-[1.02]';
+                                            } else if (isSelected && choiceResult === 'wrong') {
+                                                btnStyle = 'bg-rose-500 border-rose-500 text-white shadow-lg ring-4 ring-rose-300/60 animate-[shake_0.4s_ease-in-out]';
+                                            } else if (showCorrectHighlight) {
+                                                btnStyle = 'bg-emerald-500 border-emerald-500 text-white ring-4 ring-emerald-400/60 animate-pulse';
+                                            }
+
+                                            return (
+                                                <button
+                                                    key={choice.id}
+                                                    type="button"
+                                                    disabled={isAnswering || isDissolving}
+                                                    onClick={() => handleSelectChoice(choice, idx)}
+                                                    className={`min-h-[58px] sm:min-h-[66px] px-3 py-2 sm:px-4 sm:py-3 rounded-xl sm:rounded-2xl border-2 transition-all flex items-center gap-2 sm:gap-2.5 cursor-pointer touch-manipulation select-none active:scale-95 disabled:pointer-events-none text-left ${btnStyle}`}
+                                                >
+                                                    <span className={`w-6 h-6 sm:w-7 sm:h-7 rounded-lg text-xs sm:text-sm font-black flex items-center justify-center shrink-0 shadow-xs ${
+                                                        isSelected && choiceResult === 'correct'
+                                                            ? 'bg-white text-emerald-600'
+                                                            : isSelected && choiceResult === 'wrong'
+                                                            ? 'bg-white text-rose-600'
+                                                            : showCorrectHighlight
+                                                            ? 'bg-white text-emerald-600'
+                                                            : 'bg-gray-100 text-gray-600 border border-gray-200'
+                                                    }`}>
+                                                        {letters[idx]}
+                                                    </span>
+                                                    <span className="font-extrabold text-xs sm:text-sm md:text-base line-clamp-2 flex-1 leading-snug">
+                                                        {choice.text}
+                                                    </span>
+                                                    {isSelected && choiceResult === 'correct' && (
+                                                        <span className="text-base sm:text-lg font-bold shrink-0">✓</span>
+                                                    )}
+                                                    {isSelected && choiceResult === 'wrong' && (
+                                                        <span className="text-base sm:text-lg font-bold shrink-0">✕</span>
+                                                    )}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className={`card bg-white/50 backdrop-blur-xl border border-white/50 shadow-lg transition-all ${
+                                    isKeyboardOpen ? 'p-2 my-0.5 rounded-xl' : 'p-3 sm:p-5 my-2 rounded-2xl'
+                                } ${wrongShake ? 'animate-[shake_0.5s_ease-in-out]' : ''}`}>
+                                    <GameInput
+                                        isLocked={isDissolving || isRevealingWrong}
+                                        feedbackMessage={feedbackMessage}
+                                        currentWordId={currentWord.id}
+                                        isCompact={isKeyboardOpen}
+                                        onCheckAnswer={checkAnswer}
+                                        onClearFeedback={() => setFeedbackMessage(null)}
+                                    />
+
+                                    {/* Cảnh báo kết quả sai hoặc hướng dẫn */}
+                                    {feedbackMessage && (
+                                        <div className="mt-1.5 text-center text-xs font-semibold text-rose-600 bg-rose-50/90 py-1.5 px-3 rounded-lg border border-rose-200 animate-fade-in flex items-center justify-center gap-1">
+                                            <span>{feedbackMessage}</span>
                                         </div>
-                                        {currentWord.note && (
-                                            <div className="text-[11px] text-amber-800">
-                                                <span>📌 <em>{currentWord.note}</em></span>
+                                    )}
+
+                                    {/* Khối gợi ý */}
+                                    {showHint && currentWord && (
+                                        <div className="mt-1.5 text-center text-xs font-medium text-amber-900 bg-amber-50/90 py-1.5 px-3 rounded-lg border border-amber-200 animate-fade-in space-y-1">
+                                            <div>
+                                                💡 <strong>Gợi ý:</strong> Bắt đầu bằng <strong className="text-rose-600 uppercase">&quot;{currentWord.meanings[0].charAt(0)}&quot;</strong> ({currentWord.meanings[0].split(' ').length} từ)
                                             </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
+                                            {currentWord.note && (
+                                                <div className="text-[11px] text-amber-800">
+                                                    <span>📌 <em>{currentWord.note}</em></span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
 
                             {/* Phím hỗ trợ và bỏ qua */}
                             <div className={`flex justify-between items-center text-[11px] sm:text-xs text-[var(--muted)] px-1 select-none ${
@@ -1282,12 +1520,25 @@ export default function GameClient() {
                                         type="button"
                                         onClick={() => {
                                             triggerHaptic();
-                                            setShowHint(prev => !prev);
+                                            setPlayMode(prev => prev === 'multiple_choice' ? 'typing' : 'multiple_choice');
                                         }}
-                                        className="px-2 py-1 rounded-lg bg-white/70 hover:bg-white text-[var(--accent)] font-bold inline-flex items-center gap-1 cursor-pointer border border-white/80 active:scale-95 transition touch-manipulation"
+                                        className="px-2 py-1 rounded-lg bg-white/70 hover:bg-white font-bold text-[var(--accent)] cursor-pointer border border-white/80 active:scale-95 transition touch-manipulation flex items-center gap-1"
+                                        title="Chuyển đổi giữa trắc nghiệm 4 đáp án và gõ phím"
                                     >
-                                        <span>💡</span> {showHint ? 'Ẩn' : 'Gợi ý'}
+                                        <span>{playMode === 'multiple_choice' ? '⚡ 4 Đáp án' : '⌨️ Gõ phím'}</span>
                                     </button>
+                                    {playMode === 'typing' && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                triggerHaptic();
+                                                setShowHint(prev => !prev);
+                                            }}
+                                            className="px-2 py-1 rounded-lg bg-white/70 hover:bg-white text-[var(--accent)] font-bold inline-flex items-center gap-1 cursor-pointer border border-white/80 active:scale-95 transition touch-manipulation"
+                                        >
+                                            <span>💡</span> {showHint ? 'Ẩn' : 'Gợi ý'}
+                                        </button>
+                                    )}
                                     <button
                                         type="button"
                                         onClick={() => {
@@ -1301,7 +1552,7 @@ export default function GameClient() {
                                 </div>
                                 <button
                                     type="button"
-                                    disabled={isDissolving || isRevealingWrong}
+                                    disabled={isDissolving || isRevealingWrong || isAnswering}
                                     onClick={handleSkip}
                                     className="px-2.5 py-1 rounded-lg text-rose-600 hover:text-rose-700 font-semibold cursor-pointer disabled:opacity-40 active:scale-95 transition touch-manipulation"
                                 >

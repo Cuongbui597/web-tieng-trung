@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { SENTENCE_DATABASE, SentenceItem } from './sentenceData';
+import { selectBestChineseVoice, formatChineseSentenceForSpeech } from './ssmlHelper';
 
 interface ChunkItem {
     id: string;
@@ -123,20 +124,13 @@ function triggerHaptic(pattern: number | number[] = 15) {
     }
 }
 
-// Quản lý giọng đọc chuẩn tiếng Trung (zh-CN)
+// Quản lý giọng đọc chuẩn tiếng Trung (zh-CN) ưu tiên Natural / Neural cao cấp
 let cachedChineseVoice: SpeechSynthesisVoice | null = null;
 
 function getChineseVoice(): SpeechSynthesisVoice | null {
     if (typeof window === 'undefined' || !window.speechSynthesis) return null;
     const voices = window.speechSynthesis.getVoices();
-    if (!voices || voices.length === 0) return null;
-    // Ưu tiên giọng phổ thông zh-CN trên Windows (Huihui/Yaoyao), iOS Safari (Ting-Ting), Android (Google 普通话)
-    const zhCN = voices.find(v => v.lang === 'zh-CN' || v.lang === 'zh_CN' || v.lang === 'cmn-Hans-CN');
-    if (zhCN) return zhCN;
-    const namedVoice = voices.find(v => v.name.includes('Ting-Ting') || v.name.includes('Yaoyao') || v.name.includes('Huihui') || v.name.includes('Chinese'));
-    if (namedVoice) return namedVoice;
-    const anyZh = voices.find(v => v.lang.startsWith('zh') || v.lang.includes('cmn'));
-    return anyZh || null;
+    return selectBestChineseVoice(voices);
 }
 
 const QUESTIONS_PER_ROUND = 10;
@@ -157,6 +151,9 @@ export default function SentenceGame() {
     const [soundOn, setSoundOn] = useState(true);
     const [voiceSpeed, setVoiceSpeed] = useState<number>(0.70); // Tốc độ mặc định 0.70x: rất chậm rãi, chuẩn âm điệu
     const [isSpeaking, setIsSpeaking] = useState(false);
+    const [speechMode, setSpeechMode] = useState<'ssml-chunks' | 'flow'>('ssml-chunks'); // Chế độ SSML ngắt nhịp theo khối từ hoặc Flow cả câu
+    const [activeSpeakingChunkIndex, setActiveSpeakingChunkIndex] = useState<number | null>(null);
+    const speechTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     // Phản hồi đáp án & Chuyển câu
     const [isChecking, setIsChecking] = useState(false);
@@ -205,49 +202,34 @@ export default function SentenceGame() {
         };
     }, []);
 
-    // Dừng phát âm an toàn
+    // Dừng phát âm an toàn và dọn dẹp timer ngắt nhịp
     const stopSpeech = useCallback(() => {
+        if (speechTimeoutRef.current) {
+            clearTimeout(speechTimeoutRef.current);
+            speechTimeoutRef.current = null;
+        }
         if (typeof window !== 'undefined' && window.speechSynthesis) {
             window.speechSynthesis.cancel();
-            setIsSpeaking(false);
         }
+        setIsSpeaking(false);
+        setActiveSpeakingChunkIndex(null);
     }, []);
 
-    // Phát âm câu tiếng Trung với kiểm soát tốc độ và sự kiện kết thúc
-    const speakSentence = useCallback((text: string, rate: number = voiceSpeed, onComplete?: () => void) => {
-        if (typeof window === 'undefined' || !window.speechSynthesis) {
-            onComplete?.();
-            return;
-        }
+    // Phát âm tức thì một khối từ riêng lẻ khi chạm vào
+    const speakSingleChunk = useCallback((chunkText: string) => {
+        if (typeof window === 'undefined' || !window.speechSynthesis) return;
         try {
             window.speechSynthesis.cancel();
-            setIsSpeaking(true);
+            const clean = chunkText.replace(/[。？！，、]/g, '').trim();
+            if (!clean) return;
 
-            // Làm sạch ký tự dấu câu khi phát âm
-            const clean = text.replace(/[。？！，、]/g, ' ');
             const utterance = new SpeechSynthesisUtterance(clean);
             utterance.lang = 'zh-CN';
-            utterance.rate = rate;
+            utterance.rate = voiceSpeed;
             utterance.pitch = 1.0;
-
             const voice = cachedChineseVoice || getChineseVoice();
-            if (voice) {
-                utterance.voice = voice;
-            }
+            if (voice) utterance.voice = voice;
 
-            utterance.onend = () => {
-                setIsSpeaking(false);
-                onComplete?.();
-            };
-
-            utterance.onerror = (e) => {
-                setIsSpeaking(false);
-                if (e.error !== 'canceled' && e.error !== 'interrupted') {
-                    onComplete?.();
-                }
-            };
-
-            // Trì hoãn 40ms trên Chrome/Edge Windows để tránh lỗi kẹt sau khi cancel()
             setTimeout(() => {
                 if (typeof window !== 'undefined' && window.speechSynthesis) {
                     if (window.speechSynthesis.paused) {
@@ -255,12 +237,131 @@ export default function SentenceGame() {
                     }
                     window.speechSynthesis.speak(utterance);
                 }
-            }, 40);
-        } catch {
-            setIsSpeaking(false);
-            onComplete?.();
-        }
+            }, 20);
+        } catch {}
     }, [voiceSpeed]);
+
+    // Phát âm câu tiếng Trung với hỗ trợ thẻ SSML Chunks Break hoặc Flow liền mạch
+    const speakSentence = useCallback((
+        target: SentenceItem | string,
+        rate: number = voiceSpeed,
+        onComplete?: () => void,
+        forceMode?: 'ssml-chunks' | 'flow'
+    ) => {
+        if (typeof window === 'undefined' || !window.speechSynthesis) {
+            onComplete?.();
+            return;
+        }
+
+        stopSpeech();
+
+        let chunks: string[] = [];
+        let fullText = '';
+
+        if (typeof target === 'string') {
+            fullText = target;
+            if (currentSentence && (currentSentence.fullHanzi === target || currentSentence.id === target)) {
+                chunks = currentSentence.chunks;
+            }
+        } else {
+            fullText = target.fullHanzi;
+            chunks = target.chunks;
+        }
+
+        const mode = forceMode || speechMode;
+        const voice = cachedChineseVoice || getChineseVoice();
+
+        setIsSpeaking(true);
+
+        if (mode === 'ssml-chunks' && chunks.length > 0) {
+            // Chế độ SSML: Đọc từng khối từ kèm khoảng nghỉ 220ms ngắt nhịp tự nhiên
+            let currentChunkIdx = 0;
+
+            const speakNextChunk = () => {
+                if (currentChunkIdx >= chunks.length) {
+                    setIsSpeaking(false);
+                    setActiveSpeakingChunkIndex(null);
+                    onComplete?.();
+                    return;
+                }
+
+                const chunkText = chunks[currentChunkIdx];
+                setActiveSpeakingChunkIndex(currentChunkIdx);
+
+                const utterance = new SpeechSynthesisUtterance(chunkText);
+                utterance.lang = 'zh-CN';
+                utterance.rate = rate;
+                utterance.pitch = 1.0;
+                if (voice) utterance.voice = voice;
+
+                utterance.onend = () => {
+                    currentChunkIdx++;
+                    if (currentChunkIdx < chunks.length) {
+                        // Khoảng ngắt nghỉ SSML Break giữa các cụm từ (220ms)
+                        speechTimeoutRef.current = setTimeout(() => {
+                            speakNextChunk();
+                        }, 220);
+                    } else {
+                        setIsSpeaking(false);
+                        setActiveSpeakingChunkIndex(null);
+                        onComplete?.();
+                    }
+                };
+
+                utterance.onerror = (e) => {
+                    if (e.error !== 'canceled' && e.error !== 'interrupted') {
+                        currentChunkIdx++;
+                        speakNextChunk();
+                    } else {
+                        setIsSpeaking(false);
+                        setActiveSpeakingChunkIndex(null);
+                    }
+                };
+
+                setTimeout(() => {
+                    if (typeof window !== 'undefined' && window.speechSynthesis) {
+                        if (window.speechSynthesis.paused) {
+                            window.speechSynthesis.resume();
+                        }
+                        window.speechSynthesis.speak(utterance);
+                    }
+                }, 30);
+            };
+
+            speakNextChunk();
+        } else {
+            // Chế độ Flow: Giữ nguyên toàn bộ dấu câu tiếng Trung để máy tự động hạ giọng và luyến láy
+            const clean = formatChineseSentenceForSpeech(fullText);
+            const utterance = new SpeechSynthesisUtterance(clean);
+            utterance.lang = 'zh-CN';
+            utterance.rate = rate;
+            utterance.pitch = 1.0;
+            if (voice) utterance.voice = voice;
+
+            utterance.onend = () => {
+                setIsSpeaking(false);
+                setActiveSpeakingChunkIndex(null);
+                onComplete?.();
+            };
+
+            utterance.onerror = (e) => {
+                setIsSpeaking(false);
+                setActiveSpeakingChunkIndex(null);
+                if (e.error !== 'canceled' && e.error !== 'interrupted') {
+                    onComplete?.();
+                }
+            };
+
+            setTimeout(() => {
+                if (typeof window !== 'undefined' && window.speechSynthesis) {
+                    if (window.speechSynthesis.paused) {
+                        window.speechSynthesis.resume();
+                    }
+                    window.speechSynthesis.speak(utterance);
+                }
+            }, 30);
+        }
+    }, [voiceSpeed, speechMode, currentSentence, stopSpeech]);
 
     // Xáo trộn mảng
     const shuffleArray = <T,>(arr: T[]): T[] => {
@@ -309,7 +410,7 @@ export default function SentenceGame() {
             loadSentenceChunks(shuffled[0]);
             // Thì 1: Tự động phát âm câu mẫu khi bắt đầu câu mới (câu 1)
             setTimeout(() => {
-                speakSentence(shuffled[0].fullHanzi, 0.70);
+                speakSentence(shuffled[0], 0.70);
             }, 350);
         }
     };
@@ -319,6 +420,9 @@ export default function SentenceGame() {
         if (isChecking || isCorrect) return;
         triggerHaptic(12);
         sfx.playTap();
+        if (soundOn) {
+            speakSingleChunk(chunk.text);
+        }
         setAvailableChunks(prev => prev.filter(c => c.id !== chunk.id));
         setSelectedChunks(prev => [...prev, chunk]);
     };
@@ -385,7 +489,7 @@ export default function SentenceGame() {
             ]);
 
             // Thì 2: Tự động đọc lại câu hoàn chỉnh 1 LẦN NỮA trước khi chuyển sang câu tiếp theo
-            speakSentence(currentSentence.fullHanzi, voiceSpeed, () => {
+            speakSentence(currentSentence, voiceSpeed, () => {
                 setTimeout(() => {
                     moveToNextSentence();
                 }, 500);
@@ -440,7 +544,7 @@ export default function SentenceGame() {
             loadSentenceChunks(nextSentence);
             // Thì 1: Tự động phát âm câu mẫu khi bắt đầu câu mới (từ câu 2 trở đi)
             setTimeout(() => {
-                speakSentence(nextSentence.fullHanzi, voiceSpeed);
+                speakSentence(nextSentence, voiceSpeed);
             }, 350);
         }
     };
@@ -730,6 +834,23 @@ export default function SentenceGame() {
                                         Py {showPinyin ? '✓' : '✗'}
                                     </button>
 
+                                    {/* Nút chuyển đổi chế độ phát âm SSML (Ngắt cụm / Cả câu) */}
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            triggerHaptic(10);
+                                            setSpeechMode(prev => prev === 'ssml-chunks' ? 'flow' : 'ssml-chunks');
+                                        }}
+                                        className={`px-2 py-1 rounded-lg text-[11px] sm:text-xs font-bold transition cursor-pointer border touch-manipulation active:scale-95 select-none ${
+                                            speechMode === 'ssml-chunks'
+                                                ? 'bg-indigo-50 text-indigo-700 border-indigo-200 shadow-2xs'
+                                                : 'bg-slate-100 text-slate-600 border-slate-200'
+                                        }`}
+                                        title={speechMode === 'ssml-chunks' ? 'Chế độ SSML: Ngắt nghỉ 220ms rõ ràng giữa các khối từ' : 'Chế độ Flow: Đọc liền mạch cả câu'}
+                                    >
+                                        <span>{speechMode === 'ssml-chunks' ? '🎧 Ngắt cụm' : '🗣️ Cả câu'}</span>
+                                    </button>
+
                                     {/* Nút phát âm có hiệu ứng sóng âm khi đang nói */}
                                     <button
                                         type="button"
@@ -738,7 +859,7 @@ export default function SentenceGame() {
                                             if (isSpeaking) {
                                                 stopSpeech();
                                             } else {
-                                                speakSentence(currentSentence.fullHanzi, voiceSpeed);
+                                                speakSentence(currentSentence, voiceSpeed);
                                             }
                                         }}
                                         className={`px-2.5 py-1 rounded-xl transition cursor-pointer text-[11px] sm:text-xs font-bold flex items-center gap-1 shadow-2xs touch-manipulation active:scale-95 select-none ${
@@ -746,7 +867,7 @@ export default function SentenceGame() {
                                                 ? 'bg-rose-600 text-white animate-pulse ring-2 ring-rose-400'
                                                 : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
                                         }`}
-                                        title={isSpeaking ? 'Đang đọc... Bấm để dừng' : 'Bấm để nghe phát âm cả câu'}
+                                        title={isSpeaking ? 'Đang đọc... Bấm để dừng' : 'Bấm để nghe phát âm'}
                                     >
                                         <span>{isSpeaking ? '⏹' : '🔊'}</span>
                                         <span className="hidden sm:inline">{isSpeaking ? 'Đang đọc...' : 'Nghe câu'}</span>
@@ -776,32 +897,46 @@ export default function SentenceGame() {
                                         👇 Chạm vào các khối từ bên dưới để ghép vào đây
                                     </span>
                                 ) : (
-                                    selectedChunks.map(chunk => (
-                                        <button
-                                            key={chunk.id}
-                                            type="button"
-                                            onClick={() => handleRemoveChunk(chunk)}
-                                            className="px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl bg-indigo-600 text-white font-extrabold text-sm sm:text-base md:text-lg shadow-sm hover:bg-indigo-700 active:scale-95 transition cursor-pointer select-none touch-manipulation min-h-[42px] flex items-center justify-center"
-                                            title="Bấm để gỡ khối từ này"
-                                        >
-                                            {chunk.text}
-                                        </button>
-                                    ))
+                                    selectedChunks.map(chunk => {
+                                        const isSpeakingThis = activeSpeakingChunkIndex === chunk.originalIndex;
+                                        return (
+                                            <button
+                                                key={chunk.id}
+                                                type="button"
+                                                onClick={() => handleRemoveChunk(chunk)}
+                                                className={`px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl font-extrabold text-sm sm:text-base md:text-lg shadow-sm active:scale-95 transition cursor-pointer select-none touch-manipulation min-h-[42px] flex items-center justify-center ${
+                                                    isSpeakingThis
+                                                        ? 'bg-amber-400 text-amber-950 ring-4 ring-amber-200 scale-105 animate-pulse'
+                                                        : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                                                }`}
+                                                title="Bấm để gỡ khối từ này"
+                                            >
+                                                {chunk.text}
+                                            </button>
+                                        );
+                                    })
                                 )}
                             </div>
 
                             {/* VÙNG KHO TỪ ĐANG XÁO TRỘN (WORD BANK) */}
                             <div className="mt-3 sm:mt-5 pt-2.5 sm:pt-4 border-t border-slate-100 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2.5 min-h-[68px] sm:min-h-[80px]">
-                                {availableChunks.map(chunk => (
-                                    <button
-                                        key={chunk.id}
-                                        type="button"
-                                        onClick={() => handlePickChunk(chunk)}
-                                        className="px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl bg-white border-2 border-slate-200 hover:border-indigo-500 text-slate-800 font-extrabold text-sm sm:text-base md:text-lg shadow-2xs hover:shadow-sm active:scale-95 transition cursor-pointer select-none touch-manipulation min-h-[42px] flex items-center justify-center"
-                                    >
-                                        {chunk.text}
-                                    </button>
-                                ))}
+                                {availableChunks.map(chunk => {
+                                    const isSpeakingThis = activeSpeakingChunkIndex === chunk.originalIndex;
+                                    return (
+                                        <button
+                                            key={chunk.id}
+                                            type="button"
+                                            onClick={() => handlePickChunk(chunk)}
+                                            className={`px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl font-extrabold text-sm sm:text-base md:text-lg shadow-2xs hover:shadow-sm active:scale-95 transition cursor-pointer select-none touch-manipulation min-h-[42px] flex items-center justify-center border-2 ${
+                                                isSpeakingThis
+                                                    ? 'bg-amber-100 border-amber-400 text-amber-950 ring-2 ring-amber-300 scale-105'
+                                                    : 'bg-white border-slate-200 hover:border-indigo-500 text-slate-800'
+                                            }`}
+                                        >
+                                            {chunk.text}
+                                        </button>
+                                    );
+                                })}
                             </div>
 
                             {/* Giải thích ngữ pháp khi trả lời */}
@@ -952,7 +1087,7 @@ export default function SentenceGame() {
                                         type="button"
                                         onClick={() => {
                                             triggerHaptic(10);
-                                            speakSentence(h.sentence.fullHanzi, voiceSpeed);
+                                            speakSentence(h.sentence, voiceSpeed);
                                         }}
                                         className="p-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition cursor-pointer text-xs shrink-0 touch-manipulation"
                                         title="Nghe phát âm câu này"

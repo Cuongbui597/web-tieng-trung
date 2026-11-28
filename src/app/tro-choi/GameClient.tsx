@@ -1459,7 +1459,7 @@ export default function GameClient() {
                                                 startGame(cat.id);
                                             }
                                         }}
-                                        className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border text-xs sm:text-sm font-semibold transition-all flex flex-col items-center justify-between gap-1.5 cursor-pointer relative touch-manipulation select-none active:scale-95 shadow-xs hover:shadow-md hover:-translate-y-0.5 ${
+                                        className={`p-2 sm:p-3 md:p-3.5 rounded-xl sm:rounded-2xl border transition-all flex flex-col items-center justify-between gap-1.5 cursor-pointer relative touch-manipulation select-none active:scale-95 shadow-xs hover:shadow-md hover:-translate-y-0.5 min-h-[145px] sm:min-h-[160px] ${
                                             isGarmentActive
                                                 ? 'bg-indigo-600 text-white border-indigo-600 ring-2 ring-indigo-400'
                                                 : cat.highlight
@@ -1472,14 +1472,14 @@ export default function GameClient() {
                                                 Mới ✨
                                             </span>
                                         )}
-                                        <span className="text-2xl sm:text-3xl">{cat.icon}</span>
-                                        <div className="font-bold text-center line-clamp-1 w-full">
+                                        <span className="text-2xl sm:text-3xl my-0.5">{cat.icon}</span>
+                                        <div className="text-xs sm:text-sm font-extrabold text-center line-clamp-2 min-h-[2.5em] flex items-center justify-center w-full leading-snug px-0.5 break-words">
                                             {cat.label}
                                         </div>
-                                        <span className={`text-[10px] ${isGarmentActive ? 'text-white/80' : 'text-[var(--muted)]'}`}>
+                                        <span className={`text-[10px] sm:text-[11px] font-medium text-center line-clamp-1 ${isGarmentActive ? 'text-white/80' : 'text-[var(--muted)]'}`}>
                                             {cat.count}
                                         </span>
-                                        <div className={`mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
+                                        <div className={`mt-1 px-2 sm:px-2.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider flex items-center gap-1 shrink-0 ${
                                             isGarmentActive
                                                 ? 'bg-white/20 text-white'
                                                 : isGarment
@@ -1536,7 +1536,7 @@ export default function GameClient() {
                                                     Bài {lesson.number}
                                                 </span>
                                             </div>
-                                            <div className="text-xs font-bold text-gray-900 mt-1 line-clamp-1">
+                                            <div className="text-[11px] sm:text-xs font-bold text-gray-900 mt-1 line-clamp-2 min-h-[2.5em] leading-snug break-words">
                                                 {lesson.title}
                                             </div>
                                             <div className="flex items-center justify-between text-[10px] text-gray-500 mt-2 pt-1 border-t border-gray-100">
